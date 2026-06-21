@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker";
 import { useMutation } from "@tanstack/react-query";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, ToastAndroid, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,7 +10,9 @@ import Input from "../../../components/inputs/input";
 import type { KeyInput } from "../../../constants/constants";
 import { register } from "../../../core/api/api-endpoints";
 import type { RegisterType } from "../../../core/schemas/auth-schema";
+import { useAuth } from "../../../stores/auth-store";
 import { Colors } from "../../../themes/themes";
+
 import
   {
     fieldsNotValid,
@@ -51,6 +53,7 @@ const keyInputs: KeyInput[] = [
 ];
 
 export default function RegisterScreen() {
+  const { setId } = useAuth();
   const [info, setInfo] = useState<RegisterType>({
     cellphone: "",
     email: "",
@@ -67,8 +70,9 @@ export default function RegisterScreen() {
   const mutation = useMutation({
     mutationFn: register,
     mutationKey: ["register"],
-    onSuccess: () => {
-      //hacemos algo si la peticion se hizo correctamente
+    onSuccess: (data) => {
+      setId(data.userId);
+      router.navigate("/email");
     },
     onError: () => {
       //hacemos algo si hay un status code de error de la peticion
@@ -127,7 +131,15 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, flexDirection: "column", gap: 12 }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        flexDirection: "column",
+        gap: 12,
+        backgroundColor: "#fff",
+        position: "relative",
+      }}
+    >
       {/*contenedor de imagen */}
       <View style={styles.logoContainer}>
         <View style={styles.shadowContainer}>
@@ -197,6 +209,7 @@ export default function RegisterScreen() {
             title="Registrarse"
             action={handleSubmit}
             disabled={!isCompleteFields}
+            isPending={mutation.isPending}
           />
           <Text style={{ fontSize: 12 }}>Or</Text>
           <View

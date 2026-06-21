@@ -12,6 +12,8 @@ import { ButtonForm } from "../../../components/buttons/button";
 import { Colors } from "../../../themes/themes";
 import { GoogleAuthButton } from "../components/auth-provider";
 
+import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
+
 const email: KeyInput = {
   field: "email",
   label: "email",
@@ -26,22 +28,43 @@ const password: KeyInput = {
 
 function LoginScreen() {
   return (
-    <SafeAreaView style={{ flex: 1, position: "relative" }}>
+    <SafeAreaView
+      style={{ flex: 1, position: "relative", backgroundColor: "#fff" }}
+    >
       {/*contenedor de la imagen */}
-      <View style={{ position: "relative" }}>
-        <Image
-          source={require("../../../assets/images/login-house-image.jpg")}
-          resizeMode="cover"
-          style={styles.image}
-        />
-        <LinearGradient
-          colors={["white", "transparent"]}
-          style={styles.gradientTop}
-        />
-        <LinearGradient
-          colors={["transparent", "rgb(216, 216, 216)"]}
-          style={styles.gradientBottom}
-        />
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+        }}
+      >
+        <View
+          style={{
+            position: "relative",
+            zIndex: 1,
+            height: 400,
+            width: "100%",
+          }}
+        >
+          <Image
+            source={require("../../../assets/images/login-house-image.jpg")}
+            resizeMode="cover"
+            style={styles.image}
+          />
+          <LinearGradient
+            colors={["white", "transparent"]}
+            style={styles.gradientTop}
+          />
+          <LinearGradient
+            colors={["rgba(255, 255, 255, 0.01)", "rgb(255, 255, 255)"]}
+            style={styles.gradientBottom}
+          />
+        </View>
+      </View>
+
+      {/*background view  */}
+      <View style={{ position: "absolute", bottom: 0 }}>
+        <WaveBackground />
       </View>
 
       {/*Contenedor principal de titulo, formulario, y links */}
@@ -54,6 +77,7 @@ function LoginScreen() {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
+            paddingVertical: 24,
           }}
         >
           <Image
@@ -62,11 +86,11 @@ function LoginScreen() {
             style={{ width: 64, height: "auto", aspectRatio: 1 }}
           />
 
-          <Text style={{ fontSize: 28, fontWeight: 600 }}>
+          <Text style={{ fontSize: 28, fontWeight: 800 }}>
             Bienvenido de nuevo
           </Text>
 
-          <Text>Inicia sesión para continuar</Text>
+          <Text style={{ fontWeight: 400 }}>Inicia sesión para continuar</Text>
         </View>
 
         {/*seccion del formulario de login */}
@@ -76,11 +100,23 @@ function LoginScreen() {
             height: "auto",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#ffffffcd",
+            backgroundColor: "#ffffff",
             borderRadius: 24,
             gap: 24,
             paddingHorizontal: 12,
             paddingVertical: 36,
+            borderWidth: 1,
+            borderColor: "#00000029",
+            marginBottom: 50,
+            marginTop: 24,
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 6,
+            elevation: 6,
           }}
         >
           <View style={styles.loginFormSection}>
@@ -176,24 +212,24 @@ function LoginScreen() {
 
 const styles = StyleSheet.create({
   image: {
-    aspectRatio: 1,
     width: "100%",
-    height: "auto",
+    aspectRatio: 1,
     borderRadius: 12,
+    height: 400,
   },
   gradientTop: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 180,
+    height: 320,
   },
   gradientBottom: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 180,
+    height: 500,
   },
 
   containerInfo: {
