@@ -63,7 +63,8 @@ const styles = StyleSheet.create({
     width: "80%",
     position: "absolute",
     left: 12,
-    fontWeight: 500,
+    fontWeight: 600,
+    color: "#000",
     fontStyle: "normal",
   },
   input: {

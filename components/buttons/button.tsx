@@ -1,13 +1,14 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 import { Colors } from "../../themes/themes";
 
 export interface ButtonProps {
   title: string;
   action?: () => void;
   disabled?: boolean;
+  isPending?: boolean;
 }
 
-function ButtonForm({ title, action, disabled }: ButtonProps) {
+function ButtonForm({ title, action, disabled, isPending }: ButtonProps) {
   return (
     <Pressable
       onPress={action}
@@ -17,7 +18,9 @@ function ButtonForm({ title, action, disabled }: ButtonProps) {
       ]}
       disabled={disabled}
     >
-      <Text style={styles.text}>{title}</Text>
+      <Text style={styles.text}>
+        {isPending ? <ActivityIndicator size="small" /> : title}
+      </Text>
     </Pressable>
   );
 }
