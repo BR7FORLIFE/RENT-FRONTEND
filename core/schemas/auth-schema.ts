@@ -25,4 +25,25 @@ export const LoginSchema = z.object({
     password: z.email(),
 });
 
+export const LoginResponseSchema = z.object({
+    refreshToken: z.string(),
+    accessToken: z.string(),
+});
+
 export type LoginType = z.infer<typeof LoginSchema>;
+export type LoginResponseType = z.infer<typeof LoginResponseSchema>;
+
+//refresh token
+export const RefreshTokenSchema = z.object({
+    userId: z.string(),
+    refreshToken: z.string(),
+});
+
+export const RefreshTokenResponseSchema = z.object({
+    accessToken: z.string(),
+});
+
+export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>;
+export type RefreshTokenResponseType = z.infer<
+    typeof RefreshTokenResponseSchema
+>;
