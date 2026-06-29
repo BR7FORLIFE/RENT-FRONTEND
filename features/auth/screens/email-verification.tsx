@@ -20,7 +20,6 @@ export default function EmailVerificationScreen() {
   });
 
   const sendForwardEmail = async () => {
-    console.log(userId);
     await mutation.mutateAsync(userId!);
   };
 

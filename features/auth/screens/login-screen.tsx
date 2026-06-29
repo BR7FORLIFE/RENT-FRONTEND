@@ -5,14 +5,23 @@ import Input from "../../../components/inputs/input";
 import type { KeyInput } from "../../../constants/constants";
 
 //images
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import EmailIcon from "../../../assets/icons/email-icon.svg";
 import SeeIconPassword from "../../../assets/icons/eye-icon.svg";
 import { ButtonForm } from "../../../components/buttons/button";
 import { Colors } from "../../../themes/themes";
 import { GoogleAuthButton } from "../components/auth-provider";
 
+import { useMutation } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+import { useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
+import { login } from "../../../core/api/api-endpoints";
+import type { LoginType } from "../../../core/schemas/auth-schema";
+import { useAuth } from "../../../stores/auth-store";
+import type { ApiError } from "../../../types/global";
+import { FormInfoStorage, InfoStorage } from "../services/auth.service";
 
 const email: KeyInput = {
   field: "email",
@@ -27,6 +36,57 @@ const password: KeyInput = {
 };
 
 function LoginScreen() {
+  const { setAccessToken } = useAuth();
+
+  const [info, setInfo] = useState<LoginType>({
+    email: "",
+    password: "",
+  });
+
+  //Montamos el correo el electronico para mejor UX
+  useEffect(() => {
+    const setEmailInput = async () => {
+      const form = await FormInfoStorage().get();
+      if (form) {
+        const { email } = form;
+        setInfo((prev) => ({ ...prev, email }));
+      }
+    };
+    setEmailInput();
+  }, []);
+
+  const mutation = useMutation({
+    mutationFn: login,
+    mutationKey: ["login"],
+    onError: (err: AxiosError<ApiError>) => {
+      const data = err.response?.data;
+      if (data) {
+        Toast.show({
+          type: "error",
+          text2: data.message,
+        });
+      }
+    },
+    onSuccess: (data) => {
+      const { accessToken, refreshToken } = data;
+      setAccessToken(accessToken);
+
+      //persistimos la informacion en el Async Storage
+      InfoStorage().set({ userId: null, refreshToken });
+
+      router.navigate("/home/(tabs)/property-registration");
+    },
+  });
+
+  const handleInfoLogin = (id: string, value: string) => {
+    const nextInfo = { ...info, [id]: value };
+    setInfo(nextInfo);
+  };
+
+  const submitLogin = async () => {
+    await mutation.mutateAsync(info);
+  };
+
   return (
     <SafeAreaView
       style={{ flex: 1, position: "relative", backgroundColor: "#fff" }}
@@ -125,8 +185,8 @@ function LoginScreen() {
               field={email.field}
               label={email.label}
               placeholder={email.placeholder}
-              fn={() => null}
-              value=""
+              fn={handleInfoLogin}
+              value={info.email}
               key={email.field}
               typeInput="default"
             />
@@ -143,8 +203,8 @@ function LoginScreen() {
               field={password.field}
               label={password.label}
               placeholder={password.placeholder}
-              fn={() => null}
-              value=""
+              fn={handleInfoLogin}
+              value={info.password}
               key={password.field}
               typeInput="default"
             />
@@ -155,7 +215,12 @@ function LoginScreen() {
             />
           </View>
           {/*boton de login */}
-          <ButtonForm action={() => null} title="Iniciar sesión" />
+          <ButtonForm
+            action={submitLogin}
+            title={
+              mutation.isPending ? "Iniciando sesion... " : "Iniciar sesión"
+            }
+          />
 
           {/*estilos de la seccion de auth providers */}
           <View
