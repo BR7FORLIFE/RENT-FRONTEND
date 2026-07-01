@@ -42,4 +42,55 @@ const styles = StyleSheet.create({
   },
 });
 
-export { ButtonForm };
+type FilterButtonProps = {
+  title: string;
+  active?: boolean;
+  onPress: () => void;
+};
+
+export default function FilterButton({
+  title,
+  active = false,
+  onPress,
+}: FilterButtonProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[stylesFilter.button, active && stylesFilter.activeButton]}
+    >
+      <Text style={[stylesFilter.text, active && stylesFilter.activeText]}>
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
+
+const stylesFilter = StyleSheet.create({
+  button: {
+    height: 40,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#D8DDE6",
+    backgroundColor: "#fff",
+  },
+
+  activeButton: {
+    backgroundColor: Colors.PRIMARY,
+    borderColor: Colors.PRIMARY,
+  },
+
+  text: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#475569",
+  },
+
+  activeText: {
+    color: "#fff",
+  },
+});
+
+export { ButtonForm, FilterButton };
