@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import Toast from "react-native-toast-message";
 import SplashScreen from "../components/splash-screen";
-import { queryClient } from "../core/tanstackconfig/config";
+import { queryClient } from "../core/configs/tanstackconfig";
 import { useBootstrapApp } from "../hooks/hooks";
 
 export default function AppLayout() {

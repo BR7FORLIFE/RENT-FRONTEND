@@ -1,5 +1,5 @@
-import { Text } from "react-native";
+import PropertyScreen from "../../../features/property-registration/screens/property-screen";
 
 export default function PropertyRegistrationTab() {
-  return <Text>Hola desde el property registration tab</Text>;
+  return <PropertyScreen />;
 }

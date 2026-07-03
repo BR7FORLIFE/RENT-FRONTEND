@@ -5,7 +5,7 @@ export default function Index() {
   const { accessToken } = useAuth();
   return (
     <Redirect
-      href={accessToken ? "/home/(tabs)/properties-services" : "/login"}
+      href={accessToken ? "/home/(tabs)/property-registration" : "/login"}
     />
   );
 }
