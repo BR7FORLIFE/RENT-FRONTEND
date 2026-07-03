@@ -6,7 +6,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { ButtonForm } from "../../../components/buttons/button";
-import Input from "../../../components/inputs/input";
+import { Input } from "../../../components/inputs/input";
 import type { KeyInput } from "../../../constants/constants";
 import { register } from "../../../core/api/api-endpoints";
 import type { RegisterType } from "../../../core/schemas/auth-schema";

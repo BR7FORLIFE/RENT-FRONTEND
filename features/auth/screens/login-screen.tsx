@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Input from "../../../components/inputs/input";
+import { Input } from "../../../components/inputs/input";
 import type { KeyInput } from "../../../constants/constants";
 
 //images

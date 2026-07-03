@@ -1,5 +1,5 @@
 import { Text } from "react-native";
 
 export default function PropertyServiceScreen() {
-  return <Text>hola</Text>;
+  return <Text>property registration screen</Text>;
 }
