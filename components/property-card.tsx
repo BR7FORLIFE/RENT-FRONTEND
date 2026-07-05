@@ -1,62 +1,23 @@
-import { useEffect, useRef } from "react";
-import { Animated, Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import EditIcon from "../assets/icons/edit.svg";
 import HouseIcon from "../assets/icons/house.svg";
+import { AnimatedOccupationTypeInfo } from "../features/property-registration/components/display";
+import type { PropertyInfoCard as Props } from "../features/property-registration/types";
 import { ButtonForm } from "./buttons/button";
 
-interface Props {
-  fmi: string;
-  direction: string;
-  city: string;
-  occupationType: "OCCUPIED" | "VACANT" | "IN_PROCCESS";
-  typeProperty:
-    | "RESIDENTIAL"
-    | "COMMERCIAL"
-    | "INDUSTRIAL"
-    | "LAND_OR_SOIL"
-    | "URBAN"
-    | "AGRARIAN"
-    | "MIXED";
-}
-
 export default function PropertyCard({
+  propertyName,
   fmi,
   direction,
   typeProperty,
-  city,
   occupationType,
+  action,
 }: Props) {
-  const traslateOccupied =
-    occupationType === "OCCUPIED"
-      ? "ARRENDADO"
-      : occupationType === "IN_PROCCESS"
-        ? "En proceso"
-        : "Disponible";
-
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-  }, []);
-
   return (
     <View
       style={{
         width: "100%",
-        height: 320,
+        height: 280,
         backgroundColor: "#ffffff",
         flexDirection: "column",
         borderRadius: 12,
@@ -81,21 +42,7 @@ export default function PropertyCard({
             borderRadius: 12,
           }}
         >
-          <Animated.Text
-            style={{
-              opacity,
-              color:
-                occupationType === "OCCUPIED"
-                  ? "red"
-                  : occupationType === "VACANT"
-                    ? "green"
-                    : "orange",
-              fontWeight: "800",
-              fontSize: 11,
-            }}
-          >
-            • {traslateOccupied}
-          </Animated.Text>
+          <AnimatedOccupationTypeInfo occupationType={occupationType} />
         </View>
       </View>
 
@@ -112,11 +59,11 @@ export default function PropertyCard({
       >
         {/*fmi de la propiedad */}
         <Text
-          style={{ fontSize: 16, opacity: 0.4, fontWeight: "400" }}
+          style={{ fontSize: 12, opacity: 0.4, fontWeight: "400" }}
         >{`FMI: ${fmi}`}</Text>
         {/*la direccion parcial del inmueble NO completa */}
 
-        <Text style={{ fontSize: 20, fontWeight: "600" }}>{direction}</Text>
+        <Text style={{ fontSize: 14, fontWeight: "600" }}>{propertyName}</Text>
         <View
           style={{
             justifyContent: "center",
@@ -125,9 +72,9 @@ export default function PropertyCard({
             alignItems: "center",
           }}
         >
-          <HouseIcon width={17} height={17} style={{ opacity: 0.6 }} />
-          <Text style={{ fontSize: 12, fontWeight: "600", opacity: 0.6 }}>
-            {typeProperty} ◆ {city}
+          <HouseIcon width={14} height={14} style={{ opacity: 0.6 }} />
+          <Text style={{ fontSize: 10, fontWeight: "600", opacity: 0.6 }}>
+            {typeProperty} ◆ {direction}
           </Text>
         </View>
         {/*botones de ver detalles y editar */}
@@ -141,7 +88,11 @@ export default function PropertyCard({
           }}
         >
           <View style={{ width: "75%" }}>
-            <ButtonForm title="Ver detalles" />
+            <ButtonForm
+              title="Ver detalles"
+              style={{ height: 42, fontSize: 9 }}
+              action={action}
+            />
           </View>
 
           <Pressable
@@ -151,9 +102,10 @@ export default function PropertyCard({
               justifyContent: "center",
               padding: 8,
               borderRadius: 12,
+              marginEnd: 14,
             }}
           >
-            <EditIcon width={24} height={24} />
+            <EditIcon width={18} height={18} />
           </Pressable>
         </View>
       </View>

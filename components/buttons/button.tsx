@@ -1,20 +1,33 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 import { Colors } from "../../themes/themes";
 
+interface Styles {
+  height: number;
+  fontSize: number;
+}
+
 export interface ButtonProps {
   title: string;
   action?: () => void;
   disabled?: boolean;
   isPending?: boolean;
+  style?: Styles;
 }
 
-function ButtonForm({ title, action, disabled, isPending }: ButtonProps) {
+function ButtonForm({
+  title,
+  action,
+  disabled,
+  isPending,
+  style,
+}: ButtonProps) {
   return (
     <Pressable
       onPress={action}
       style={[
         styles.button,
         { backgroundColor: disabled ? "#9aacec" : Colors.PRIMARY },
+        style,
       ]}
       disabled={disabled}
     >
@@ -37,7 +50,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#fff",
-    fontSize: 15,
     fontWeight: 600,
   },
 });
@@ -67,7 +79,7 @@ export default function FilterButton({
 
 const stylesFilter = StyleSheet.create({
   button: {
-    height: 40,
+    height: 32,
     paddingHorizontal: 18,
     borderRadius: 999,
     justifyContent: "center",
@@ -83,7 +95,7 @@ const stylesFilter = StyleSheet.create({
   },
 
   text: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: "600",
     color: "#475569",
   },

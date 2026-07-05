@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: "100%",
     borderRadius: 6,
-    borderColor: Colors.NEUTRAL,
+    borderColor: Colors.TERTIARY,
     height: 50,
     paddingLeft: 12,
   },
@@ -95,10 +95,10 @@ function SearchInput({
     <View
       style={[
         stylesSearch.container,
-        { borderColor: focus ? Colors.PRIMARY : "#D8DDE6" },
+        { borderColor: focus ? Colors.TERTIARY : "#D8DDE6" },
       ]}
     >
-      <SearchIcon width={22} height={22} />
+      <SearchIcon width={18} height={18} />
 
       <TextInput
         value={value}
@@ -120,13 +120,13 @@ const stylesSearch = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     paddingHorizontal: 16,
-    height: 56,
+    height: 40,
     gap: 12,
   },
 
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 12,
     color: "#000000",
   },
 });
