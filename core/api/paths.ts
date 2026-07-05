@@ -1,16 +1,16 @@
 export const AUTHPATHS = {
-    register: "/auth/register",
-    login: "/auth/login",
+    register: "/rent-auth/auth/register",
+    login: "/rent-auth/auth/login",
     email: {
-        forward: "/email/forward",
+        forward: "/rent-auth/email/forward",
     },
-    refresh: "/auth/refresh",
-    rotate: "/auth/refresh/rotate",
-    logout: "/auth/logout",
+    refresh: "/rent-auth/auth/refresh",
+    rotate: "/rent-auth/auth/refresh/rotate",
+    logout: "/rent-auth/auth/logout",
 };
 
 export const FINANCIAL_MODULE = {
     PROPERTY_REGISTRATION_FEATURE: {
-        
-    }
-}
+        PROPERTY: "/rent-financial/property", // post y GET (ALL)
+    },
+};
