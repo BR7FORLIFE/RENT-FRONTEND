@@ -1,18 +1,47 @@
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PlusIcon from "../../../assets/icons/plus.svg";
 import { AIButton } from "../../../components/ai";
 import { FilterButton } from "../../../components/buttons/button";
+import { PrincipalError } from "../../../components/error";
 import Header from "../../../components/header";
 import { SearchInput } from "../../../components/inputs/input";
 import PropertyCard from "../../../components/property-card";
+import SplashScreen from "../../../components/splash-screen";
 import { Colors } from "../../../themes/themes";
+import { GetAllProperties } from "../api";
+import { normalizePropertyInformation } from "../services/property-registration.service";
+import type { PropertyInfoCard } from "../types";
+
+const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 
 export default function PropertyScreen() {
+  const [properties, setProperties] = useState<PropertyInfoCard[]>();
   const [text, setText] = useState("");
   const [Ai, setAt] = useState<boolean>(false);
+
+  const { isLoading, data, isError } = useQuery({
+    queryKey: ["properties"],
+    queryFn: GetAllProperties,
+    staleTime: 60000 * 60,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setProperties(normalizePropertyInformation(data.data));
+    }
+  }, [data]);
+
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
+  if (isError) {
+    return <PrincipalError error="error al obtener los datos..." />;
+  }
 
   return (
     <SafeAreaView
@@ -35,22 +64,31 @@ export default function PropertyScreen() {
         }}
       >
         <Header />
-        <Pressable
-          onPress={() => router.navigate("/home/property-registration")}
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]}
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 6,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          <PlusIcon width={22} height={22} />
-        </Pressable>
+          <Pressable
+            onPress={() => router.navigate("/home/property-registration")}
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <PlusIcon width={22} height={22} />
+          </Pressable>
+        </View>
       </View>
 
       {/*seccion de titulo y text input y botones de paginaciones */}
       <View style={{ marginHorizontal: 16, flexDirection: "column", gap: 4 }}>
         <Text
           style={{
-            fontSize: 15,
+            fontSize: 12,
             fontWeight: "700",
             opacity: 0.5,
           }}
@@ -58,46 +96,47 @@ export default function PropertyScreen() {
           Mis Propiedades
         </Text>
         <SearchInput onChangeText={setText} value={text} />
-        <View style={{ flexDirection: "row", marginTop: 12, gap: 5 }}>
-          <FilterButton title="Todas" onPress={() => null} />
-          <FilterButton title="Disponibles" onPress={() => null} />
-          <FilterButton title="Ocupadas" onPress={() => null} />
-        </View>
+
+        <FlatList
+          horizontal
+          data={FILTER_BUTTONS}
+          renderItem={({ item }) => (
+            <FilterButton title={item} onPress={() => null} />
+          )}
+          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+          contentContainerStyle={{ marginTop: 12 }}
+        />
       </View>
 
       <View
-        style={{ flex: 1, justifyContent: "flex-start", alignItems: "center" }}
+        style={{
+          flex: 1,
+          justifyContent: "flex-start",
+          alignItems: "center",
+          paddingHorizontal: 24,
+        }}
       >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ flex: 1 }}
-          contentContainerStyle={{ alignItems: "center" }}
-        >
-          {/* IMPORTANTE USAR FLATLIST CUANDO RECUPEREMOS INFO DE LA API */}
-          <View
-            style={{
-              width: "90%",
-              flexDirection: "column",
-              gap: 8,
-              overflow: "hidden",
-            }}
-          >
+        <View style={{ width: "100%", height: 20 }} />
+        <FlatList
+          data={properties}
+          keyExtractor={(property) => property.fmi}
+          renderItem={({ item }) => (
             <PropertyCard
-              fmi="060-467897"
-              direction="Diagonal a manga"
-              typeProperty="COMMERCIAL"
-              city="Cartagena"
-              occupationType="OCCUPIED"
+              propertyName={item.propertyName}
+              fmi={item.fmi}
+              direction={item.direction}
+              occupationType={item.occupationType}
+              typeProperty={item.typeProperty}
+              action={() =>
+                router.push({
+                  pathname: "/home/property-registration/[id]",
+                  params: { id: item.id as string },
+                })
+              }
             />
-            <PropertyCard
-              fmi="060-1234571"
-              direction="AV Caracoles"
-              typeProperty="INDUSTRIAL"
-              city="Cartagena"
-              occupationType="VACANT"
-            />
-          </View>
-        </ScrollView>
+          )}
+        />
+        <View style={{ width: "100%", height: 80 }} />
       </View>
     </SafeAreaView>
   );
@@ -112,7 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
 
-    backgroundColor: Colors.PRIMARY,
+    backgroundColor: Colors.NEUTRAL,
 
     marginRight: 20,
 
