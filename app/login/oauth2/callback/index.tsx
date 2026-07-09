@@ -4,6 +4,7 @@ import type { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import Toast from "react-native-toast-message";
+import SplashScreen from "../../../../components/splash-screen";
 import { oauth2GetCredentials } from "../../../../core/api/api-endpoints";
 import { InfoStorage } from "../../../../features/auth/services/auth.service";
 import { useAuth } from "../../../../stores/auth-store";
@@ -39,4 +40,6 @@ export default function Oauth2SessionID() {
     };
     getData();
   }, [sessionID, mutation]);
+
+  return mutation.isPending && <SplashScreen />;
 }

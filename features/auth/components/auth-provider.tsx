@@ -1,13 +1,18 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import GoogleIcon from "../../../assets/icons/google-icon.svg";
-import { ButtonProps } from "../../../components/buttons/button";
 
-export const GoogleAuthButton = ({ action, title, disabled }: ButtonProps) => {
+export const GoogleAuthButton = ({
+  action,
+  disabled,
+}: {
+  action: () => void;
+  disabled?: boolean;
+}) => {
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={action} disabled={disabled}>
       <GoogleIcon width={24} height={24} />
       <Text style={{ fontSize: 17 }}>Google</Text>
-    </View>
+    </Pressable>
   );
 };
 
