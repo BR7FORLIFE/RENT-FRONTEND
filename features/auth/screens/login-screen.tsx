@@ -14,10 +14,12 @@ import { GoogleAuthButton } from "../components/auth-provider";
 
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
+import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
 import { login } from "../../../core/api/api-endpoints";
+import { AUTHPATHS } from "../../../core/api/paths";
 import type { LoginType } from "../../../core/schemas/auth-schema";
 import { useAuth } from "../../../stores/auth-store";
 import type { ApiError } from "../../../types/global";
@@ -85,6 +87,13 @@ function LoginScreen() {
 
   const submitLogin = async () => {
     await mutation.mutateAsync(info);
+  };
+
+  const oauth2Login = async () => {
+    await WebBrowser.openAuthSessionAsync(
+      AUTHPATHS.oauth2.authorization,
+      "rentfrontend://login/oauth2/callback",
+    );
   };
 
   return (
@@ -249,7 +258,10 @@ function LoginScreen() {
               <View style={styles.decorativeBarrer}></View>
             </View>
 
-            <GoogleAuthButton title="Continua con Google" />
+            <GoogleAuthButton
+              title="Continua con Google"
+              action={oauth2Login}
+            />
             <View
               style={{
                 width: "100%",

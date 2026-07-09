@@ -29,6 +29,15 @@ export async function login(info: LoginType) {
     return data;
 }
 
+// oauth2 apis
+export async function oauth2GetCredentials(sessionID: string) {
+    const { data } = await api.post<LoginResponseType>(
+        AUTHPATHS.oauth2.credentials,
+        sessionID,
+    );
+    return data;
+}
+
 export async function emailForward(userId: string) {
     const { data } = await api.post<string>(AUTHPATHS.email.forward, {
         userId,
