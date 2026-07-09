@@ -4,60 +4,19 @@ import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
 import UndoIcon from "../../../assets/icons/undo.svg";
-import UploadIcon from "../../../assets/icons/upload.svg";
-import { Colors } from "../../../themes/themes";
+import { DirectionStep, DrapAndDropStep } from "../components/steps";
+import type { CreatePropertyType } from "../schemas/property-registration.schema";
 
-function DrapAndDropStep() {
-  return (
-    <Pressable
-      style={{
-        width: "100%",
-        height: "auto",
-        alignItems: "center",
-        marginTop: 15,
-      }}
-    >
-      <Text style={{ fontSize: 24, fontWeight: 700 }}>
-        Registra tu inmueble!
-      </Text>
-      <Text
-        style={{
-          width: "80%",
-          marginTop: 12,
-          textAlign: "center",
-          fontWeight: "300",
-        }}
-      >
-        Adjunta una o varias imagenes para la propiedad que deseas agregar!
-      </Text>
-
-      <View
-        style={{
-          width: "70%",
-          height: "70%",
-          borderRadius: 8,
-          borderWidth: 2,
-          borderColor: Colors.PRIMARY,
-          marginTop: 12,
-          justifyContent: "center",
-          alignItems: "center",
-          borderStyle: "dashed",
-          gap: 4,
-        }}
-      >
-        <UploadIcon width={70} height={70} />
-        <Text
-          style={{ fontSize: 14, color: Colors.NEUTRAL, fontWeight: "600" }}
-        >
-          Cargar Imagen
-        </Text>
-      </View>
-    </Pressable>
-  );
+export interface RegisterFormData {
+  saveData: React.Dispatch<
+    React.SetStateAction<CreatePropertyType | undefined>
+  >;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function PropertyRegistrationScreen() {
   const [step, setStep] = useState<number>(1);
+  const [registerForm, setRegisterForm] = useState<CreatePropertyType>();
 
   return (
     <SafeAreaView
@@ -109,7 +68,13 @@ export default function PropertyRegistrationScreen() {
               borderRadius: 12,
             }}
           />
-          {step === 1 && <DrapAndDropStep />}
+          {/* 7 Steps para poder registrar un inmueble */}
+          {step === 1 && (
+            <DrapAndDropStep saveData={setRegisterForm} setStep={setStep} />
+          )}
+          {step === 2 && (
+            <DirectionStep saveData={setRegisterForm} setStep={setStep} />
+          )}
           <View style={{ width: "80%", marginTop: 30 }}></View>
         </View>
       </View>

@@ -1,9 +1,16 @@
-import type { PropertyType } from "../schemas/property-registration.schema";
+import type {
+    CreatePropertyType,
+    PropertyType,
+} from "../schemas/property-registration.schema";
 import type { PropertyInfoCard } from "../types";
 
 export function normalizePropertyInformation(
     properties: PropertyType[],
 ): PropertyInfoCard[] {
+    if (properties.length === 0) {
+        return [];
+    }
+
     return properties.map(
         ({
             id,
@@ -25,3 +32,7 @@ export function normalizePropertyInformation(
         },
     );
 }
+
+//funcion para guardar los pasos en el registro de las propiedades
+
+//export async function saveStepStorage(): Promise<CreatePropertyType> {}
