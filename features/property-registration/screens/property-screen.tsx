@@ -18,6 +18,8 @@ import type { PropertyInfoCard } from "../types";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 
+const emptyItems = () => <Text>No data</Text>;
+
 export default function PropertyScreen() {
   const [properties, setProperties] = useState<PropertyInfoCard[]>();
   const [text, setText] = useState("");
@@ -105,6 +107,7 @@ export default function PropertyScreen() {
           )}
           ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
           contentContainerStyle={{ marginTop: 12 }}
+          ListEmptyComponent={emptyItems}
         />
       </View>
 

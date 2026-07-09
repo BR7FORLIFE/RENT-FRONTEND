@@ -258,10 +258,7 @@ function LoginScreen() {
               <View style={styles.decorativeBarrer}></View>
             </View>
 
-            <GoogleAuthButton
-              title="Continua con Google"
-              action={oauth2Login}
-            />
+            <GoogleAuthButton action={oauth2Login} />
             <View
               style={{
                 width: "100%",
