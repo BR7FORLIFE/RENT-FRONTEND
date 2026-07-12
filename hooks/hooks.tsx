@@ -15,6 +15,7 @@ export function useBootstrapApp() {
         //hay que inyectar el accessToken al store de zustand ademas de validar y
         // hacer logout si el refresh esta expirado
         const { accessToken } = await refresh();
+
         //hacemos el logout para volver a pedir el refresh
         if (!accessToken) {
           logoutUser();

@@ -5,7 +5,6 @@ export async function getUserCredentials(): Promise<{
     refreshToken: string | null;
 }> {
     const data = await InfoStorage().get();
-
     return {
         userId: data?.userId ?? null,
         refreshToken: data?.refreshToken ?? null,
