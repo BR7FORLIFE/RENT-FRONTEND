@@ -6,6 +6,7 @@ import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
 import UndoIcon from "../../../assets/icons/undo.svg";
 import { DirectionStep, DrapAndDropStep } from "../components/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
+import { resourcesImageStorage } from "../services/property-registration.service";
 
 export interface RegisterFormData {
   saveData: React.Dispatch<
@@ -17,6 +18,11 @@ export interface RegisterFormData {
 export default function PropertyRegistrationScreen() {
   const [step, setStep] = useState<number>(1);
   const [registerForm, setRegisterForm] = useState<CreatePropertyType>();
+
+  const cleanSteps = async () => {
+    await resourcesImageStorage().clean();
+    router.navigate("/home/(tabs)/property-registration");
+  };
 
   return (
     <SafeAreaView
@@ -32,7 +38,7 @@ export default function PropertyRegistrationScreen() {
       {/*boton de regresar */}
       <Pressable
         style={{ position: "absolute", top: 24, left: 24 }}
-        onPress={() => router.navigate("/home/(tabs)/property-registration")}
+        onPress={cleanSteps}
       >
         <UndoIcon width={24} height={24} />
         <Text>Regresar</Text>
