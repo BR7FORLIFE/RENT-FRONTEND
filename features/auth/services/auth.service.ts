@@ -5,6 +5,7 @@ import {
     type RegisterType,
 } from "../../../core/schemas/auth-schema";
 import { useAuth } from "../../../stores/auth-store";
+import type { Storage } from "../../../types/global";
 
 export const fieldsNotValid = (data: RegisterType): string[] => {
     const notValidField = Object.entries(data)
@@ -18,12 +19,16 @@ export const validateRegisterFields = (data: RegisterType) => {
     return registerSchema.safeParse(data);
 };
 
-export function InfoStorage() {
+export function InfoStorage(): Storage<{
+    userId: string | null;
+    refreshToken: string | null;
+}> {
+    const KEY_STORAGE = "userInfo";
     const get = async (): Promise<{
         userId: string;
         refreshToken: string;
     } | null> => {
-        const userInfo = await AsyncStorage.getItem("userInfo");
+        const userInfo = await AsyncStorage.getItem(KEY_STORAGE);
         return userInfo ? JSON.parse(userInfo) : null;
     };
 
@@ -31,7 +36,7 @@ export function InfoStorage() {
         userId: string | null;
         refreshToken: string | null;
     }) => {
-        const current = await AsyncStorage.getItem("userInfo");
+        const current = await AsyncStorage.getItem(KEY_STORAGE);
 
         const stored = current ? JSON.parse(current) : {};
 
@@ -43,31 +48,38 @@ export function InfoStorage() {
             }),
         };
 
-        await AsyncStorage.setItem("userInfo", JSON.stringify(updated));
+        await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(updated));
     };
 
-    return { get, set };
+    const clean = async () => await AsyncStorage.clear();
+
+    return { get, set, clean };
 }
 
-export function FormInfoStorage() {
+export function FormInfoStorage(): Storage<RegisterType> {
+    const KEY_STORAGE = "register-form";
+
     const get = async (): Promise<RegisterType | null> => {
-        const data = await AsyncStorage.getItem("register-form");
+        const data = await AsyncStorage.getItem(KEY_STORAGE);
         return data ? JSON.parse(data) : null;
     };
 
     const set = async (formData: RegisterType): Promise<void> => {
-        await AsyncStorage.setItem("register-form", JSON.stringify(formData));
+        await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(formData));
     };
 
-    return { get, set };
+    const clean = async () => await AsyncStorage.clear();
+
+    return { get, set, clean };
 }
 
 export async function logoutUser() {
+    const KEY_STORAGE = "refreshToken";
     //hasync acemos saber al servidor que el usuario ha hecho un logout
     await logout();
 
     //elimnamos el refresh token del asynStorage
-    await AsyncStorage.setItem("refreshToken", "");
+    await AsyncStorage.setItem(KEY_STORAGE, "");
 
     //elinamos la informacion del store
     useAuth.getState().logout();

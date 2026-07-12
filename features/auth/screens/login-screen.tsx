@@ -75,7 +75,7 @@ function LoginScreen() {
 
       //persistimos la informacion en el Async Storage
       InfoStorage().set({ userId: null, refreshToken });
-
+  
       router.navigate("/home/(tabs)/property-registration");
     },
   });

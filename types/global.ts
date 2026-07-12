@@ -22,3 +22,9 @@ export type GetAll<T> = {
 export type Get<T extends PropertyKey, K> = {
     [P in T]: K;
 };
+
+export interface Storage<T> {
+    get: () => Promise<T | null>;
+    set: (data: T) => Promise<void>;
+    clean: () => Promise<void>;
+}
