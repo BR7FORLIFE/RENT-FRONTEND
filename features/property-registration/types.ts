@@ -12,3 +12,9 @@ export interface PropertyInfoCard {
     typeProperty: TypePropertyType;
     action?: () => void;
 }
+
+export interface OpenStreetResponse {
+    lat: string; //latitude
+    lon: string; // longitude
+    name: string; // name
+}
