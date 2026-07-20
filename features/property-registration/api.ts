@@ -2,7 +2,11 @@ import { api } from "../../core/api/axios-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { Get, GetAll } from "../../types/global";
 import { type PropertyType } from "./schemas/property-registration.schema";
-import type { OpenStreetResponse } from "./types";
+import type {
+    IAPropertyField,
+    IAPropertyRegistrationResponse,
+    OpenStreetResponse,
+} from "./types";
 
 export const GetAllProperties = async () => {
     const { data } = await api.get<GetAll<PropertyType[]>>(
@@ -18,19 +22,39 @@ export const GetPropertyById = async (id: string) => {
     return data;
 };
 
+export const IAPropertyRegistrationSuggestion = async (
+    field: IAPropertyField,
+) => {
+    const { data } = await api.post<IAPropertyRegistrationResponse>(
+        `${FINANCIAL_MODULE.PROPERTY_REGISTRATION_FEATURE.PROPERTY}/IA-registration-suggestion`,
+        { propertyField: field },
+    );
+
+    return data;
+};
+
 export const OpenStreetMapApi = async (
     place: string,
 ): Promise<OpenStreetResponse> => {
-    const req = await fetch(
-        encodeURI(
-            `https://nominatim.openstreetmap.org/search?q=${place}&format=json`,
-        ),
+    console.log(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json`,
     );
-    const data = (await req.json()) as OpenStreetResponse[];
+    const req = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json`,
+    );
+
+    console.log(req.status);
+    const data = await req.text();
+
+    console.log(data);
+    if (!req.ok) {
+        throw new Error(`HTTP ${req.status}`);
+    }
 
     return {
-        lat: data[0].lat,
-        lon: data[0].lon,
-        name: data[0].name,
+        lat: "",
+        lon: "",
+        name: "",
+        display_name: "",
     };
 };

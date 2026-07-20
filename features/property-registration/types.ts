@@ -14,7 +14,16 @@ export interface PropertyInfoCard {
 }
 
 export interface OpenStreetResponse {
-    lat: string; //latitude
-    lon: string; // longitude
-    name: string; // name
+    lat: string;
+    lon: string;
+    name: string;
+    display_name: string;
+}
+
+// IA Request and Responses
+export type IAPropertyField = "PropertyName" | "PropertyDescription";
+
+export interface IAPropertyRegistrationResponse {
+    name: string;
+    description: string;
 }
