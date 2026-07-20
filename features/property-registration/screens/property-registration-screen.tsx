@@ -4,7 +4,14 @@ import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
 import UndoIcon from "../../../assets/icons/undo.svg";
-import { DirectionStep, DrapAndDropStep } from "../components/steps";
+import
+  {
+    DirectionStep,
+    DrapAndDropStep,
+    FmiAndPredialNumberStep,
+    PropertyInfo,
+    TypeAndOccupationStep,
+  } from "../components/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
 import { resourcesImageStorage } from "../services/property-registration.service";
 
@@ -16,7 +23,9 @@ export interface RegisterFormData {
 }
 
 export default function PropertyRegistrationScreen() {
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(5);
+  //estado que nos permitira renderizar un splash screen cuando se este generando el proceso de registro
+  const [isCreateProperty, setIsCreateProperty] = useState<boolean>(false);
   const [registerForm, setRegisterForm] = useState<CreatePropertyType>();
 
   const cleanSteps = async () => {
@@ -46,7 +55,7 @@ export default function PropertyRegistrationScreen() {
 
       {/*STEPS indicador */}
       <View style={{ position: "absolute", right: 24, top: 24 }}>
-        <Text>{`Step ${step}  / 7`}</Text>
+        <Text>{`Step ${step}  / 5`}</Text>
       </View>
 
       <View
@@ -80,6 +89,22 @@ export default function PropertyRegistrationScreen() {
           )}
           {step === 2 && (
             <DirectionStep saveData={setRegisterForm} setStep={setStep} />
+          )}
+          {step === 3 && (
+            <FmiAndPredialNumberStep
+              saveData={setRegisterForm}
+              setStep={setStep}
+            />
+          )}
+          {step === 4 && (
+            <PropertyInfo saveData={setRegisterForm} setStep={setStep} />
+          )}
+          {step === 5 && (
+            <TypeAndOccupationStep
+              setStep={setStep}
+              saveData={setRegisterForm}
+              setIsCreateProperty={setIsCreateProperty}
+            />
           )}
           <View style={{ width: "80%", marginTop: 30 }}></View>
         </View>

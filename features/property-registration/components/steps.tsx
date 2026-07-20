@@ -8,6 +8,7 @@ import
     Pressable,
     StyleSheet,
     Text,
+    TextInput,
     View,
   } from "react-native";
 import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
@@ -16,12 +17,20 @@ import { ButtonForm } from "../../../components/buttons/button";
 import { Colors } from "../../../themes/themes";
 import type { RegisterFormData } from "../screens/property-registration-screen";
 
-import { useQuery } from "@tanstack/react-query";
+import { Picker } from "@react-native-picker/picker";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import AddIcon from "../../../assets/icons/add-square.svg";
+import IAIcon from "../../../assets/icons/ai.svg";
 import CloseIcon from "../../../assets/icons/close.svg";
 import UploadIcon from "../../../assets/icons/upload.svg";
 import { SearchInput } from "../../../components/inputs/input";
-import { OpenStreetMapApi } from "../api";
+import type { ApiError } from "../../../types/global";
+import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../api";
+import type {
+  PropertyOccupationType,
+  TypePropertyType,
+} from "../schemas/property-registration.schema";
 import { resourcesImageStorage } from "../services/property-registration.service";
 
 /**
@@ -53,7 +62,7 @@ const ImagePreview = ({
 {
   /*paso 1: cargar la imagen para crear el ResourceImage */
 }
-function DrapAndDropStep({ saveData, setStep }: RegisterFormData) {
+export function DrapAndDropStep({ saveData, setStep }: RegisterFormData) {
   const [imagesUris, setImagesUris] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -258,19 +267,23 @@ const imagesStyles = StyleSheet.create({
   },
 });
 
-function DirectionStep({ saveData, setStep }: RegisterFormData) {
+export function DirectionStep({ saveData, setStep }: RegisterFormData) {
   //le pedimos permiso al usuario para acceder a su ubicacion y poder ubicarlo en el Map View
   const [coords, setCoords] = useState<Region>();
   const [mark, setMark] = useState<LatLng>();
-  const [inputPlace, setInputPlace] = useState<string>("Colombia");
-  const [debouncedPlace, setDebouncedPlace] = useState("");
+  const [inputPlace, setInputPlace] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
 
   const mapRef = useRef<MapView>(null);
 
   const { data } = useQuery({
-    queryFn: async () => await OpenStreetMapApi(debouncedPlace),
-    queryKey: ["openstreet", debouncedPlace],
-    enabled: debouncedPlace.trim().length >= 3,
+    queryKey: ["openstreet", search],
+    queryFn: () => {
+      console.log(">>> queryFn ejecutado");
+      return OpenStreetMapApi(search);
+    },
+    retry: false,
+    enabled: search.trim().length >= 3,
   });
 
   useEffect(() => {
@@ -293,11 +306,18 @@ function DirectionStep({ saveData, setStep }: RegisterFormData) {
         longitude: location.coords.longitude,
         longitudeDelta: 0.005,
       };
-
+      setMark({
+        latitude: initialRegion.latitude,
+        longitude: initialRegion.longitude,
+      });
       setCoords(initialRegion);
     };
     getPermission();
   }, []);
+
+  const handleInformation = () => {
+    setStep((prev) => prev + 1);
+  };
 
   useEffect(() => {
     if (!data) return;
@@ -314,14 +334,6 @@ function DirectionStep({ saveData, setStep }: RegisterFormData) {
       longitudeDelta: 0.005,
     });
   }, [data]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedPlace(inputPlace);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [inputPlace]);
 
   return (
     <View style={globalStyles.container}>
@@ -356,6 +368,13 @@ function DirectionStep({ saveData, setStep }: RegisterFormData) {
         ) : (
           <Text>Cargando Mapa...</Text>
         )}
+        <View style={{ width: "40%" }}>
+          <ButtonForm
+            title="Buscar"
+            action={handleInformation}
+            disabled={!coords || inputPlace.trim().length === 0}
+          />
+        </View>
       </View>
     </View>
   );
@@ -364,7 +383,7 @@ function DirectionStep({ saveData, setStep }: RegisterFormData) {
 const DirectionStepStyles = StyleSheet.create({
   mapContainer: {
     width: "90%",
-    height: 300,
+    height: 240,
 
     borderRadius: 18,
     overflow: "hidden",
@@ -389,6 +408,387 @@ const DirectionStepStyles = StyleSheet.create({
   },
 });
 
+export function FmiAndPredialNumberStep({
+  saveData,
+  setStep,
+}: RegisterFormData) {
+  const [data, setData] = useState({
+    FMI: "",
+    PredialNumber: "",
+  });
+
+  const handleData = (key: keyof typeof data, value: string) => {
+    const info = {
+      ...data,
+      [key]: value,
+    };
+    setData(info);
+  };
+
+  const isValid = data.FMI.trim() !== "" && data.PredialNumber.trim() !== "";
+
+  const handleSubmit = () => {
+    setStep((prev) => prev + 1);
+  };
+
+  return (
+    <View style={globalStyles.container}>
+      <View style={stylesFmiAndPredialNumber.container}>
+        <Text style={stylesFmiAndPredialNumber.title}>
+          Ingresa el FMI y el número predial de tu vivienda
+        </Text>
+
+        <Text style={stylesFmiAndPredialNumber.subtitle}>
+          Esta información se utilizará para identificar el inmueble.
+        </Text>
+
+        <View style={stylesFmiAndPredialNumber.field}>
+          <Text style={stylesFmiAndPredialNumber.label}>FMI</Text>
+          <TextInput
+            placeholder="Ej. 060-123456"
+            style={stylesFmiAndPredialNumber.input}
+            value={data.FMI}
+            onChangeText={(text) => handleData("FMI", text)}
+          />
+        </View>
+
+        <View style={stylesFmiAndPredialNumber.field}>
+          <Text style={stylesFmiAndPredialNumber.label}>Número Predial</Text>
+          <TextInput
+            placeholder="Ej. 010203040506"
+            style={stylesFmiAndPredialNumber.input}
+            value={data.PredialNumber}
+            onChangeText={(text) => handleData("PredialNumber", text)}
+          />
+        </View>
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "center",
+          }}
+        >
+          <View style={{ width: "50%" }}>
+            <ButtonForm
+              title="Aceptar"
+              disabled={!isValid}
+              action={handleSubmit}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const stylesFmiAndPredialNumber = StyleSheet.create({
+  container: {
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    gap: 24,
+    alignItems: "center",
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+    textAlign: "center",
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+
+  field: {
+    width: "100%",
+    gap: 8,
+  },
+
+  label: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#374151",
+    marginLeft: 4,
+  },
+
+  input: {
+    width: "100%",
+    height: 52,
+    borderWidth: 1,
+    borderColor: Colors.TERTIARY,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    backgroundColor: "#FFF",
+    color: "#111827",
+  },
+});
+
+export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
+  //estado de el nombre de la propiedad y descripcion de esta misma
+  const [info, setInfo] = useState<{
+    propertyName: string;
+    propertyDescription: string;
+  }>({
+    propertyName: "",
+    propertyDescription: "",
+  });
+
+  //estasync async async ado que controla cuando la IA esta trabajando
+  const [IsGeneratePrompt, setGeneratePrompt] = useState<boolean>();
+
+  const mutation = useMutation({
+    mutationFn: IAPropertyRegistrationSuggestion,
+    mutationKey: ["IA-registration-suggestion"],
+    onError: (err: AxiosError<ApiError>) => {
+      const data = err.response?.data;
+
+      if (data) {
+        Toast.show({
+          text1: "Error en la generacion con IA",
+          type: "error",
+        });
+      }
+    },
+    onSuccess: (data) => {
+      setInfo({
+        propertyName: data.name,
+        propertyDescription: data.description,
+      });
+    },
+  });
+
+  //generacion de contenido con IA
+  const generationIA = async () => {
+    setGeneratePrompt(true);
+
+    //limpiamos el estado de propertyName y descripcion para no montar sobre capas
+    setInfo({ propertyName: "", propertyDescription: "" });
+
+    mutation.mutate("PropertyName"); //llamamos al servidor para sugerir los nombres y descripcion
+
+    setGeneratePrompt(false);
+  };
+
+  const onChangeText = (id: string, value: string) => {
+    const currentInfo = {
+      ...info,
+      [id]: value,
+    };
+
+    setInfo(currentInfo);
+  };
+
+  const nextStep = () => {
+    setStep((prev) => prev + 1);
+  };
+
+  const isValid =
+    info.propertyName.trim() !== "" && info.propertyDescription.trim() !== "";
+
+  return (
+    <View style={globalStyles.container}>
+      <View
+        style={{
+          width: "100%",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          height: "100%",
+          gap: 30,
+        }}
+      >
+        {/**Nombre de la propiedad */}
+        <View
+          style={{
+            width: "100%",
+            height: "20%",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: "700" }}>Nombre de la propiedad</Text>
+          <TextInput
+            value={info.propertyName}
+            style={{
+              borderWidth: 2,
+              borderColor: "black",
+              width: "70%",
+              height: 50,
+              borderRadius: 12,
+              textAlign: "center",
+            }}
+            placeholder="NOMBRE PROPIEDAD"
+            onChangeText={(text) => onChangeText("propertyName", text)}
+          />
+        </View>
+
+        {/**Descripcion de la propiedad */}
+        <View
+          style={{
+            width: "100%",
+            height: "30%",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: "700" }}>Descripción de la propiedad</Text>
+          <TextInput
+            value={info.propertyDescription}
+            style={{
+              borderWidth: 2,
+              borderColor: "black",
+              width: "70%",
+              height: "100%",
+              borderRadius: 12,
+              textAlign: "center",
+            }}
+            multiline
+            numberOfLines={4}
+            placeholder="DESCRIPCION DE LA PROPIEDAD"
+            onChangeText={(text) => onChangeText("propertyDescription", text)}
+          />
+        </View>
+
+        {/** Boton para establecer la informacion */}
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
+          <View style={{ width: "40%" }}>
+            <ButtonForm title="Aceptar" action={nextStep} disabled={!isValid} />
+          </View>
+          <Pressable
+            onPress={generationIA}
+            style={{
+              flexDirection: "row",
+              gap: 4,
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 2,
+              borderColor: "#1b81ff",
+              paddingHorizontal: 8,
+              borderRadius: 12,
+            }}
+            disabled={IsGeneratePrompt}
+          >
+            <IAIcon width={24} height={24} />
+            {mutation.isPending ? (
+              <Text style={{ fontWeight: "700", color: "#1b81ff" }}>
+                Generando...
+              </Text>
+            ) : (
+              <Text style={{ fontWeight: "700", color: "#1b81ff" }}>
+                Generar con IA
+              </Text>
+            )}
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface TypeAndOccupationProps {
+  typeProperty: TypePropertyType;
+  occupationType: PropertyOccupationType;
+}
+
+export function TypeAndOccupationStep({
+  saveData,
+  setStep,
+  setIsCreateProperty,
+}: RegisterFormData & {
+  setIsCreateProperty: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const [info, setInfo] = useState<TypeAndOccupationProps>({
+    occupationType: "VACANT",
+    typeProperty: "RESIDENTIAL",
+  });
+
+  const handlePropertyType = (key: string, value: string) => {};
+
+  return (
+    <View style={globalStyles.container}>
+      <View
+        style={{
+          width: "100%",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          height: "100%",
+          gap: 30,
+        }}
+      >
+        <View>
+          <Text></Text>
+          <View style={PickerStyles.container}>
+            <Picker
+              style={PickerStyles.picker}
+              selectedValue={info.typeProperty}
+              onValueChange={(itemValue, _) =>
+                handlePropertyType("typeProperty", itemValue)
+              }
+            >
+              <Picker.Item label="RESIDENCIAL" value="RESIDENTIAL" />
+              <Picker.Item label="COMERCIAL" value="COMMERCIAL" />
+              <Picker.Item label="INDUSTRIAL" value="INDUSTRIAL" />
+              <Picker.Item label="TERRENO" value="LAND_OR_SOIL" />
+              <Picker.Item label="URBANO" value="URBAN" />
+              <Picker.Item label="AGRARIO" value="AGRARIAN" />
+              <Picker.Item label="MIXTO" value="MIXED" />
+            </Picker>
+          </View>
+        </View>
+
+        <View>
+          <Text></Text>
+          <View style={PickerStyles.container}>
+            <Picker
+              style={PickerStyles.picker}
+              selectedValue={info.occupationType}
+              onValueChange={(itemValue, _) =>
+                handlePropertyType("occupationType", itemValue)
+              }
+            >
+              <Picker.Item label="ARRENDADO" value="OCCUPIED" />
+              <Picker.Item label="EN PROCESO" value="IN_PROCESS" />
+              <Picker.Item label="DISPONIBLE" value="VACANT" />
+            </Picker>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const PickerStyles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+    marginVertical: 8,
+  },
+  picker: {
+    color: "#111827",
+    height: 56,
+    width: "100%",
+  },
+});
+
 const globalStyles = StyleSheet.create({
   container: {
     width: "100%",
@@ -397,5 +797,3 @@ const globalStyles = StyleSheet.create({
     marginTop: 5,
   },
 });
-
-export { DirectionStep, DrapAndDropStep };
