@@ -13,7 +13,7 @@ import PropertyCard from "../../../components/property-card";
 import SplashScreen from "../../../components/splash-screen";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
-import { normalizePropertyInformation } from "../services/property-registration.service";
+import { normalizePropertyInformation } from "../services/property-registration.domain.service";
 import type { PropertyInfoCard } from "../types";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];

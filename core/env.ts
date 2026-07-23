@@ -1,4 +1,4 @@
 // Cloudinary config env
-export const CloudinaryCloudName = process.env.EXPO_CLOUDINARY_CLOUD_NAME;
-export const CloudinaryApiSecret = process.env.EXPO_CLOUDINARY_API_SECRET;
-export const CloudinaryApiKey = process.env.EXPO_CLOUDINARY_API_KEY;
+export const CLOUDINARY_CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+//Unsigned upload images
+export const CLOUDINARY_PRESET_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_PRESET_NAME;
