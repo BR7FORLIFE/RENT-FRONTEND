@@ -1,7 +1,10 @@
 import { api } from "../../core/api/axios-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { Get, GetAll } from "../../types/global";
-import { type PropertyType } from "./schemas/property-registration.schema";
+import {
+    type CreatePropertyType,
+    type PropertyType,
+} from "./schemas/property-registration.schema";
 import type {
     IAPropertyField,
     IAPropertyRegistrationResponse,
@@ -33,28 +36,30 @@ export const IAPropertyRegistrationSuggestion = async (
     return data;
 };
 
+export const saveProperty = async (property: Partial<CreatePropertyType>) => {
+    const { data } = await api.post<{ id: string; message: string }>(
+        FINANCIAL_MODULE.PROPERTY_REGISTRATION_FEATURE.PROPERTY,
+        property,
+    );
+    return data;
+};
+
 export const OpenStreetMapApi = async (
     place: string,
 ): Promise<OpenStreetResponse> => {
-    console.log(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json`,
-    );
     const req = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json`,
     );
 
-    console.log(req.status);
-    const data = await req.text();
-
-    console.log(data);
     if (!req.ok) {
         throw new Error(`HTTP ${req.status}`);
     }
+    const data = (await req.json()) as OpenStreetResponse[];
 
     return {
-        lat: "",
-        lon: "",
-        name: "",
-        display_name: "",
+        lat: data[0].lat,
+        lon: data[0].lon,
+        name: data[0].name,
+        display_name: data[0].display_name,
     };
 };

@@ -1,56 +1,27 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Storage } from "../../../types/global";
-import type { PropertyType } from "../schemas/property-registration.schema";
-import type { PropertyInfoCard } from "../types";
+import { uploadImage } from "../../../core/configs/cloudinaryconfig";
+import type { createResourceImageType } from "../schemas/property-registration.schema";
+import { resourcesImageStorage } from "./property-registration.domain.service";
 
-export function normalizePropertyInformation(
-    properties: PropertyType[],
-): PropertyInfoCard[] {
-    if (properties.length === 0) {
-        return [];
+//cargamos las imagenes a cloduinary y retornamos la informacion para ser comprendida
+export async function uploadImagesToCloudinary(): Promise<
+    createResourceImageType[]
+> {
+    const imagesUris = await resourcesImageStorage().get(); //obtenemos todas las imagenes del usuario
+
+    if (!imagesUris) {
+        throw new Error("Not images saved!"); // se debe de tratar de mejor manera
     }
 
-    return properties.map(
-        ({
-            id,
-            fmi,
-            direction,
-            propertyOccupationType,
-            typeProperty,
-            propertyName,
-        }) => {
-            const normalizeDirection = `${direction.city} - ${direction.neighborhood}`;
-            return {
-                id,
-                propertyName,
-                fmi,
-                direction: normalizeDirection,
-                occupationType: propertyOccupationType.name,
-                typeProperty: typeProperty.name,
-            };
-        },
-    );
-}
+    const uploadPromises = imagesUris.map(uploadImage);
 
-//funcion para guardar los pasos en el registro de las propiedades
+    const responses = await Promise.all(uploadPromises);
 
-//export async function saveStepStorage(): Promise<CreatePropertyType> {}
-
-//storages (para reconstruir toda la informacion completa de registro de propiedades)
-
-// 1. STEP resources Images
-export function resourcesImageStorage(): Storage<string[]> {
-    const KEY_STORAGE = "resourcesImages";
-    const get = async () => {
-        const data = await AsyncStorage.getItem(KEY_STORAGE);
-        if (!data) return [];
-        return JSON.parse(data);
-    };
-    const set = async (uri: string[]) => {
-        await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(uri));
-    };
-
-    const clean = async () => await AsyncStorage.clear();
-
-    return { get, set, clean };
+    return responses.map((res) => ({
+        url: res.url,
+        assetId: res.asset_id,
+        format: res.format,
+        height: res.height,
+        secureUrl: res.secure_url,
+        width: res.width,
+    }));
 }

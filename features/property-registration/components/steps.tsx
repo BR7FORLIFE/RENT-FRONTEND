@@ -28,10 +28,12 @@ import { SearchInput } from "../../../components/inputs/input";
 import type { ApiError } from "../../../types/global";
 import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../api";
 import type {
+  CreateDirectionType,
+  CreatePropertyType,
   PropertyOccupationType,
   TypePropertyType,
 } from "../schemas/property-registration.schema";
-import { resourcesImageStorage } from "../services/property-registration.service";
+import { resourcesImageStorage } from "../services/property-registration.domain.service";
 
 /**
  * Mejoras a tener en cuenta
@@ -62,7 +64,7 @@ const ImagePreview = ({
 {
   /*paso 1: cargar la imagen para crear el ResourceImage */
 }
-export function DrapAndDropStep({ saveData, setStep }: RegisterFormData) {
+export function DrapAndDropStep({ setStep }: RegisterFormData) {
   const [imagesUris, setImagesUris] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -276,10 +278,9 @@ export function DirectionStep({ saveData, setStep }: RegisterFormData) {
 
   const mapRef = useRef<MapView>(null);
 
-  const { data } = useQuery({
+  const { data, isSuccess, error } = useQuery({
     queryKey: ["openstreet", search],
     queryFn: () => {
-      console.log(">>> queryFn ejecutado");
       return OpenStreetMapApi(search);
     },
     retry: false,
@@ -316,6 +317,22 @@ export function DirectionStep({ saveData, setStep }: RegisterFormData) {
   }, []);
 
   const handleInformation = () => {
+    // setSearch(inputPlace); -> ejecuta la api de geolocalizacion
+
+    //hardcodeamos para despues probar con la API
+    const direction: CreateDirectionType = {
+      city: "Cartagena",
+      department: "Bolivar",
+      latitute: 90,
+      longitud: 90,
+      neighborhood: "Barrio Bocagrande",
+      numberStreet: 12,
+      typeStreet: "CAREER",
+      complement: "cerca al mar",
+    };
+
+    saveData((prev) => ({ ...prev, direction }));
+
     setStep((prev) => prev + 1);
   };
 
@@ -428,6 +445,11 @@ export function FmiAndPredialNumberStep({
   const isValid = data.FMI.trim() !== "" && data.PredialNumber.trim() !== "";
 
   const handleSubmit = () => {
+    saveData((prev) => ({
+      ...prev,
+      fmi: data.FMI,
+      predialNumber: data.PredialNumber,
+    }));
     setStep((prev) => prev + 1);
   };
 
@@ -455,6 +477,7 @@ export function FmiAndPredialNumberStep({
         <View style={stylesFmiAndPredialNumber.field}>
           <Text style={stylesFmiAndPredialNumber.label}>Número Predial</Text>
           <TextInput
+            inputMode="numeric"
             placeholder="Ej. 010203040506"
             style={stylesFmiAndPredialNumber.input}
             value={data.PredialNumber}
@@ -584,7 +607,12 @@ export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
     setInfo(currentInfo);
   };
 
-  const nextStep = () => {
+  const submitInfo = () => {
+    saveData((prev) => ({
+      ...prev,
+      propertyName: info.propertyName,
+      propertyDescription: info.propertyDescription,
+    }));
     setStep((prev) => prev + 1);
   };
 
@@ -668,7 +696,11 @@ export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
           }}
         >
           <View style={{ width: "40%" }}>
-            <ButtonForm title="Aceptar" action={nextStep} disabled={!isValid} />
+            <ButtonForm
+              title="Aceptar"
+              action={submitInfo}
+              disabled={!isValid}
+            />
           </View>
           <Pressable
             onPress={generationIA}
@@ -708,9 +740,13 @@ interface TypeAndOccupationProps {
 
 export function TypeAndOccupationStep({
   saveData,
-  setStep,
   setIsCreateProperty,
-}: RegisterFormData & {
+  disabled,
+}: {
+  disabled: boolean;
+  saveData: React.Dispatch<
+    React.SetStateAction<Partial<CreatePropertyType> | undefined>
+  >;
   setIsCreateProperty: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [info, setInfo] = useState<TypeAndOccupationProps>({
@@ -718,21 +754,40 @@ export function TypeAndOccupationStep({
     typeProperty: "RESIDENTIAL",
   });
 
-  const handlePropertyType = (key: string, value: string) => {};
+  const handlePropertyType = (key: string, value: string) => {
+    const data = {
+      ...info,
+      [key]: value,
+    };
+
+    setInfo(data);
+  };
+
+  const submitData = () => {
+    saveData((prev) => ({
+      ...prev,
+      propertyOccupationType: info.occupationType,
+      propertyType: info.typeProperty,
+    }));
+
+    setIsCreateProperty(true);
+  };
 
   return (
     <View style={globalStyles.container}>
       <View
         style={{
           width: "100%",
+          flexDirection: "column",
           justifyContent: "flex-start",
           alignItems: "center",
           height: "100%",
           gap: 30,
+          marginTop: 24,
         }}
       >
-        <View>
-          <Text></Text>
+        <View style={{ width: "80%" }}>
+          <Text>Tipo de inmueble</Text>
           <View style={PickerStyles.container}>
             <Picker
               style={PickerStyles.picker}
@@ -752,8 +807,8 @@ export function TypeAndOccupationStep({
           </View>
         </View>
 
-        <View>
-          <Text></Text>
+        <View style={{ width: "80%" }}>
+          <Text>Estado de ocupacion del inmueble</Text>
           <View style={PickerStyles.container}>
             <Picker
               style={PickerStyles.picker}
@@ -767,6 +822,14 @@ export function TypeAndOccupationStep({
               <Picker.Item label="DISPONIBLE" value="VACANT" />
             </Picker>
           </View>
+        </View>
+
+        <View style={{ width: "80%" }}>
+          <ButtonForm
+            title="Registrar Propiedad"
+            action={submitData}
+            disabled={disabled}
+          />
         </View>
       </View>
     </View>

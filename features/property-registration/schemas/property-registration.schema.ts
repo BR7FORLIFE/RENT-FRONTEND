@@ -95,7 +95,7 @@ export const propertySchema = z.object({
     typeProperty: createCatalogSchema(TypeProperty),
     propertyOccupationType: createCatalogSchema(PropertyOccupation),
     direction: DirectionSchema,
-    resourceImage: ResourceImageSchema,
+    resourceImages: z.array(ResourceImageSchema),
 });
 
 export type PropertyType = z.infer<typeof propertySchema>;
@@ -104,7 +104,7 @@ export const createPropertySchema = z.object({
     propertyType: TypeProperty,
     propertyOccupationType: PropertyOccupation,
     direction: createDirectionSchema,
-    resourceImage: createResourceImageSchema,
+    resourceImages: z.array(createResourceImageSchema),
     propertyName: z.string(),
     propertyDescription: z.string(),
     fmi: z.string(),
