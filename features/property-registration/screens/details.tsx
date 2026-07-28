@@ -130,7 +130,7 @@ export default function DetailsScreen() {
           }}
         >
           <AnimatedOccupationTypeInfo
-            occupationType={property?.propertyOccupationType.name}
+            occupationType={property?.propertyOccupationType}
           />
         </View>
       </View>

@@ -25,8 +25,8 @@ export function normalizePropertyInformation(
                 propertyName,
                 fmi,
                 direction: normalizeDirection,
-                occupationType: propertyOccupationType.name,
-                typeProperty: typeProperty.name,
+                occupationType: propertyOccupationType,
+                typeProperty: typeProperty,
             };
         },
     );

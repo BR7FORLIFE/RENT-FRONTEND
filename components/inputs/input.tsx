@@ -4,7 +4,12 @@ import { Colors } from "../../themes/themes";
 
 import SearchIcon from "../../assets/icons/search-input.svg";
 
-export type TypeInput = "phone-pad" | "numeric" | "default";
+export type TypeInput =
+  | "phone-pad"
+  | "numeric"
+  | "default"
+  | "email-address"
+  | "number-pad";
 
 function Input({
   field,
@@ -13,12 +18,14 @@ function Input({
   fn,
   value,
   typeInput,
+  maxLength = 50,
 }: {
   field: string;
   label: string;
   placeholder: string;
   value: string;
   typeInput?: TypeInput;
+  maxLength?: number;
   fn: (id: string, value: string) => void;
 }) {
   const [onfocus, setOnFocus] = useState<boolean>(false);
@@ -49,7 +56,10 @@ function Input({
         onFocus={() => setOnFocus(true)}
         onBlur={() => setOnFocus(false)}
         placeholder={shouldSee ? placeholder : ""}
-        onChange={(event) => fn(field, event.nativeEvent.text.trim())} // el objeto event en react native es distinto
+        onChangeText={(text) => fn(field, text)}
+        autoCorrect={false}
+        autoCapitalize="none"
+        maxLength={maxLength}
       />
     </View>
   );

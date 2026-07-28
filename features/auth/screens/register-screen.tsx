@@ -17,9 +17,9 @@ import type { AxiosError } from "axios";
 import type { ApiError } from "../../../types/global";
 import
   {
-    fieldsNotValid,
     FormInfoStorage,
     InfoStorage,
+    validateContentData,
     validateRegisterFields,
   } from "../services/auth.service";
 
@@ -69,8 +69,6 @@ export default function RegisterScreen() {
   });
   //activar o desctivar el boton de register si la informacion es correcta
   const [isCompleteFields, setCompleteFields] = useState<boolean>(false);
-  // desactivar el boton cuando se haga una peticion http
-  const [isPending, setIsPending] = useState<boolean>(false);
 
   //mutation para cambiar la informacion en el servidor
   const mutation = useMutation({
@@ -116,21 +114,26 @@ export default function RegisterScreen() {
     setInfo(nextInfo);
 
     //activar el boton de registrarse si todos los campos estan rellenados
-    const fieldsListNotValid = fieldsNotValid(nextInfo);
+    const { contentResult, emptyFields } = validateContentData(nextInfo);
 
-    if (fieldsListNotValid.length === 0) {
-      setCompleteFields(true);
+    if (contentResult) {
+      FormInfoStorage().set(contentResult);
+      setCompleteFields(true); // campos rellanaods
       return;
     }
 
-    setCompleteFields(false);
+    if (emptyFields) {
+      setCompleteFields(false); // desactivamos el boton ya que los campos no estan rellenados
 
-    FormInfoStorage().set(nextInfo);
+      //notificamos al usuario sobre los campos que necesitan ser rellenados
+      
+
+      return;
+    }
   };
 
   //funcion de envio de datos al servidor
   const handleSubmit = async () => {
-    setIsPending(true);
     //validamos la estrasync uctura de la informacion
     const result = validateRegisterFields(info);
 
@@ -179,7 +182,7 @@ export default function RegisterScreen() {
           {/*contenedor de inputs */}
           <View style={styles.containerInput}>
             {keyInputs.map(({ field, label, placeholder }) => {
-              if (field === "cellphone" || field === "identificationNumber") {
+              if (field === "cellphone") {
                 return (
                   <Input
                     key={field}
@@ -188,7 +191,37 @@ export default function RegisterScreen() {
                     placeholder={placeholder}
                     fn={handleSetInfo}
                     value={info[field]}
-                    typeInput="numeric"
+                    typeInput="number-pad"
+                    maxLength={10}
+                  />
+                );
+              }
+
+              if (field === "identificationNumber") {
+                return (
+                  <Input
+                    key={field}
+                    field={field}
+                    label={label}
+                    placeholder={placeholder}
+                    fn={handleSetInfo}
+                    value={info[field]}
+                    typeInput="number-pad"
+                    maxLength={12}
+                  />
+                );
+              }
+
+              if (field === "email") {
+                return (
+                  <Input
+                    key={field}
+                    field={field}
+                    label={label}
+                    placeholder={placeholder}
+                    fn={handleSetInfo}
+                    value={info[field]}
+                    typeInput="email-address"
                   />
                 );
               }
@@ -223,7 +256,7 @@ export default function RegisterScreen() {
             <ButtonForm
               title="Registrarse"
               action={handleSubmit}
-              disabled={!isCompleteFields || isPending}
+              disabled={!isCompleteFields || mutation.isPending}
               isPending={mutation.isPending}
             />
             <Text style={{ fontSize: 12 }}>Or</Text>

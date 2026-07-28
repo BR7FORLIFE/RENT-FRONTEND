@@ -2,7 +2,6 @@ import type { CloudinaryResponse } from "../../features/property-registration/ty
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_PRESET_NAME } from "../env";
 
 export async function uploadImage(imgUri: string) {
-    console.log({ CLOUDINARY_CLOUD_NAME, CLOUDINARY_PRESET_NAME });
     const CloudinaryUrlCloud = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
     const data = new FormData();
