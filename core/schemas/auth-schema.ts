@@ -47,3 +47,12 @@ export type RefreshTokenType = z.infer<typeof RefreshTokenSchema>;
 export type RefreshTokenResponseType = z.infer<
     typeof RefreshTokenResponseSchema
 >;
+
+export const MeResponseSchema = z.object({
+    username: z.string(),
+    email: z.email(),
+    cellphone: z.string(),
+    fullname: z.string(),
+});
+
+export type MeResponseType = z.infer<typeof MeResponseSchema>;

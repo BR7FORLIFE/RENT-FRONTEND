@@ -79,11 +79,6 @@ export const createResourceImageSchema = z.object({
 
 export type createResourceImageType = z.infer<typeof createResourceImageSchema>;
 
-const createCatalogSchema = <T extends z.ZodEnum<any>>(schema: T) =>
-    z.object({
-        name: schema,
-    });
-
 export const propertySchema = z.object({
     id: z.uuid(),
     fmi: z.string(),
@@ -92,10 +87,10 @@ export const propertySchema = z.object({
     createat: z.date(),
     propertyDescription: z.string(),
     propertyName: z.string(),
-    typeProperty: createCatalogSchema(TypeProperty),
-    propertyOccupationType: createCatalogSchema(PropertyOccupation),
+    typeProperty: TypeProperty,
+    propertyOccupationType: PropertyOccupation,
     direction: DirectionSchema,
-    resourceImages: z.array(ResourceImageSchema),
+    resourcesImages: z.array(ResourceImageSchema),
 });
 
 export type PropertyType = z.infer<typeof propertySchema>;

@@ -4,6 +4,7 @@ import {
     RegisterResponseSchema,
     type LoginResponseType,
     type LoginType,
+    type MeResponseType,
     type RefreshTokenResponseType,
     type RegisterResponseType,
     type RegisterType,
@@ -26,6 +27,11 @@ export async function register(
 export async function login(info: LoginType) {
     const { data } = await api.post<LoginResponseType>(AUTHPATHS.login, info);
     LoginResponseSchema.parse(data);
+    return data;
+}
+
+export async function Me() {
+    const { data } = await api.get<MeResponseType>(AUTHPATHS.me);
     return data;
 }
 

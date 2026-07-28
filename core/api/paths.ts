@@ -8,6 +8,7 @@ export const AUTHPATHS = {
         authorization: "/rent-auth/oauth2/authorization/google",
         credentials: "/rent-auth/auth/oauth2/exchange",
     },
+    me: "/rent-auth/auth/me",
     refresh: "/rent-auth/auth/refresh",
     rotate: "/rent-auth/auth/refresh/rotate",
     logout: "/rent-auth/auth/logout",
