@@ -1,0 +1,67 @@
+FEATURE AUTENTICACION DE USUARIOS
+
+Cosas a tener en cuenta a testear
+
+_ Logica de negocio
+_ Estado (State Management)
+_ Hooks
+_ Servicios (Comunicaciones con el exterior) Backend
+_ Cliente Http (Apis)
+_ Componentes
+_ Screens (Interacciones de la UI)
+_ Navegaciones
+_ Integraciones Externas (Google, OpenStreet, Cloudinary. etc)
+_ Persistencia local (Async Storage)
+_ End to End (Flujo completo de la aplicacion)
+_ Observabilidad 
+
+
+FEATURE AUTH
+
+1. Logica de negocio - [HECHO]
+
+- Testear la validacion de campos no validos (Telefonos, espacios, formatos incorrectos, direcciones,etc)
+
+2. Estados (State Management)
+
+- | Register | 
+    - activar o desactivar  el boton de registro cuando todos los campos estan rellenos
+
+- Validar que se guarde la informacion correspondiente dentro del store de zustand y como se comporta la UI
+en presencia de este dato (setId , setAccesstoken, userId).
+
+3. Servicios
+
+- se debe validar que la informacion del usuario despues del registro y login 
+(Registro satisfactorio e login satisfactorio) se guarde correctamente dentro la store de zustand, 
+ademas de la persistencia y navegacion de esta misma. Y si por alguna razon la peticion falla se debe
+notificar al usuario con su respectivo porqué.
+
+- Hacer la redireccion correctamente en la web para el login con oauth2.
+
+4. Componentes
+
+| login y register|
+    - Se debe rellanar los inputs si en el storage del usuario se encuentra información de inicio de sesión
+    caso contrario permaneceran vacios y a la espera de su utilización
+    - Comprobar que los estados cambian cuando el usuario escribe en dichos inputs
+    - Si se presiona el boton de login debe desactivarse dicho boton al ejecutar la acción
+
+| register | 
+    - se debe de ejecutar el picker si el estado del boton esta presionado para realizar la accion
+
+5. Screens -> validar el flujo completo esperado dentro del login, register, y verificaciones de email.
+
+6. Navegaciones -> validar si se cumplen las navegaciones correctamente en acciones exitosas o no exitosas
+dentro de login, register y  verificacion de email
+
+[HECHO]
+7. Persistencia -> se debe validar que se guarda la informacion correctamente dentro de la storage del 
+usuario, y se acceda correctamente a dicha informacion.
+
+8. End to End -> comprobar que los flujos ya descritos funcionen como se esperan y como estas actuan frente
+a un caso poco favorable.
+
+9 Observabilidad -> Errores criticos se muestran correctamente, tiempos de ejucucion de servicios, errores 
+inesperados, eventos importantes, etc.
+
