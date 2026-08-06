@@ -11,6 +11,7 @@ import Header from "../../../components/header";
 import { SearchInput } from "../../../components/inputs/input";
 import PropertyCard from "../../../components/property-card";
 import SplashScreen from "../../../components/splash-screen";
+import { useBehaviorAside } from "../../../stores/auth-store";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
 import { normalizePropertyInformation } from "../services/property-registration.domain.service";
@@ -21,6 +22,7 @@ const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 const emptyItems = () => <Text>No data</Text>;
 
 export default function PropertyScreen() {
+  const { isOpen } = useBehaviorAside();
   const [properties, setProperties] = useState<PropertyInfoCard[]>();
   const [text, setText] = useState("");
   const [Ai, setAt] = useState<boolean>(false);
@@ -54,8 +56,6 @@ export default function PropertyScreen() {
         gap: 24,
       }}
     >
-      <AIButton />
-
       <AIButton onPress={() => setAt((prev) => !prev)} />
       <View
         style={{

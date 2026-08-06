@@ -1,30 +1,39 @@
 import * as z from "zod";
 
+export const statusPropertyMemberEnum = z.enum([
+    "IN_PROCESS",
+    "ACTIVE",
+    "DESACTIVE",
+]);
+
+export type StatusPropertyMemberType = z.infer<typeof statusPropertyMemberEnum>;
+
 const TypeProperty = z.enum([
-    "RESIDENTIAL",
-    "COMMERCIAL",
+    "RESIDENCIAL",
+    "COMERCIAL",
     "INDUSTRIAL",
-    "LAND_OR_SOIL",
-    "URBAN",
-    "AGRARIAN",
-    "MIXED",
+    "TERRENO",
+    "URBANO",
+    "AGRARIO",
+    "MIXTO",
 ]);
 
 export type TypePropertyType = z.infer<typeof TypeProperty>;
 
-const PropertyOccupation = z.enum(["OCCUPIED", "VACANT", "IN_PROCESS"]);
+const PropertyOccupation = z.enum(["OCUPADO", "DESOCUPADO", "EN_PROCESO"]);
 
 export type PropertyOccupationType = z.infer<typeof PropertyOccupation>;
 
-const Street = z.enum(["STREET", "CAREER", "AVENUE", "DIAGONAL", "CROSS"]);
+const Street = z.enum(["CALLE", "CARRERA", "AVENIDA", "DIAGONAL"]);
 
 export type TypeStreet = z.infer<typeof Street>;
 
 export type PropertyActorRoleType =
-    | "LANDLORD"
-    | "TENANT"
-    | "PROPERTY_ADMINISTRATOR"
-    | "OPERATION_SUPPORT";
+    | "PROPIETARIO"
+    | "ARRENDADO"
+    | "ADMINISTRADOR"
+    | "SOPORTE_OPERATIVO"
+    | "MIEMBRO";
 
 export const DirectionSchema = z.object({
     id: z.uuid().optional(),
@@ -126,3 +135,13 @@ export const PropertyMemberRoleSchema = z.object({
 });
 
 export type PropertyMemberRoleType = z.infer<typeof PropertyMemberRoleSchema>;
+
+//editing property schema
+export const editingPropertyInfo = z.object({
+    propertyName: z.string().optional(),
+    propertyType: TypeProperty.optional(),
+    propertyOccupationType: PropertyOccupation.optional(),
+    resourcesImages: z.array(createResourceImageSchema).optional(),
+});
+
+export type EditingPropertyInfo = z.infer<typeof editingPropertyInfo>;

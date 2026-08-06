@@ -14,8 +14,4 @@ export const AUTHPATHS = {
     logout: "/rent-auth/auth/logout",
 };
 
-export const FINANCIAL_MODULE = {
-    PROPERTY_REGISTRATION_FEATURE: {
-        PROPERTY: "/rent-financial/property", // post y GET (ALL)
-    },
-};
+export const FINANCIAL_MODULE = "/rent-financial";

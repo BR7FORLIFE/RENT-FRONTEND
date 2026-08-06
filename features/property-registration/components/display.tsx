@@ -1,4 +1,4 @@
-import { Animated, Text, View } from "react-native";
+import { Animated } from "react-native";
 import { useTextAnimation } from "../../../hooks/hooks";
 import type { PropertyOccupationType } from "../schemas/property-registration.schema";
 
@@ -13,27 +13,21 @@ export function AnimatedOccupationTypeInfo({
     return null;
   }
 
-  const traslateOccupied =
-    occupationType === "OCCUPIED"
-      ? "ARRENDADO"
-      : occupationType === "IN_PROCESS"
-        ? "En proceso"
-        : "Disponible";
   return (
     <Animated.Text
       style={{
         opacity,
         color:
-          occupationType === "OCCUPIED"
+          occupationType === "OCUPADO"
             ? "red"
-            : occupationType === "VACANT"
+            : occupationType === "DESOCUPADO"
               ? "green"
               : "orange",
         fontWeight: "800",
         fontSize: 11,
       }}
     >
-      {traslateOccupied}
+      {occupationType}
     </Animated.Text>
   );
 }

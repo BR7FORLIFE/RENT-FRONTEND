@@ -40,7 +40,6 @@ export const validateContentData = (
 
     if (emptyFields.length !== 0) {
         //campos a enviar a la UI para notificar
-        console.log({ emptyFields });
         return { emptyFields, contentResult: null, invalidFields: null };
     }
 
@@ -88,7 +87,6 @@ export const validateContentData = (
     result["cellphone"] = data.cellphone;
     result["identificationNumber"] = data.identificationNumber;
 
-    console.log({ result });
     return { contentResult: result, emptyFields: null, invalidFields: null };
 };
 

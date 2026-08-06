@@ -49,10 +49,12 @@ export type RefreshTokenResponseType = z.infer<
 >;
 
 export const MeResponseSchema = z.object({
+    userId: z.uuid(),
     username: z.string(),
     email: z.email(),
     cellphone: z.string(),
     fullname: z.string(),
+    isEnabled: z.boolean(),
 });
 
 export type MeResponseType = z.infer<typeof MeResponseSchema>;

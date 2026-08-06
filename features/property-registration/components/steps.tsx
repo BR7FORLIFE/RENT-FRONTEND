@@ -327,7 +327,7 @@ export function DirectionStep({ saveData, setStep }: RegisterFormData) {
       longitud: 90,
       neighborhood: "Barrio Bocagrande",
       numberStreet: 12,
-      typeStreet: "CAREER",
+      typeStreet: "CARRERA",
       complement: "cerca al mar",
     };
 
@@ -750,8 +750,8 @@ export function TypeAndOccupationStep({
   setIsCreateProperty: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [info, setInfo] = useState<TypeAndOccupationProps>({
-    occupationType: "VACANT",
-    typeProperty: "RESIDENTIAL",
+    occupationType: "DESOCUPADO",
+    typeProperty: "RESIDENCIAL",
   });
 
   const handlePropertyType = (key: string, value: string) => {
@@ -796,13 +796,13 @@ export function TypeAndOccupationStep({
                 handlePropertyType("typeProperty", itemValue)
               }
             >
-              <Picker.Item label="RESIDENCIAL" value="RESIDENTIAL" />
-              <Picker.Item label="COMERCIAL" value="COMMERCIAL" />
+              <Picker.Item label="RESIDENCIAL" value="RESIDENCIAL" />
+              <Picker.Item label="COMERCIAL" value="COMERCIAL" />
               <Picker.Item label="INDUSTRIAL" value="INDUSTRIAL" />
-              <Picker.Item label="TERRENO" value="LAND_OR_SOIL" />
-              <Picker.Item label="URBANO" value="URBAN" />
-              <Picker.Item label="AGRARIO" value="AGRARIAN" />
-              <Picker.Item label="MIXTO" value="MIXED" />
+              <Picker.Item label="TERRENO" value="TERRENO" />
+              <Picker.Item label="URBANO" value="URBANO" />
+              <Picker.Item label="AGRARIO" value="AGRARIO" />
+              <Picker.Item label="MIXTO" value="MIXTO" />
             </Picker>
           </View>
         </View>
@@ -817,9 +817,9 @@ export function TypeAndOccupationStep({
                 handlePropertyType("occupationType", itemValue)
               }
             >
-              <Picker.Item label="ARRENDADO" value="OCCUPIED" />
-              <Picker.Item label="EN PROCESO" value="IN_PROCESS" />
-              <Picker.Item label="DISPONIBLE" value="VACANT" />
+              <Picker.Item label="ARRENDADO" value="ARRENDADO" />
+              <Picker.Item label="EN PROCESO" value="EN PROCESO" />
+              <Picker.Item label="DISPONIBLE" value="DISPONIBLE" />
             </Picker>
           </View>
         </View>
