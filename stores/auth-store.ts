@@ -21,3 +21,18 @@ export const useAuth = create<UserAuth>((set) => ({
         set({ userId: null, accessToken: null });
     },
 }));
+
+interface BehaviorAside {
+    isOpen: boolean;
+    toggle: () => void;
+}
+
+export const useBehaviorAside = create<BehaviorAside>((set, get) => ({
+    isOpen: false,
+    toggle() {
+        const open = get().isOpen;
+        set({
+            isOpen: !open,
+        });
+    },
+}));

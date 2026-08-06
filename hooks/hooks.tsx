@@ -1,7 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated } from "react-native";
-import { refresh } from "../core/api/api-endpoints";
+import { Me, refresh } from "../core/api/api-endpoints";
 import { logoutUser } from "../features/auth/services/auth.service";
 import { useAuth } from "../stores/auth-store";
 
@@ -59,4 +60,17 @@ export function useTextAnimation() {
   }, [opacity]);
 
   return opacity;
+}
+
+export function useMe() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["me"],
+    queryFn: Me,
+  });
+
+  return {
+    user: data,
+    isLoading,
+    isError
+  }
 }
