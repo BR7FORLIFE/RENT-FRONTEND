@@ -15,8 +15,10 @@ import
   {
     DirectionStep,
     DrapAndDropStep,
+    EconomicPropertyInfo,
     FmiAndPredialNumberStep,
     PropertyInfo,
+    StructurePropertyInfo,
     TypeAndOccupationStep,
   } from "../components/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
@@ -115,7 +117,7 @@ export default function PropertyRegistrationScreen() {
 
       {/*STEPS indicador */}
       <View style={{ position: "absolute", right: 24, top: 24 }}>
-        <Text>{`Step ${step}  / 5`}</Text>
+        <Text>{`Step ${step}  / 6`}</Text>
       </View>
 
       <View
@@ -160,6 +162,18 @@ export default function PropertyRegistrationScreen() {
             <PropertyInfo saveData={setRegisterForm} setStep={setStep} />
           )}
           {step === 5 && (
+            <StructurePropertyInfo
+              saveData={setRegisterForm}
+              setStep={setStep}
+            />
+          )}
+          {step === 6 && (
+            <EconomicPropertyInfo
+              saveData={setRegisterForm}
+              setStep={setStep}
+            />
+          )}
+          {step === 7 && (
             <TypeAndOccupationStep
               disabled={proccesing}
               saveData={setRegisterForm}

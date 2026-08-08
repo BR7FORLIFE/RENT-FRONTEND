@@ -24,13 +24,15 @@ import AddIcon from "../../../assets/icons/add-square.svg";
 import IAIcon from "../../../assets/icons/ai.svg";
 import CloseIcon from "../../../assets/icons/close.svg";
 import UploadIcon from "../../../assets/icons/upload.svg";
-import { SearchInput } from "../../../components/inputs/input";
+import { NumberInput, SearchInput } from "../../../components/inputs/input";
 import type { ApiError } from "../../../types/global";
 import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../api";
 import type {
   CreateDirectionType,
   CreatePropertyType,
+  EconomicPropertyInfoType,
   PropertyOccupationType,
+  StructurePropertyInfoType,
   TypePropertyType,
 } from "../schemas/property-registration.schema";
 import { resourcesImageStorage } from "../services/property-registration.domain.service";
@@ -727,6 +729,455 @@ export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
               </Text>
             )}
           </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export function StructurePropertyInfo({ saveData, setStep }: RegisterFormData) {
+  const [structureProperty, setStructureProperty] =
+    useState<StructurePropertyInfoType>({
+      area: 0,
+      bathrooms: 0,
+      bedrooms: 0,
+      constructionYear: 0,
+      floors: 0,
+      lotArea: 0,
+      parkingSpaces: 0,
+    });
+
+  //guardamos la informacion estructural de la vivienda
+  const submitData = () => {
+    saveData((prev) => ({ ...prev, structurePropertyInfo: structureProperty }));
+    setStep((prev) => prev + 1);
+  };
+
+  return (
+    <View
+      style={{
+        marginTop: 10,
+        width: "100%",
+        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Text
+        style={{
+          fontWeight: "600",
+          color: "#111827",
+          marginBottom: 14,
+        }}
+      >
+        Características del inmueble
+      </Text>
+
+      <View
+        style={{
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          gap: 8,
+          marginBottom: 9,
+          marginHorizontal: 12,
+        }}
+      >
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            N° de baños
+          </Text>
+
+          <NumberInput field="bathrooms" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            N° de habitaciones
+          </Text>
+
+          <NumberInput field="bedrooms" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            N° de pisos
+          </Text>
+
+          <NumberInput field="floors" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            N° de parqueaderos
+          </Text>
+
+          <NumberInput field="parkingSpaces" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Área del terreno (m²)
+          </Text>
+
+          <NumberInput field="area" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Área construida (m²)
+          </Text>
+
+          <NumberInput field="lotArea" saveData={setStructureProperty} />
+        </View>
+
+        <View style={{ width: "47%" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "500",
+              color: "#374151",
+              marginBottom: 6,
+            }}
+          >
+            Año de construcción
+          </Text>
+
+          <NumberInput
+            field="constructionYear"
+            saveData={setStructureProperty}
+          />
+        </View>
+      </View>
+
+      <View style={{ width: "50%" }}>
+        <ButtonForm title="Aceptar" action={submitData} />
+      </View>
+    </View>
+  );
+}
+
+export function EconomicPropertyInfo({ saveData, setStep }: RegisterFormData) {
+  const [economicInfo, setEconomicInfo] = useState<EconomicPropertyInfoType>({
+    currency: "COP",
+    depositAmount: 0,
+    monthlyRent: 0,
+    utilitiesIncluded: false,
+  });
+
+  useEffect(() => {
+    console.log(economicInfo);
+    saveData((prev) => ({ ...prev, economicPropertyInfo: economicInfo }));
+  }, [economicInfo]);
+
+  return (
+    <View
+      style={{
+        marginTop: 10,
+        width: "100%",
+        alignItems: "center",
+      }}
+    >
+      <View
+        style={{
+          width: "92%",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "600",
+            color: "#111827",
+            marginBottom: 18,
+          }}
+        >
+          Información económica del inmueble
+        </Text>
+
+        <View
+          style={{
+            width: "100%",
+            gap: 16,
+          }}
+        >
+          <View>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "500",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Valor de renta mensual
+            </Text>
+
+            <View
+              style={{
+                height: 48,
+                flexDirection: "row",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              <Text
+                style={{
+                  paddingLeft: 12,
+                  fontSize: 16,
+                  color: "#6B7280",
+                }}
+              >
+                $
+              </Text>
+
+              <TextInput
+                value={String(economicInfo.monthlyRent ?? "")}
+                onChangeText={(value) =>
+                  setEconomicInfo((prev) => ({
+                    ...prev,
+                    monthlyRent: Number(value.replace(/[^0-9]/g, "")),
+                  }))
+                }
+                keyboardType="numeric"
+                placeholder="0"
+                placeholderTextColor="#9CA3AF"
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  paddingHorizontal: 10,
+                  fontSize: 16,
+                  color: "#111827",
+                }}
+              />
+            </View>
+          </View>
+
+          <View>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "500",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Valor del depósito
+            </Text>
+
+            <View
+              style={{
+                height: 48,
+                flexDirection: "row",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              <Text
+                style={{
+                  paddingLeft: 12,
+                  fontSize: 16,
+                  color: "#6B7280",
+                }}
+              >
+                $
+              </Text>
+
+              <TextInput
+                value={String(economicInfo.depositAmount ?? "")}
+                onChangeText={(value) =>
+                  setEconomicInfo((prev) => ({
+                    ...prev,
+                    depositAmount: Number(value.replace(/[^0-9]/g, "")),
+                  }))
+                }
+                keyboardType="numeric"
+                placeholder="0"
+                placeholderTextColor="#9CA3AF"
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  paddingHorizontal: 10,
+                  fontSize: 16,
+                  color: "#111827",
+                }}
+              />
+            </View>
+          </View>
+
+          <View>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "500",
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Tipo de moneda
+            </Text>
+
+            <View
+              style={{
+                height: 48,
+                justifyContent: "center",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                borderRadius: 8,
+                backgroundColor: "#FFFFFF",
+                overflow: "hidden",
+              }}
+            >
+              <Picker
+                selectedValue={economicInfo.currency}
+                onValueChange={(itemValue) =>
+                  setEconomicInfo((prev) => ({
+                    ...prev,
+                    currency: itemValue,
+                  }))
+                }
+                style={{
+                  width: "100%",
+                  color: "#111827",
+                }}
+              >
+                <Picker.Item label="Peso colombiano (COP)" value="COP" />
+                <Picker.Item label="Dólar estadounidense (USD)" value="USD" />
+              </Picker>
+            </View>
+          </View>
+
+          <View>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "500",
+                color: "#374151",
+                marginBottom: 8,
+              }}
+            >
+              ¿Servicios incluidos?
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <Pressable
+                onPress={() =>
+                  setEconomicInfo((prev) => ({
+                    ...prev,
+                    utilitiesIncluded: true,
+                  }))
+                }
+                style={{
+                  flex: 1,
+                  height: 44,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: economicInfo.utilitiesIncluded
+                    ? "#111827"
+                    : "#D1D5DB",
+                  borderRadius: 8,
+                  backgroundColor: economicInfo.utilitiesIncluded
+                    ? "#F3F4F6"
+                    : "#FFFFFF",
+                }}
+              >
+                <Text
+                  style={{
+                    fontWeight: "500",
+                    color: "#374151",
+                  }}
+                >
+                  Sí
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() =>
+                  setEconomicInfo((prev) => ({
+                    ...prev,
+                    utilitiesIncluded: false,
+                  }))
+                }
+                style={{
+                  flex: 1,
+                  height: 44,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderColor: !economicInfo.utilitiesIncluded
+                    ? "#111827"
+                    : "#D1D5DB",
+                  borderRadius: 8,
+                  backgroundColor: !economicInfo.utilitiesIncluded
+                    ? "#F3F4F6"
+                    : "#FFFFFF",
+                }}
+              >
+                <Text
+                  style={{
+                    fontWeight: "500",
+                    color: "#374151",
+                  }}
+                >
+                  No
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       </View>
     </View>
