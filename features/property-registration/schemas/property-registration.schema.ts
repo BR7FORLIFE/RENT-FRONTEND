@@ -88,6 +88,27 @@ export const createResourceImageSchema = z.object({
 
 export type createResourceImageType = z.infer<typeof createResourceImageSchema>;
 
+export const StructurePropertyInfo = z.object({
+    bedrooms: z.number().positive(),
+    bathrooms: z.number().positive(),
+    floors: z.number().positive(),
+    parkingSpaces: z.number().positive(),
+    area: z.number().positive(),
+    lotArea: z.number().positive(),
+    constructionYear: z.number().positive(),
+});
+
+export type StructurePropertyInfoType = z.infer<typeof StructurePropertyInfo>;
+
+export const EconomicPropertyInfo = z.object({
+    monthlyRent: z.coerce.number().positive(),
+    depositAmount: z.coerce.number().positive(),
+    currency: z.enum(["COP", "USD"]),
+    utilitiesIncluded: z.boolean(),
+});
+
+export type EconomicPropertyInfoType = z.infer<typeof EconomicPropertyInfo>
+
 export const propertySchema = z.object({
     id: z.uuid(),
     fmi: z.string(),
@@ -100,6 +121,8 @@ export const propertySchema = z.object({
     propertyOccupationType: PropertyOccupation,
     direction: DirectionSchema,
     resourcesImages: z.array(ResourceImageSchema),
+    structurePropertyInfo: StructurePropertyInfo,
+    economicPropertyInfo: EconomicPropertyInfo,
 });
 
 export type PropertyType = z.infer<typeof propertySchema>;
@@ -113,6 +136,8 @@ export const createPropertySchema = z.object({
     propertyDescription: z.string(),
     fmi: z.string(),
     predialNumber: z.string(),
+    structurePropertyInfo: StructurePropertyInfo,
+    economicPropertyInfo: EconomicPropertyInfo,
 });
 
 export type CreatePropertyType = z.infer<typeof createPropertySchema>;
