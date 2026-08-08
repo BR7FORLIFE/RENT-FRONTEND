@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Colors } from "../../themes/themes";
 
 import SearchIcon from "../../assets/icons/search-input.svg";
@@ -141,4 +141,103 @@ const stylesSearch = StyleSheet.create({
   },
 });
 
-export { Input, SearchInput };
+function NumberInput<T>({
+  field,
+  saveData,
+}: {
+  field: keyof T;
+  saveData: React.Dispatch<React.SetStateAction<T>>;
+}) {
+  const [number, setNumber] = useState<number>(0);
+
+  const increment = () => {
+    setNumber((prev) => {
+      const newValue = prev + 1;
+
+      saveData((currentData) => ({
+        ...currentData,
+        [field]: newValue,
+      }));
+
+      return newValue;
+    });
+  };
+
+  const decrement = () => {
+    setNumber((prev) => {
+      const newValue = Math.max(0, prev - 1);
+
+      saveData((currentData) => ({
+        ...currentData,
+        [field]: newValue,
+      }));
+
+      return newValue;
+    });
+  };
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#D1D5DB",
+        borderRadius: 6,
+        height: 50,
+        overflow: "hidden",
+        backgroundColor: "#FFFFFF",
+      }}
+    >
+      <TextInput
+        value={String(number)}
+        style={{
+          flex: 1,
+          height: "100%",
+          paddingHorizontal: 10,
+          fontSize: 16,
+          color: "#111827",
+          textAlign: "center",
+        }}
+        keyboardType="numeric"
+      />
+
+      <View
+        style={{
+          height: "100%",
+          width: 32,
+          borderLeftWidth: 1,
+          borderLeftColor: "#D1D5DB",
+        }}
+      >
+        <Pressable
+          onPress={increment}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#F9FAFB",
+          }}
+        >
+          <Text style={{ fontSize: 12, color: "#374151" }}>▲</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={decrement}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#F9FAFB",
+            borderTopWidth: 1,
+            borderTopColor: "#E5E7EB",
+          }}
+        >
+          <Text style={{ fontSize: 12, color: "#374151" }}>▼</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+export { Input, NumberInput, SearchInput };
