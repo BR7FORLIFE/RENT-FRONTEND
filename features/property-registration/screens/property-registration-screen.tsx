@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
@@ -96,83 +96,69 @@ export default function PropertyRegistrationScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        position: "relative",
-        backgroundColor: "#fff",
-      }}
-    >
-      <WaveBackground style={{ position: "absolute", bottom: 0 }} />
-
-      {/*boton de regresar */}
+    <SafeAreaView style={styles.screen}>
+      <WaveBackground style={styles.wave} />
       <Pressable
-        style={{ position: "absolute", top: 24, left: 24 }}
+        style={({ pressed }) => [
+          styles.backButton,
+          pressed && styles.backButtonPressed,
+        ]}
         onPress={cleanSteps}
+        hitSlop={8}
       >
-        <UndoIcon width={24} height={24} />
-        <Text>Regresar</Text>
+        <UndoIcon width={21} height={21} />
+
+        <Text style={styles.backText}>Regresar</Text>
       </Pressable>
 
-      {/*STEPS indicador */}
-      <View style={{ position: "absolute", right: 24, top: 24 }}>
-        <Text>{`Step ${step}  / 6`}</Text>
+      <View style={styles.stepIndicator}>
+        <Text style={styles.stepText}>{`Step ${step} / 7`}</Text>
       </View>
 
-      <View
-        style={{
-          width: "100%",
-          position: "absolute",
-          zIndex: 1,
-          marginTop: 100,
-        }}
-      >
-        {/*seccion de logo */}
-        <View
-          style={{
-            width: "100%",
-            alignItems: "center",
-          }}
-        >
+      <View style={styles.content}>
+
+        <View style={styles.logoContainer}>
           <Image
             source={require("../../../assets/images/logo-recortado.png")}
-            resizeMode="cover"
-            style={{
-              width: 80,
-              height: "auto",
-              aspectRatio: 1,
-              borderRadius: 12,
-            }}
+            resizeMode="contain"
+            style={styles.logo}
           />
-          {/* 7 Steps para poder registrar un inmueble */}
+        </View>
+
+        <View style={styles.stepContainer}>
           {step === 1 && (
             <DrapAndDropStep saveData={setRegisterForm} setStep={setStep} />
           )}
+
           {step === 2 && (
             <DirectionStep saveData={setRegisterForm} setStep={setStep} />
           )}
+
           {step === 3 && (
             <FmiAndPredialNumberStep
               saveData={setRegisterForm}
               setStep={setStep}
             />
           )}
+
           {step === 4 && (
             <PropertyInfo saveData={setRegisterForm} setStep={setStep} />
           )}
+
           {step === 5 && (
             <StructurePropertyInfo
               saveData={setRegisterForm}
               setStep={setStep}
             />
           )}
+
           {step === 6 && (
             <EconomicPropertyInfo
               saveData={setRegisterForm}
               setStep={setStep}
             />
           )}
+
           {step === 7 && (
             <TypeAndOccupationStep
               disabled={proccesing}
@@ -180,9 +166,129 @@ export default function PropertyRegistrationScreen() {
               setIsCreateProperty={setIsCreateProperty}
             />
           )}
-          <View style={{ width: "80%", marginTop: 30 }}></View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+
+    position: "relative",
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  wave: {
+    position: "absolute",
+
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    zIndex: 0,
+  },
+
+  backButton: {
+    position: "absolute",
+
+    top: 30,
+    left: 20,
+
+    zIndex: 10,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    gap: 6,
+
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+
+    borderRadius: 10,
+
+    backgroundColor: "#FFFFFF",
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+
+    elevation: 3,
+  },
+
+  backButtonPressed: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.75,
+  },
+
+  backText: {
+    fontSize: 13,
+
+    fontWeight: "600",
+
+    color: "#374151",
+  },
+
+  stepIndicator: {
+    position: "absolute",
+
+    top: 30,
+    right: 20,
+
+    zIndex: 10,
+
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+
+    borderRadius: 20,
+
+    backgroundColor: "#F3F4F6",
+  },
+
+  stepText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#4B5563",
+  },
+
+  content: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+
+  logoContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: 14,
+  },
+
+  logo: {
+    width: 64,
+    height: 64,
+
+    borderRadius: 12,
+  },
+
+  stepContainer: {
+    width: "100%",
+    maxWidth: 500,
+
+    flex: 1,
+
+    alignItems: "center",
+    justifyContent: "flex-start",
+
+    paddingHorizontal: 4,
+  },
+});

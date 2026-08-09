@@ -7,7 +7,6 @@ import PlusIcon from "../../../assets/icons/plus.svg";
 import { AIButton } from "../../../components/ai";
 import { FilterButton } from "../../../components/buttons/button";
 import { PrincipalError } from "../../../components/error";
-import Header from "../../../components/header";
 import { SearchInput } from "../../../components/inputs/input";
 import PropertyCard from "../../../components/property-card";
 import SplashScreen from "../../../components/splash-screen";
@@ -48,78 +47,45 @@ export default function PropertyScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        backgroundColor: "#ffffff",
-        gap: 24,
-      }}
-    >
+    <SafeAreaView style={styles.screen}>
       <AIButton onPress={() => setAt((prev) => !prev)} />
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Header />
-        <View
-          style={{
-            flexDirection: "row",
-            gap: 6,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+
+      <View style={styles.headerSection}>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Mis Propiedades</Text>
+
           <Pressable
             onPress={() => router.navigate("/home/property-registration")}
             style={({ pressed }) => [
-              styles.button,
+              styles.addButton,
               pressed && styles.buttonPressed,
             ]}
           >
-            <PlusIcon width={22} height={22} />
+            <PlusIcon width={18} height={18} />
           </Pressable>
         </View>
-      </View>
 
-      {/*seccion de titulo y text input y botones de paginaciones */}
-      <View style={{ marginHorizontal: 16, flexDirection: "column", gap: 4 }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: "700",
-            opacity: 0.5,
-          }}
-        >
-          Mis Propiedades
-        </Text>
-        <SearchInput onChangeText={setText} value={text} />
+        <SearchInput
+          onChangeText={setText}
+          value={text}
+          placeholder="Buscar propiedad..."
+        />
 
         <FlatList
           horizontal
           data={FILTER_BUTTONS}
+          keyExtractor={(item) => item}
           renderItem={({ item }) => (
             <FilterButton title={item} onPress={() => null} />
           )}
-          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-          contentContainerStyle={{ marginTop: 12 }}
+          ItemSeparatorComponent={() => <View style={styles.filterSeparator} />}
+          contentContainerStyle={styles.filterList}
+          showsHorizontalScrollIndicator={false}
           ListEmptyComponent={emptyItems}
         />
       </View>
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "flex-start",
-          alignItems: "center",
-          paddingHorizontal: 24,
-        }}
-      >
-        <View style={{ width: "100%", height: 20 }} />
+      <View style={styles.propertiesSection}>
         <FlatList
           data={properties}
           keyExtractor={(property) => property.fmi}
@@ -138,39 +104,146 @@ export default function PropertyScreen() {
               }
             />
           )}
+          contentContainerStyle={styles.propertiesList}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => (
+            <View style={styles.propertySeparator} />
+          )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>No tienes propiedades</Text>
+
+              <Text style={styles.emptyDescription}>
+                Agrega tu primera propiedad para comenzar a administrarla.
+              </Text>
+            </View>
+          }
         />
-        <View style={{ width: "100%", height: 80 }} />
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: 36,
-    height: 36,
-    borderRadius: 24,
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
 
-    justifyContent: "center",
+  headerSection: {
+    width: "100%",
+
+    paddingHorizontal: 20,
+    paddingTop: 12,
+
+    gap: 12,
+  },
+
+  titleRow: {
+    width: "100%",
+
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  title: {
+    fontSize: 22,
+    lineHeight: 28,
+
+    fontWeight: "800",
+
+    color: "#111827",
+  },
+
+  addButton: {
+    width: 40,
+    height: 40,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    borderRadius: 20,
 
     backgroundColor: Colors.NEUTRAL,
 
-    marginRight: 20,
-
-    shadowColor: "#000",
+    shadowColor: "#000000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 3,
     },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
 
-    elevation: 6,
+    elevation: 4,
   },
 
   buttonPressed: {
-    transform: [{ scale: 0.95 }],
-    opacity: 0.9,
+    transform: [{ scale: 0.94 }],
+    opacity: 0.8,
+  },
+
+
+  filterList: {
+    paddingRight: 20,
+    paddingVertical: 2,
+  },
+
+  filterSeparator: {
+    width: 8,
+  },
+
+
+  propertiesSection: {
+    flex: 1,
+
+    width: "100%",
+
+    marginTop: 8,
+
+    paddingHorizontal: 20,
+  },
+
+  propertiesList: {
+    flexGrow: 1,
+
+    paddingTop: 12,
+    paddingBottom: 32,
+  },
+
+  propertySeparator: {
+    height: 12,
+  },
+
+  emptyContainer: {
+    flex: 1,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    paddingHorizontal: 32,
+    paddingTop: 80,
+  },
+
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+
+    textAlign: "center",
+
+    color: "#111827",
+
+    marginBottom: 6,
+  },
+
+  emptyDescription: {
+    maxWidth: 300,
+
+    fontSize: 14,
+    lineHeight: 20,
+
+    textAlign: "center",
+
+    color: "#6B7280",
   },
 });
