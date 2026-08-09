@@ -1,9 +1,14 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
-import { Colors } from "../../themes/themes";
+import
+  {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text
+  } from "react-native";
 
-interface Styles {
-  height: number;
-  fontSize: number;
+interface ButtonStyle {
+  height?: number;
+  fontSize?: number;
 }
 
 export interface ButtonProps {
@@ -11,29 +16,50 @@ export interface ButtonProps {
   action?: () => void;
   disabled?: boolean;
   isPending?: boolean;
-  style?: Styles;
+  style?: ButtonStyle;
 }
 
 function ButtonForm({
   title,
   action,
-  disabled,
-  isPending,
+  disabled = false,
+  isPending = false,
   style,
 }: ButtonProps) {
   return (
     <Pressable
       onPress={action}
-      style={[
+      disabled={disabled || isPending}
+      style={({ pressed }) => [
         styles.button,
-        { backgroundColor: disabled ? "#9aacec" : Colors.PRIMARY },
+
+        // Estado normal / disabled
+        disabled ? styles.disabledButton : styles.enabledButton,
+
+        // Feedback al presionar
+        pressed && !disabled && styles.pressedButton,
+
         style,
       ]}
-      disabled={disabled}
     >
-      <Text style={styles.text}>
-        {isPending ? <ActivityIndicator size="small" /> : title}
-      </Text>
+      {isPending ? (
+        <ActivityIndicator
+          size="small"
+          color={disabled ? "#64748B" : "#111827"}
+        />
+      ) : (
+        <Text
+          style={[
+            styles.text,
+            {
+              fontSize: style?.fontSize ?? 14,
+            },
+            disabled && styles.disabledText,
+          ]}
+        >
+          {title}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -41,16 +67,55 @@ function ButtonForm({
 const styles = StyleSheet.create({
   button: {
     width: "100%",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 8,
+    minHeight: 46,
+
+    paddingHorizontal: 16,
+
+    borderRadius: 12,
+
     flexDirection: "row",
     justifyContent: "center",
-    alignContent: "center",
+    alignItems: "center",
+
+    borderWidth: 1,
+
+    // Sombra
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+
+    elevation: 3,
   },
+
+  enabledButton: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D1D5DB",
+  },
+
+  disabledButton: {
+    backgroundColor: "#E5E7EB",
+    borderColor: "#D1D5DB",
+
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+
+  pressedButton: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.85,
+  },
+
   text: {
-    color: "#fff",
-    fontWeight: 600,
+    color: "#111827",
+    fontWeight: "700",
+  },
+
+  disabledText: {
+    color: "#9CA3AF",
   },
 });
 
@@ -60,15 +125,15 @@ type FilterButtonProps = {
   onPress: () => void;
 };
 
-export default function FilterButton({
-  title,
-  active = false,
-  onPress,
-}: FilterButtonProps) {
+function FilterButton({ title, active = false, onPress }: FilterButtonProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={[stylesFilter.button, active && stylesFilter.activeButton]}
+      style={({ pressed }) => [
+        stylesFilter.button,
+        active && stylesFilter.activeButton,
+        pressed && stylesFilter.pressedButton,
+      ]}
     >
       <Text style={[stylesFilter.text, active && stylesFilter.activeText]}>
         {title}
@@ -79,19 +144,39 @@ export default function FilterButton({
 
 const stylesFilter = StyleSheet.create({
   button: {
-    height: 32,
-    paddingHorizontal: 18,
+    height: 34,
+
+    paddingHorizontal: 16,
+
     borderRadius: 999,
+
     justifyContent: "center",
     alignItems: "center",
+
     borderWidth: 1,
     borderColor: "#D8DDE6",
-    backgroundColor: "#fff",
+
+    backgroundColor: "#FFFFFF",
   },
 
   activeButton: {
-    backgroundColor: Colors.PRIMARY,
-    borderColor: Colors.PRIMARY,
+    backgroundColor: "#111827",
+    borderColor: "#111827",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+
+    elevation: 2,
+  },
+
+  pressedButton: {
+    transform: [{ scale: 0.96 }],
+    opacity: 0.85,
   },
 
   text: {
@@ -101,7 +186,7 @@ const stylesFilter = StyleSheet.create({
   },
 
   activeText: {
-    color: "#fff",
+    color: "#FFFFFF",
   },
 });
 

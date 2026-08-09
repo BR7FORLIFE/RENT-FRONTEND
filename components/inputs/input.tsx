@@ -11,6 +11,8 @@ export type TypeInput =
   | "email-address"
   | "number-pad";
 
+// Input
+
 function Input({
   field,
   label,
@@ -28,7 +30,7 @@ function Input({
   maxLength?: number;
   fn: (id: string, value: string) => void;
 }) {
-  const [onfocus, setOnFocus] = useState<boolean>(false);
+  const [onfocus, setOnFocus] = useState(false);
 
   const shouldSee = onfocus || value.trim().length > 0;
 
@@ -38,24 +40,28 @@ function Input({
         style={[
           styles.text,
           {
-            top: shouldSee ? -20 : 15,
+            top: shouldSee ? -8 : 15,
             color: shouldSee ? Colors.TERTIARY : Colors.NEUTRAL,
           },
         ]}
       >
         {label}
       </Text>
+
       <TextInput
         nativeID={field}
         style={[
           styles.input,
-          { borderColor: shouldSee ? Colors.TERTIARY : Colors.NEUTRAL },
+          {
+            borderColor: shouldSee ? Colors.TERTIARY : Colors.NEUTRAL,
+          },
         ]}
         keyboardType={typeInput || "default"}
         value={value}
         onFocus={() => setOnFocus(true)}
         onBlur={() => setOnFocus(false)}
         placeholder={shouldSee ? placeholder : ""}
+        placeholderTextColor="#9CA3AF"
         onChangeText={(text) => fn(field, text)}
         autoCorrect={false}
         autoCapitalize="none"
@@ -68,24 +74,42 @@ function Input({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 50,
+    height: 52,
+
     position: "relative",
+
+    justifyContent: "center",
   },
+
   text: {
-    width: "80%",
     position: "absolute",
+
     left: 12,
-    fontWeight: 600,
-    color: "#000",
-    fontStyle: "normal",
+
+    zIndex: 2,
+
+    paddingHorizontal: 4,
+
+    fontSize: 14,
+    fontWeight: "600",
+
+    backgroundColor: "#FFFFFF",
   },
+
   input: {
-    borderWidth: 1,
     width: "100%",
-    borderRadius: 6,
-    borderColor: Colors.TERTIARY,
-    height: 50,
-    paddingLeft: 12,
+    height: 52,
+
+    paddingHorizontal: 12,
+    paddingRight: 44,
+
+    borderWidth: 1,
+    borderRadius: 8,
+
+    fontSize: 15,
+    color: "#111827",
+
+    backgroundColor: "#FFFFFF",
   },
 });
 
@@ -94,22 +118,24 @@ type SearchInputProps = {
   onChangeText: (text: string) => void;
   placeholder?: string;
 };
+// SearchInput
+
 function SearchInput({
   value,
   onChangeText,
   placeholder = "Buscar",
 }: SearchInputProps) {
-  const [focus, setFocus] = useState<boolean>(false);
+  const [focus, setFocus] = useState(false);
 
   return (
     <View
       style={[
         stylesSearch.container,
-        { borderColor: focus ? Colors.TERTIARY : "#D8DDE6" },
+        {
+          borderColor: focus ? Colors.TERTIARY : "#D8DDE6",
+        },
       ]}
     >
-      <SearchIcon width={18} height={18} />
-
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -117,27 +143,46 @@ function SearchInput({
         placeholderTextColor="#9CA3AF"
         style={stylesSearch.input}
         onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
       />
+
+      <SearchIcon width={18} height={18} style={stylesSearch.icon} />
     </View>
   );
 }
 
 const stylesSearch = StyleSheet.create({
   container: {
+    width: "100%",
+
+    minHeight: 44,
+
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+
+    backgroundColor: "#FFFFFF",
+
     borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 40,
-    gap: 12,
+    borderRadius: 12,
+
+    paddingHorizontal: 14,
+
+    gap: 10,
   },
 
   input: {
     flex: 1,
-    fontSize: 12,
-    color: "#000000",
+
+    minHeight: 42,
+
+    fontSize: 14,
+    color: "#111827",
+
+    paddingVertical: 0,
+  },
+
+  icon: {
+    flexShrink: 0,
   },
 });
 
@@ -177,67 +222,99 @@ function NumberInput<T>({
   };
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#D1D5DB",
-        borderRadius: 6,
-        height: 50,
-        overflow: "hidden",
-        backgroundColor: "#FFFFFF",
-      }}
-    >
+    <View style={stylesNumber.container}>
       <TextInput
         value={String(number)}
-        style={{
-          flex: 1,
-          height: "100%",
-          paddingHorizontal: 10,
-          fontSize: 16,
-          color: "#111827",
-          textAlign: "center",
-        }}
+        style={stylesNumber.input}
         keyboardType="numeric"
       />
 
-      <View
-        style={{
-          height: "100%",
-          width: 32,
-          borderLeftWidth: 1,
-          borderLeftColor: "#D1D5DB",
-        }}
-      >
+      <View style={stylesNumber.controls}>
         <Pressable
           onPress={increment}
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#F9FAFB",
-          }}
+          style={({ pressed }) => [
+            stylesNumber.controlButton,
+            pressed && stylesNumber.controlButtonPressed,
+          ]}
         >
-          <Text style={{ fontSize: 12, color: "#374151" }}>▲</Text>
+          <Text style={stylesNumber.controlText}>▲</Text>
         </Pressable>
 
         <Pressable
           onPress={decrement}
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#F9FAFB",
-            borderTopWidth: 1,
-            borderTopColor: "#E5E7EB",
-          }}
+          style={({ pressed }) => [
+            stylesNumber.controlButton,
+            stylesNumber.controlButtonBottom,
+            pressed && stylesNumber.controlButtonPressed,
+          ]}
         >
-          <Text style={{ fontSize: 12, color: "#374151" }}>▼</Text>
+          <Text style={stylesNumber.controlText}>▼</Text>
         </Pressable>
       </View>
     </View>
   );
 }
+
+const stylesNumber = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: 50,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    overflow: "hidden",
+
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 8,
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  input: {
+    flex: 1,
+
+    height: "100%",
+
+    paddingHorizontal: 10,
+
+    fontSize: 16,
+    color: "#111827",
+
+    textAlign: "center",
+  },
+
+  controls: {
+    width: 36,
+    height: "100%",
+
+    borderLeftWidth: 1,
+    borderLeftColor: "#D1D5DB",
+  },
+
+  controlButton: {
+    flex: 1,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: "#F9FAFB",
+  },
+
+  controlButtonBottom: {
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+
+  controlButtonPressed: {
+    opacity: 0.6,
+  },
+
+  controlText: {
+    fontSize: 11,
+    color: "#374151",
+  },
+});
 
 export { Input, NumberInput, SearchInput };
