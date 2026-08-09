@@ -126,7 +126,6 @@ export default function RegisterScreen() {
       setCompleteFields(false); // desactivamos el boton ya que los campos no estan rellenados
 
       //notificamos al usuario sobre los campos que necesitan ser rellenados
-      
 
       return;
     }
@@ -149,37 +148,34 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        gap: 12,
-        backgroundColor: "#fff",
-      }}
-    >
-      <ScrollView>
-        {/*contenedor de imagen */}
+    <SafeAreaView style={styles.screen}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* contenedor de imagen */}
         <View style={styles.logoContainer}>
-          <View style={styles.shadowContainer}>
-            <Image
-              source={require("../../../assets/images/logo-recortado.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+          <Image
+            source={require("../../../assets/images/logo-recortado.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
-        {/*contenedor de formulario */}
+
+        {/* contenedor de formulario */}
         <View style={styles.containerForm}>
-          {/*zona de textos y titulos */}
+          {/* zona de textos y titulos */}
           <View style={styles.containerText}>
-            <Text style={styles.containerFormTitle}>Registrate</Text>
-            <Text style={{ width: "95%" }}>
-              Unete a la mejor plataforma de admistracion de arriendos y
+            <Text style={styles.containerFormTitle}>Regístrate</Text>
+
+            <Text style={styles.description}>
+              Únete a la mejor plataforma de administración de arriendos y
               disfruta de sus beneficios
             </Text>
           </View>
 
-          {/*contenedor de inputs */}
+          {/* contenedor de inputs */}
           <View style={styles.containerInput}>
             {keyInputs.map(({ field, label, placeholder }) => {
               if (field === "cellphone") {
@@ -238,19 +234,30 @@ export default function RegisterScreen() {
               );
             })}
           </View>
-          {/*seccion de selecccion de identificacion */}
-          <Picker
-            selectedValue={info.identificationType}
-            onValueChange={(itemValue, _) =>
-              handleSetInfo("identificationType", itemValue)
-            }
-          >
-            <Picker.Item label="CC" value="CC" />
-            <Picker.Item label="CE" value="CE" />
-            <Picker.Item label="TI" value="TI" />
-            <Picker.Item label="Permiso especial de permanencia" value="PPT" />
-            <Picker.Item label="Pasaporte" value="PASSPORT" />
-          </Picker>
+
+          {/* selección de identificación */}
+          <View style={styles.pickerContainer}>
+            <Text style={styles.pickerLabel}>Tipo de identificación</Text>
+
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={info.identificationType}
+                onValueChange={(itemValue, _) =>
+                  handleSetInfo("identificationType", itemValue)
+                }
+                style={styles.picker}
+              >
+                <Picker.Item label="CC" value="CC" />
+                <Picker.Item label="CE" value="CE" />
+                <Picker.Item label="TI" value="TI" />
+                <Picker.Item
+                  label="Permiso especial de permanencia"
+                  value="PPT"
+                />
+                <Picker.Item label="Pasaporte" value="PASSPORT" />
+              </Picker>
+            </View>
+          </View>
 
           <View style={styles.buttonSection}>
             <ButtonForm
@@ -259,18 +266,13 @@ export default function RegisterScreen() {
               disabled={!isCompleteFields || mutation.isPending}
               isPending={mutation.isPending}
             />
-            <Text style={{ fontSize: 12 }}>Or</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 4,
-              }}
-            >
-              <Text>Tienes una cuenta?</Text>
-              <Link
-                href="/login"
-                style={{ color: Colors.TERTIARY, fontWeight: 600 }}
-              >
+
+            <Text style={styles.orText}>Or</Text>
+
+            <View style={styles.loginRedirect}>
+              <Text style={styles.loginText}>¿Tienes una cuenta?</Text>
+
+              <Link href="/login" style={styles.loginLink}>
                 Iniciar sesión
               </Link>
             </View>
@@ -282,20 +284,38 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  //contenedor de imagen
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 32,
+  },
+
+  // Logo
   logoContainer: {
     width: "100%",
-    justifyContent: "center",
+
     alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: 12,
   },
+
   logo: {
     width: 64,
-    height: "auto",
-    aspectRatio: 1,
+    height: 64,
   },
+
   shadowContainer: {
     width: 64,
     height: 16,
+
     shadowColor: Colors.SECONDARY,
     shadowOffset: {
       width: 0,
@@ -303,46 +323,157 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
+
     elevation: 5,
   },
 
-  //contenedor de formulario global
+  // Formulario global
   containerForm: {
-    marginHorizontal: 10,
-    flex: 1,
-    paddingHorizontal: 12,
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
-    borderRadius: 12,
-    borderColor: Colors.NEUTRAL,
+    width: "100%",
+
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+
+    borderWidth: 1,
+    borderColor: "#0000001A",
+    borderRadius: 20,
+
+    backgroundColor: "#FFFFFF",
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+
+    elevation: 3,
   },
 
-  //contendor donde dentro tiene titulos y parrafos
+  // Textos
   containerText: {
-    flexDirection: "column",
-    gap: 5,
+    width: "100%",
+
+    gap: 6,
+
+    marginBottom: 28,
   },
 
-  //titulo de la seccion de formulatio
   containerFormTitle: {
     fontFamily: "arimo",
-    fontSize: 20,
+
+    fontSize: 24,
+    lineHeight: 30,
+
     fontStyle: "normal",
-    fontWeight: 800,
-    marginTop: 12,
+    fontWeight: "800",
+
+    color: "#111827",
   },
 
-  //contenedor de inputs
+  description: {
+    width: "100%",
+
+    fontSize: 14,
+    lineHeight: 21,
+
+    fontWeight: "400",
+
+    color: "#6B7280",
+  },
+
+  // Inputs
   containerInput: {
-    marginTop: 32,
+    width: "100%",
+
     flexDirection: "column",
-    gap: 28,
+
+    gap: 22,
+
+    marginBottom: 24,
   },
 
-  buttonSection: {
-    flexDirection: "column",
+  // Picker
+  pickerContainer: {
+    width: "100%",
+
+    marginBottom: 28,
+  },
+
+  pickerLabel: {
+    marginBottom: 8,
+
+    fontSize: 14,
+    fontWeight: "600",
+
+    color: "#374151",
+  },
+
+  pickerWrapper: {
+    width: "100%",
+    height: 52,
+
+    overflow: "hidden",
+
     justifyContent: "center",
+
+    borderWidth: 1,
+    borderColor: Colors.NEUTRAL,
+    borderRadius: 8,
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  picker: {
+    width: "100%",
+    height: 52,
+
+    color: "#111827",
+  },
+
+  // Botón
+  buttonSection: {
+    width: "100%",
+
     alignItems: "center",
-    gap: 8,
+    justifyContent: "center",
+
+    gap: 10,
+  },
+
+  orText: {
+    fontSize: 13,
+
+    color: "#9CA3AF",
+
+    marginVertical: 2,
+  },
+
+  loginRedirect: {
+    width: "100%",
+
+    flexDirection: "row",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    gap: 5,
+
+    marginTop: 2,
+  },
+
+  loginText: {
+    fontSize: 14,
+
+    color: "#6B7280",
+  },
+
+  loginLink: {
+    fontSize: 14,
+
+    fontWeight: "600",
+
+    color: Colors.TERTIARY,
   },
 });

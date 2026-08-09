@@ -75,7 +75,7 @@ function LoginScreen() {
 
       //persistimos la informacion en el Async Storage
       InfoStorage().set({ userId: null, refreshToken });
-  
+
       router.navigate("/home/(tabs)/property-registration");
     },
   });
@@ -97,99 +97,46 @@ function LoginScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, position: "relative", backgroundColor: "#fff" }}
-    >
-      {/*contenedor de la imagen */}
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-        }}
-      >
-        <View
-          style={{
-            position: "relative",
-            zIndex: 1,
-            height: 400,
-            width: "100%",
-          }}
-        >
+    <SafeAreaView style={styles.screen}>
+      <View style={styles.backgroundImageContainer}>
+        <View style={styles.imageWrapper}>
           <Image
             source={require("../../../assets/images/login-house-image.jpg")}
             resizeMode="cover"
             style={styles.image}
           />
+
           <LinearGradient
-            colors={["white", "transparent"]}
+            colors={["#FFFFFF", "transparent"]}
             style={styles.gradientTop}
           />
+
           <LinearGradient
-            colors={["rgba(255, 255, 255, 0.01)", "rgb(255, 255, 255)"]}
+            colors={["rgba(255,255,255,0.01)", "#FFFFFF"]}
             style={styles.gradientBottom}
           />
         </View>
+
+        <View style={styles.waveContainer}>
+          <WaveBackground />
+        </View>
       </View>
 
-      {/*background view  */}
-      <View style={{ position: "absolute", bottom: 0 }}>
-        <WaveBackground />
-      </View>
-
-      {/*Contenedor principal de titulo, formulario, y links */}
       <View style={styles.containerInfo}>
-        {/*titulo y descripcion del login */}
-        <View
-          style={{
-            width: "100%",
-            height: "auto",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            paddingVertical: 24,
-          }}
-        >
+        <View style={styles.headerInfo}>
           <Image
             source={require("../../../assets/images/logo-recortado.png")}
-            resizeMode="cover"
-            style={{ width: 64, height: "auto", aspectRatio: 1 }}
+            resizeMode="contain"
+            style={styles.logo}
           />
 
-          <Text style={{ fontSize: 28, fontWeight: 800 }}>
-            Bienvenido de nuevo
-          </Text>
+          <Text style={styles.title}>Bienvenido de nuevo</Text>
 
-          <Text style={{ fontWeight: 400 }}>Inicia sesión para continuar</Text>
+          <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
         </View>
 
-        {/*seccion del formulario de login */}
-        <View
-          style={{
-            width: "100%",
-            height: "auto",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#ffffff",
-            borderRadius: 24,
-            gap: 24,
-            paddingHorizontal: 12,
-            paddingVertical: 36,
-            borderWidth: 1,
-            borderColor: "#00000029",
-            marginBottom: 50,
-            marginTop: 24,
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
-            shadowOpacity: 0.15,
-            shadowRadius: 6,
-            elevation: 6,
-          }}
-        >
+        <View style={styles.loginCard}>
           <View style={styles.loginFormSection}>
-            {/*input de email */}
             <Input
               field={email.field}
               label={email.label}
@@ -197,16 +144,16 @@ function LoginScreen() {
               fn={handleInfoLogin}
               value={info.email}
               key={email.field}
-              typeInput="default"
+              typeInput="email-address"
             />
 
             <EmailIcon
-              width={24}
-              height={24}
+              width={22}
+              height={22}
               style={styles.loginFormSectionImage}
             />
           </View>
-          {/*input de password */}
+
           <View style={styles.loginFormSection}>
             <Input
               field={password.field}
@@ -217,64 +164,37 @@ function LoginScreen() {
               key={password.field}
               typeInput="default"
             />
+
             <SeeIconPassword
-              width={24}
-              height={24}
+              width={22}
+              height={22}
               style={styles.loginFormSectionImage}
             />
           </View>
-          {/*boton de login */}
+
           <ButtonForm
             action={submitLogin}
             title={
-              mutation.isPending ? "Iniciando sesion... " : "Iniciar sesión"
+              mutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"
             }
           />
 
-          {/*estilos de la seccion de auth providers */}
-          <View
-            style={{
-              width: "100%",
-              height: "auto",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                width: "100%",
-                height: "auto",
-                flexDirection: "row",
-                justifyContent: "space-around",
-                alignItems: "center",
-                marginBottom: 15,
-              }}
-            >
-              <View style={styles.decorativeBarrer}></View>
-              <Text style={{ marginHorizontal: 3, fontSize: 14 }}>
-                o continúa con
-              </Text>
-              <View style={styles.decorativeBarrer}></View>
+          <View style={styles.providersSection}>
+            <View style={styles.dividerContainer}>
+              <View style={styles.decorativeBarrer} />
+
+              <Text style={styles.dividerText}>o continúa con</Text>
+
+              <View style={styles.decorativeBarrer} />
             </View>
 
             <GoogleAuthButton action={oauth2Login} />
-            <View
-              style={{
-                width: "100%",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 8,
-                marginTop: 12,
-              }}
-            >
-              <Text>¿No tienes cuenta?</Text>
-              <Link
-                href={"/register"}
-                style={{ color: Colors.TERTIARY, fontWeight: 600 }}
-              >
-                Registrate
+
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>¿No tienes cuenta?</Text>
+
+              <Link href={"/register"} style={styles.registerLink}>
+                Regístrate
               </Link>
             </View>
           </View>
@@ -283,40 +203,119 @@ function LoginScreen() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  backgroundImageContainer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  imageWrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 360,
+    overflow: "hidden",
+  },
+
   image: {
     width: "100%",
-    aspectRatio: 1,
-    borderRadius: 12,
-    height: 400,
+    height: "100%",
   },
+
   gradientTop: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 320,
+    height: 180,
   },
+
   gradientBottom: {
     position: "absolute",
-    bottom: 0,
     left: 0,
     right: 0,
-    height: 500,
+    bottom: 0,
+    height: 220,
+  },
+
+  waveContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 
   containerInfo: {
-    position: "absolute",
-    zIndex: 1,
     flex: 1,
-    flexDirection: "column",
     justifyContent: "flex-end",
-    alignContent: "center",
-    inset: 0,
-    marginHorizontal: 24,
-    marginBottom: 24,
-    height: "auto",
+
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+
+  headerInfo: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: 20,
+  },
+
+  logo: {
+    width: 60,
+    height: 60,
+
+    marginBottom: 10,
+  },
+
+  title: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "800",
+
+    textAlign: "center",
+    color: "#111827",
+
+    marginBottom: 4,
+  },
+
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: "400",
+
+    textAlign: "center",
+    color: "#6B7280",
+  },
+
+  loginCard: {
+    width: "100%",
+
+    paddingHorizontal: 16,
+    paddingVertical: 28,
+
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#0000001A",
+
+    backgroundColor: "#FFFFFF",
+
+    gap: 20,
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+
+    elevation: 6,
   },
 
   loginFormSection: {
@@ -326,16 +325,63 @@ const styles = StyleSheet.create({
 
   loginFormSectionImage: {
     position: "absolute",
-    top: 12,
-    bottom: 0,
+
     right: 12,
+    top: 14,
+  },
+
+  providersSection: {
+    width: "100%",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dividerContainer: {
+    width: "100%",
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    marginBottom: 16,
   },
 
   decorativeBarrer: {
     flex: 1,
-    maxWidth: 80,
+
     height: 1,
-    backgroundColor: "black",
+
+    backgroundColor: "#D1D5DB",
+  },
+
+  dividerText: {
+    marginHorizontal: 10,
+
+    fontSize: 14,
+    color: "#6B7280",
+  },
+
+  registerContainer: {
+    width: "100%",
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+
+    gap: 6,
+
+    marginTop: 12,
+  },
+
+  registerText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+
+  registerLink: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.TERTIARY,
   },
 });
 
