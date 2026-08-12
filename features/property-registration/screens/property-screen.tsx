@@ -3,7 +3,6 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import PlusIcon from "../../../assets/icons/plus.svg";
 import { AIButton } from "../../../components/ai";
 import { FilterButton } from "../../../components/buttons/button";
 import { PrincipalError } from "../../../components/error";
@@ -13,8 +12,13 @@ import SplashScreen from "../../../components/splash-screen";
 import { useBehaviorAside } from "../../../stores/auth-store";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
-import { normalizePropertyInformation } from "../services/property-registration.domain.service";
-import type { PropertyInfoCard } from "../types";
+import type { PropertyResponseApi } from "../api.response";
+import type {
+  PropertyOccupationType,
+  TypePropertyType,
+} from "../schemas/property-registration.schema";
+
+import PlusIcon from "../../../assets/icons/plus.svg";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 
@@ -22,9 +26,10 @@ const emptyItems = () => <Text>No data</Text>;
 
 export default function PropertyScreen() {
   const { isOpen } = useBehaviorAside();
-  const [properties, setProperties] = useState<PropertyInfoCard[]>();
+  const [properties, setProperties] = useState<PropertyResponseApi[]>();
   const [text, setText] = useState("");
-  const [Ai, setAt] = useState<boolean>(false);
+  const [debounce, setDebounce] = useState();
+  const [Ai, setAI] = useState<boolean>(false);
 
   const { isLoading, data, isError } = useQuery({
     queryKey: ["properties"],
@@ -32,9 +37,16 @@ export default function PropertyScreen() {
     staleTime: 60000 * 60,
   });
 
+  //debounce para las paginaciones y busquedas cuando se agregue busquedas por nombre en el backend
+  useEffect(() => {
+    const debounce = setTimeout(() => {}, 1500);
+
+    return () => clearInterval(debounce);
+  }, [text]);
+
   useEffect(() => {
     if (data) {
-      setProperties(normalizePropertyInformation(data.data));
+      setProperties(data.data);
     }
   }, [data]);
 
@@ -48,7 +60,7 @@ export default function PropertyScreen() {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <AIButton onPress={() => setAt((prev) => !prev)} />
+      <AIButton onPress={() => setAI((prev) => !prev)} />
 
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
@@ -93,9 +105,12 @@ export default function PropertyScreen() {
             <PropertyCard
               propertyName={item.propertyName}
               fmi={item.fmi}
-              direction={item.direction}
-              occupationType={item.occupationType}
-              typeProperty={item.typeProperty}
+              direction={item.direction?.city}
+              occupationType={
+                item.propertyOccupationType as PropertyOccupationType
+              }
+              typeProperty={item.typeProperty as TypePropertyType}
+              resourcesImages={item.resourcesImages}
               action={() =>
                 router.push({
                   pathname: "/home/property-registration/[id]",
@@ -183,7 +198,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
-
   filterList: {
     paddingRight: 20,
     paddingVertical: 2,
@@ -192,7 +206,6 @@ const styles = StyleSheet.create({
   filterSeparator: {
     width: 8,
   },
-
 
   propertiesSection: {
     flex: 1,

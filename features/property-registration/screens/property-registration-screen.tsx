@@ -6,7 +6,6 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
-import UndoIcon from "../../../assets/icons/undo.svg";
 import SplashScreen from "../../../components/splash-screen";
 import { queryClient } from "../../../core/configs/tanstackconfig";
 import type { ApiError } from "../../../types/global";
@@ -24,6 +23,7 @@ import
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
 import { resourcesImageStorage } from "../services/property-registration.domain.service";
 import { uploadImagesToCloudinary } from "../services/property-registration.service";
+import { BackButton } from "../components/display";
 
 export interface RegisterFormData {
   saveData: React.Dispatch<
@@ -78,7 +78,6 @@ export default function PropertyRegistrationScreen() {
       ...registerForm,
       resourcesImages: cloudImageInfo,
     };
-
     setRegisterForm(property);
 
     //mandamos al servidor el objeto completo del inmueble a registrar
@@ -98,18 +97,7 @@ export default function PropertyRegistrationScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <WaveBackground style={styles.wave} />
-      <Pressable
-        style={({ pressed }) => [
-          styles.backButton,
-          pressed && styles.backButtonPressed,
-        ]}
-        onPress={cleanSteps}
-        hitSlop={8}
-      >
-        <UndoIcon width={21} height={21} />
-
-        <Text style={styles.backText}>Regresar</Text>
-      </Pressable>
+      <BackButton action={cleanSteps}/>
 
       <View style={styles.stepIndicator}>
         <Text style={styles.stepText}>{`Step ${step} / 7`}</Text>
