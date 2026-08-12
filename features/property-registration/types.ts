@@ -1,5 +1,6 @@
 import type {
     PropertyOccupationType,
+    ResourceImageType,
     TypePropertyType,
 } from "./schemas/property-registration.schema";
 
@@ -7,9 +8,10 @@ export interface PropertyInfoCard {
     id?: string;
     propertyName: string;
     fmi: string;
-    direction: string;
+    direction?: string;
     occupationType: PropertyOccupationType;
     typeProperty: TypePropertyType;
+    resourcesImages: ResourceImageType[];
     action?: () => void;
 }
 

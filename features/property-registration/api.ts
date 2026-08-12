@@ -1,11 +1,11 @@
 import { api } from "../../core/api/axios-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { Get, GetAll } from "../../types/global";
+import type { PropertyResponseApi } from "./api.response";
 import {
     type CreatePropertyType,
     type EditingPropertyInfo,
     type PropertyActorRoleType,
-    type PropertyType,
     type StatusPropertyMemberType,
 } from "./schemas/property-registration.schema";
 import type {
@@ -23,17 +23,17 @@ export const saveProperty = async (property: Partial<CreatePropertyType>) => {
 };
 
 export const GetAllProperties = async () => {
-    const { data } = await api.get<GetAll<PropertyType[]>>(
+    const { data } = await api.get<GetAll<PropertyResponseApi[]>>(
         `${FINANCIAL_MODULE}/property`,
     );
     return data;
 };
 
 export const GetPropertyById = async (id: string) => {
-    const { data } = await api.get<Get<"property", PropertyType>>(
+    const { data } = await api.get<Get<"property", PropertyResponseApi>>(
         `${FINANCIAL_MODULE}/property/${id}`,
     );
-    return data;
+    return data.property;
 };
 
 export const EditingProperty = async (
