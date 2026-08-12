@@ -37,16 +37,17 @@ export type PropertyActorRoleType =
 
 export const DirectionSchema = z.object({
     id: z.uuid().optional(),
-    latitute: z.number(),
-    longitud: z.number(),
+    propertyId: z.uuid(),
+    latitute: z.string(),
+    longitud: z.string(),
     department: z.string(),
     city: z.string(),
     neighborhood: z.string(),
     typeStreet: Street,
     numberStreet: z.number(),
     complement: z.string().optional(),
-    createAt: z.date().optional(),
-    updateAt: z.date().optional(),
+    createAt: z.string().optional(),
+    updateAt: z.string().optional(),
 });
 
 export type DirectionType = z.infer<typeof DirectionSchema>;
@@ -64,15 +65,15 @@ export const createDirectionSchema = z.object({
 export type CreateDirectionType = z.infer<typeof createDirectionSchema>;
 
 export const ResourceImageSchema = z.object({
-    id: z.uuid().optional(),
-    assetId: z.string().optional(),
-    width: z.int().optional(),
-    height: z.int().optional(),
-    format: z.string().optional(),
+    id: z.uuid().nullable(),
+    assetId: z.string().nullable(),
+    width: z.int().nullable(),
+    height: z.int().nullable(),
+    format: z.string().nullable(),
     url: z.string(),
-    secureUrl: z.string().optional(),
-    createAt: z.date().optional(),
-    updateAt: z.date().optional(),
+    secureUrl: z.string().nullable(),
+    createAt: z.string().optional(),
+    updateAt: z.string().optional(),
 });
 
 export type ResourceImageType = z.infer<typeof ResourceImageSchema>;
@@ -101,8 +102,8 @@ export const StructurePropertyInfo = z.object({
 export type StructurePropertyInfoType = z.infer<typeof StructurePropertyInfo>;
 
 export const EconomicPropertyInfo = z.object({
-    monthlyRent: z.coerce.number().positive(),
-    depositAmount: z.coerce.number().positive(),
+    monthlyRent: z.coerce.number(),
+    depositAmount: z.coerce.number(),
     currency: z.enum(["COP", "USD"]),
     utilitiesIncluded: z.boolean(),
 });
@@ -114,15 +115,15 @@ export const propertySchema = z.object({
     fmi: z.string(),
     predialNumber: z.string(),
     isPublished: z.boolean(),
-    createat: z.date(),
+    createAt: z.string(),
     propertyDescription: z.string(),
     propertyName: z.string(),
     typeProperty: TypeProperty,
     propertyOccupationType: PropertyOccupation,
     direction: DirectionSchema,
-    resourcesImages: z.array(ResourceImageSchema),
-    structurePropertyInfo: StructurePropertyInfo,
-    economicPropertyInfo: EconomicPropertyInfo,
+    resourceImages: z.array(ResourceImageSchema),
+    structureInfoResponse: StructurePropertyInfo,
+    economicInfoResponse: EconomicPropertyInfo,
 });
 
 export type PropertyType = z.infer<typeof propertySchema>;

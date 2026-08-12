@@ -1,10 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Storage } from "../../../types/global";
-import type { PropertyType } from "../schemas/property-registration.schema";
+import type { PropertyResponseApi } from "../api.response";
+import type {
+    PropertyOccupationType,
+    TypePropertyType,
+} from "../schemas/property-registration.schema";
 import type { PropertyInfoCard } from "../types";
 
 export function normalizePropertyInformation(
-    properties: PropertyType[],
+    properties: PropertyResponseApi[],
 ): PropertyInfoCard[] {
     if (properties.length === 0) {
         return [];
@@ -18,15 +22,21 @@ export function normalizePropertyInformation(
             propertyOccupationType,
             typeProperty,
             propertyName,
+            resourcesImages,
         }) => {
-            const normalizeDirection = `${direction.city} - ${direction.neighborhood}`;
+            const normalizeDirection = direction
+                ? `${direction.city} - ${direction.neighborhood}`
+                : "N.A";
+
             return {
                 id,
                 propertyName,
                 fmi,
                 direction: normalizeDirection,
-                occupationType: propertyOccupationType,
-                typeProperty: typeProperty,
+                occupationType:
+                    propertyOccupationType as PropertyOccupationType,
+                typeProperty: typeProperty as TypePropertyType,
+                resourcesImages: resourcesImages,
             };
         },
     );
