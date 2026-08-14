@@ -3,7 +3,8 @@ import
     ActivityIndicator,
     Pressable,
     StyleSheet,
-    Text
+    Text,
+    View
   } from "react-native";
 
 interface ButtonStyle {
@@ -190,4 +191,72 @@ const stylesFilter = StyleSheet.create({
   },
 });
 
-export { ButtonForm, FilterButton };
+interface AsideButtonProps {
+  icon: React.ReactNode;
+  title: string;
+  action: () => void;
+}
+function AsideButton({
+  icon,
+  title,
+  action,
+}: AsideButtonProps) {
+  return (
+    <Pressable
+      onPress={action}
+      style={({ pressed }) => [
+        buttonAsideStyles.container,
+        pressed && buttonAsideStyles.pressed,
+      ]}
+    >
+      <View style={buttonAsideStyles.iconContainer}>
+        {icon}
+      </View>
+
+      <Text style={buttonAsideStyles.title}>
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
+
+const buttonAsideStyles = StyleSheet.create({
+  container: {
+    width: "90%",
+    minHeight: 58,
+
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: 'center',
+
+    paddingHorizontal: 18,
+    marginVertical: 5,
+
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#00000056",
+
+    backgroundColor: "#FFFFFF",
+  },
+
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 14,
+  },
+
+  title: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#1F2937",
+  },
+
+  pressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
+  },
+});
+
+export { ButtonForm, FilterButton, AsideButton };
