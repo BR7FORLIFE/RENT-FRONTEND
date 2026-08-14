@@ -9,7 +9,7 @@ import { PrincipalError } from "../../../components/error";
 import { SearchInput } from "../../../components/inputs/input";
 import PropertyCard from "../../../components/property-card";
 import SplashScreen from "../../../components/splash-screen";
-import { useBehaviorAside } from "../../../stores/auth-store";
+import { useBehaviorAside } from "../../../stores/global-store";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
 import type { PropertyResponseApi } from "../api.response";
@@ -18,24 +18,44 @@ import type {
   TypePropertyType,
 } from "../schemas/property-registration.schema";
 
+import AsideIcon from "../../../assets/icons/bar-right.svg";
 import PlusIcon from "../../../assets/icons/plus.svg";
+import { ContentAside } from "../../../components/aside";
+import { Me } from "../../../core/api/api-endpoints";
+import { useMe } from "../../../stores/auth-store";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 
 const emptyItems = () => <Text>No data</Text>;
 
 export default function PropertyScreen() {
-  const { isOpen } = useBehaviorAside();
+  const { isOpen, toggle } = useBehaviorAside();
+  const { setUser } = useMe();
   const [properties, setProperties] = useState<PropertyResponseApi[]>();
   const [text, setText] = useState("");
   const [debounce, setDebounce] = useState();
   const [Ai, setAI] = useState<boolean>(false);
 
+  //informacion de todas las propiedades
   const { isLoading, data, isError } = useQuery({
     queryKey: ["properties"],
     queryFn: GetAllProperties,
     staleTime: 60000 * 60,
   });
+
+  //informacion del usuario cuando ya ha hecho login
+  const {
+    data: meData,
+  } = useQuery({
+    queryKey: ["me"],
+    queryFn: Me,
+  });
+
+  useEffect(() => {
+    if(meData){
+      setUser(meData);
+    }
+  }, [meData, setUser]);
 
   //debounce para las paginaciones y busquedas cuando se agregue busquedas por nombre en el backend
   useEffect(() => {
@@ -62,9 +82,16 @@ export default function PropertyScreen() {
     <SafeAreaView style={styles.screen}>
       <AIButton onPress={() => setAI((prev) => !prev)} />
 
+      {isOpen && <ContentAside />}
+
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>Mis Propiedades</Text>
+          <View style={styles.asidebutton}>
+            <Pressable onPress={toggle}>
+              <AsideIcon width={27} height={27} />
+            </Pressable>
+            <Text style={styles.title}>Mis Propiedades</Text>
+          </View>
 
           <Pressable
             onPress={() => router.navigate("/home/property-registration")}
@@ -160,6 +187,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+
+  asidebutton: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   title: {
