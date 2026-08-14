@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { MeResponseType } from "../core/schemas/auth-schema";
 
 interface UserAuth {
     userId: string | null;
@@ -22,17 +23,18 @@ export const useAuth = create<UserAuth>((set) => ({
     },
 }));
 
-interface BehaviorAside {
-    isOpen: boolean;
-    toggle: () => void;
+interface Me {
+    user: MeResponseType | null;
+    setUser: (user: MeResponseType) => void;
+    clear: () => void;
 }
 
-export const useBehaviorAside = create<BehaviorAside>((set, get) => ({
-    isOpen: false,
-    toggle() {
-        const open = get().isOpen;
-        set({
-            isOpen: !open,
-        });
+export const useMe = create<Me>((set) => ({
+    user: null,
+    setUser: (user: MeResponseType) => {
+        set({ user });
+    },
+    clear: () => {
+        set({ user: null });
     },
 }));
