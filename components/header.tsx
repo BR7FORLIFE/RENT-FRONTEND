@@ -1,6 +1,6 @@
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import BarIcon from "../assets/icons/bar-right.svg";
-import { useBehaviorAside } from "../stores/auth-store";
+import { useBehaviorAside } from "../stores/global-store";
 import { ContentAside } from "./aside";
 
 export default function Header() {
@@ -26,7 +26,7 @@ export default function Header() {
       <Text style={{ fontSize: 20, fontWeight: 700 }}>RENT</Text>
 
       {/** aside  */}
-      {isOpen && <ContentAside width={width} height={height} />}
+      {isOpen && <ContentAside />}
     </View>
   );
 }

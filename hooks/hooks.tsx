@@ -61,16 +61,3 @@ export function useTextAnimation() {
 
   return opacity;
 }
-
-export function useMe() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["me"],
-    queryFn: Me,
-  });
-
-  return {
-    user: data,
-    isLoading,
-    isError
-  }
-}

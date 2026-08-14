@@ -1,5 +1,5 @@
 import { PropertyMemberScreen } from "../../../features/property-registration/screens/property-member-screen";
 
-export function PropertyMember() {
+export default function PropertyMember() {
   return <PropertyMemberScreen />;
 }
