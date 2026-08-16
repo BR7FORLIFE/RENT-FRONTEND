@@ -1,11 +1,17 @@
 import { create } from "zustand";
+import type { GlobalBehavior } from "../types/global";
 
-interface BehaviorAside {
-    isOpen: boolean;
-    toggle: () => void;
-}
+export const useBehaviorAside = create<GlobalBehavior>((set, get) => ({
+    isOpen: false,
+    toggle() {
+        const open = get().isOpen;
+        set({
+            isOpen: !open,
+        });
+    },
+}));
 
-export const useBehaviorAside = create<BehaviorAside>((set, get) => ({
+export const useBehaviorNotification = create<GlobalBehavior>((set, get) => ({
     isOpen: false,
     toggle() {
         const open = get().isOpen;

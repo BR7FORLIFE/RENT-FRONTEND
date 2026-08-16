@@ -28,3 +28,9 @@ export interface Storage<T> {
     set: (data: T) => Promise<void>;
     clean: () => Promise<void>;
 }
+
+//stores de comportamiento
+export interface GlobalBehavior {
+    isOpen: boolean;
+    toggle: () => void;
+}
