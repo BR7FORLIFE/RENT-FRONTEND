@@ -233,10 +233,6 @@ const buttonAsideStyles = StyleSheet.create({
     paddingHorizontal: 18,
     marginVertical: 5,
 
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#00000056",
-
     backgroundColor: "#FFFFFF",
   },
 
