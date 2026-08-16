@@ -12,19 +12,19 @@ import
   } from "react-native";
 import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
 import Toast from "react-native-toast-message";
-import { ButtonForm } from "../../../components/buttons/button";
-import { Colors } from "../../../themes/themes";
-import type { RegisterFormData } from "../screens/property-registration-screen";
+import { ButtonForm } from "../../../../components/buttons/button";
+import { Colors } from "../../../../themes/themes";
+import type { RegisterFormData } from "../../screens/property-registration-screen";
 
 import { Picker } from "@react-native-picker/picker";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import AddIcon from "../../../assets/icons/add-square.svg";
-import IAIcon from "../../../assets/icons/ai.svg";
-import UploadIcon from "../../../assets/icons/upload.svg";
-import { NumberInput, SearchInput } from "../../../components/inputs/input";
-import type { ApiError } from "../../../types/global";
-import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../api";
+import { NumberInput, SearchInput } from "../../../../components/inputs/input";
+import type { ApiError } from "../../../../types/global";
+import AddIcon from "../../../../assets/icons/add-square.svg";
+import IAIcon from "../../../../assets/icons/ai.svg";
+import UploadIcon from "../../../../assets/icons/upload.svg";
+import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../../api";
 import type {
   CreateDirectionType,
   CreatePropertyType,
@@ -32,8 +32,8 @@ import type {
   PropertyOccupationType,
   StructurePropertyInfoType,
   TypePropertyType,
-} from "../schemas/property-registration.schema";
-import { resourcesImageStorage } from "../services/property-registration.domain.service";
+} from "../../schemas/property-registration.schema";
+import { resourcesImageStorage } from "../../services/property-registration.domain.service";
 
 /**
  * Mejoras a tener en cuenta

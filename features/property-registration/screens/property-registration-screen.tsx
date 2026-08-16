@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
@@ -10,20 +10,20 @@ import SplashScreen from "../../../components/splash-screen";
 import { queryClient } from "../../../core/configs/tanstackconfig";
 import type { ApiError } from "../../../types/global";
 import { saveProperty } from "../api";
+import { BackButton } from "../components/display";
 import
-  {
-    DirectionStep,
-    DrapAndDropStep,
-    EconomicPropertyInfo,
-    FmiAndPredialNumberStep,
-    PropertyInfo,
-    StructurePropertyInfo,
-    TypeAndOccupationStep,
-  } from "../components/steps";
+    {
+        DirectionStep,
+        DrapAndDropStep,
+        EconomicPropertyInfo,
+        FmiAndPredialNumberStep,
+        PropertyInfo,
+        StructurePropertyInfo,
+        TypeAndOccupationStep,
+    } from "../components/property-registration/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
 import { resourcesImageStorage } from "../services/property-registration.domain.service";
 import { uploadImagesToCloudinary } from "../services/property-registration.service";
-import { BackButton } from "../components/display";
 
 export interface RegisterFormData {
   saveData: React.Dispatch<
@@ -97,14 +97,13 @@ export default function PropertyRegistrationScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <WaveBackground style={styles.wave} />
-      <BackButton action={cleanSteps}/>
+      <BackButton action={cleanSteps} />
 
       <View style={styles.stepIndicator}>
         <Text style={styles.stepText}>{`Step ${step} / 7`}</Text>
       </View>
 
       <View style={styles.content}>
-
         <View style={styles.logoContainer}>
           <Image
             source={require("../../../assets/images/logo-recortado.png")}
