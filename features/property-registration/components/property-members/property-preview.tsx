@@ -1,5 +1,4 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-
 import ImagePreview from "../../../../assets/icons/image-preview.svg";
 import QrCode from "../../../../assets/icons/qr.svg";
 import type { PropertyResponseApi } from "../../api.response";
@@ -14,68 +13,71 @@ export function PropertyPreview({
   const { set } = useProperty();
 
   const showQrInfo = () => {
-    set(property); // establecemos la propiedad al store
+    set(property);
     setOpen(true); // abrimos el panel para mostrar el qr
   };
 
   return (
-    <View style={propertyPreview.container}>
-      {/**imagen de previsualizacion de la propiedad */}
-      <View style={propertyPreview.image}>
-        {property.resourcesImages[0].secureUrl ? (
-          <Image
-            source={{ uri: property.resourcesImages[0].secureUrl! }}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <ImagePreview width={24} height={24} />
-        )}
-      </View>
+    <Pressable>
+      <View style={propertyPreview.container}>
+        {/**imagen de previsualizacion de la propiedad */}
+        <View style={propertyPreview.image}>
+          {property.resourcesImages[0].secureUrl ? (
+            <Image
+              source={{ uri: property.resourcesImages[0].secureUrl! }}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <ImagePreview width={24} height={24} />
+          )}
+        </View>
 
-      {/**seccion de FMI, nombre, y tipo de propiedad  */}
-      <View style={propertyPreview.information}>
-        <View>
-          <Text style={{ fontSize: 10, color: "#000000d3" }}>
-            FMI {property.fmi}
-          </Text>
-          <Text
-            style={{
-              fontSize: 11,
-              fontWeight: "600",
-              letterSpacing: 1.2,
-              lineHeight: 25,
-            }}
+        {/**seccion de FMI, nombre, y tipo de propiedad  */}
+        <View style={propertyPreview.information}>
+          <View>
+            <Text style={{ fontSize: 10, color: "#000000d3" }}>
+              FMI {property.fmi}
+            </Text>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "600",
+                letterSpacing: 1.2,
+                lineHeight: 25,
+              }}
+            >
+              {property.propertyName}
+            </Text>
+          </View>
+
+          <View>
+            <Text style={{ fontSize: 10, color: "#000000d3" }}>
+              {property.typeProperty}
+            </Text>
+          </View>
+        </View>
+
+        {/**seccion de imagen de qr */}
+        <View style={propertyPreview.qr}>
+          <Pressable
+            onPress={showQrInfo}
+            style={({ pressed }) => [
+              propertyPreview.button,
+
+              pressed && propertyPreview.buttonPressed,
+            ]}
           >
-            {property.propertyName}
-          </Text>
-        </View>
-
-        <View>
-          <Text style={{ fontSize: 10, color: "#000000d3" }}>
-            {property.typeProperty}
-          </Text>
+            <QrCode width={24} height={24} />
+          </Pressable>
         </View>
       </View>
-
-      {/**seccion de imagen de qr */}
-      <View style={propertyPreview.qr}>
-        <Pressable
-          onPress={showQrInfo}
-          style={({ pressed }) => [
-            propertyPreview.button,
-
-            pressed && propertyPreview.buttonPressed,
-          ]}
-        >
-          <QrCode width={24} height={24} />
-        </Pressable>
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
 const propertyPreview = StyleSheet.create({
   container: {
+    flex: 1,
     width: "100%",
     height: 40,
     minHeight: 60,

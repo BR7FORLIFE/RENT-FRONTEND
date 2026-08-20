@@ -59,22 +59,6 @@ export const IAPropertyRegistrationSuggestion = async (
     return data;
 };
 
-export const InvitePropertyMember = async (
-    email: string,
-    propertyId: string,
-) => {
-    const { data } = await api.post<{
-        id: string;
-        invitedEmailTo: string;
-        message: string;
-    }>(`${FINANCIAL_MODULE}/property/invite-property-member`, {
-        email,
-        propertyId,
-    });
-
-    return data;
-};
-
 export const getAllPropertyMembers = async (
     page: number,
     limit: number,
@@ -82,6 +66,24 @@ export const getAllPropertyMembers = async (
 ) => {
     const { data } = await api.get(`${FINANCIAL_MODULE}/property-member`, {
         params: { status, page, limit },
+    });
+
+    return data;
+};
+
+export const InvitePropertyMember = async (
+    email: string, // correo que se pretende invitar
+    propertyId: string, // la id de la propiedad
+    userId: string, // dueño de la propiedad
+) => {
+    const { data } = await api.post<{
+        id: string;
+        invitedEmailTo: string;
+        message: string;
+    }>(`${FINANCIAL_MODULE}/property-member/invite-property-member`, {
+        email,
+        propertyId,
+        userId,
     });
 
     return data;
