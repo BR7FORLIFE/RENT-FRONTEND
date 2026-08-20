@@ -12,9 +12,17 @@ import SplashScreen from "../../../components/splash-screen";
 import { GetAllProperties } from "../api";
 import type { PropertyResponseApi } from "../api.response";
 import { PropertyPreview } from "../components/property-members/property-preview";
+import
+  {
+    InvitePropertyMemberCard,
+    QrScan,
+  } from "../components/property-members/qr";
+import { useBehaviorQr } from "../stores/property.store";
 
 export function PropertyMemberScreen() {
+  const { isOpen } = useBehaviorQr(); // comportamiento de la card de qr
   const [property, setProperty] = useState<PropertyResponseApi[]>();
+  const [openQrScan, setOpenQrScan] = useState<boolean>(false);
 
   //recuperamos las propiedades, gracias a tanstack nosotros podremos
   // obtener las propiedades ya cacheadas en memoria para mostrar sin necesidad de hacer
@@ -25,11 +33,19 @@ export function PropertyMemberScreen() {
     queryFn: GetAllProperties,
   });
 
+  const processScan = () => {
+    setOpenQrScan(true);
+  };
+
   useEffect(() => {
     if (data) {
       setProperty(data.data);
     }
   }, [data]);
+
+  if (openQrScan) {
+    return <QrScan />;
+  }
 
   if (isLoading) {
     return <SplashScreen />;
@@ -60,6 +76,7 @@ export function PropertyMemberScreen() {
               propertyMemberStyles.iconButton,
               pressed && propertyMemberStyles.iconButtonPressed,
             ]}
+            onPress={processScan}
           >
             <ScanIcon width={23} height={23} />
           </Pressable>
@@ -118,6 +135,8 @@ export function PropertyMemberScreen() {
           )}
         />
       </View>
+
+      {isOpen && <InvitePropertyMemberCard />}
     </SafeAreaView>
   );
 }
@@ -275,6 +294,6 @@ const propertyMemberStyles = StyleSheet.create({
   },
 
   separator: {
-    height: 12,
+    height: 36,
   },
 });
