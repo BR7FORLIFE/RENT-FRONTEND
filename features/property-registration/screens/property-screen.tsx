@@ -44,15 +44,13 @@ export default function PropertyScreen() {
   });
 
   //informacion del usuario cuando ya ha hecho login
-  const {
-    data: meData,
-  } = useQuery({
+  const { data: meData } = useQuery({
     queryKey: ["me"],
     queryFn: Me,
   });
 
   useEffect(() => {
-    if(meData){
+    if (meData) {
       setUser(meData);
     }
   }, [meData, setUser]);
@@ -94,7 +92,7 @@ export default function PropertyScreen() {
           </View>
 
           <Pressable
-            onPress={() => router.navigate("/home/property-registration")}
+            onPress={() => router.navigate("/property/property-registration")}
             style={({ pressed }) => [
               styles.addButton,
               pressed && styles.buttonPressed,
@@ -140,7 +138,7 @@ export default function PropertyScreen() {
               resourcesImages={item.resourcesImages}
               action={() =>
                 router.push({
-                  pathname: "/home/property-registration/[id]",
+                  pathname: "/property/property-registration/[id]",
                   params: { id: item.id as string },
                 })
               }

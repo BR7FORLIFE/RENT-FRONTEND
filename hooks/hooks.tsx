@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Animated } from "react-native";
-import { Me, refresh } from "../core/api/api-endpoints";
+import { refresh } from "../core/api/api-endpoints";
 import { logoutUser } from "../features/auth/services/auth.service";
 import { useAuth } from "../stores/auth-store";
 
@@ -20,7 +19,7 @@ export function useBootstrapApp() {
         //hacemos el logout para volver a pedir el refresh
         if (!accessToken) {
           logoutUser();
-          router.navigate("/login");
+          router.navigate("/auth/login");
           return;
         }
         setAccessToken(accessToken);
@@ -28,7 +27,7 @@ export function useBootstrapApp() {
         setLoading(false);
       } catch (error) {
         logoutUser();
-        router.navigate("/login");
+        router.navigate("/auth/login");
       } finally {
         setLoading(false);
       }

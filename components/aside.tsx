@@ -27,7 +27,7 @@ const ASIDE_ITEMS: AsideItems[] = [
     Icon: InvitePersonIcon,
     name: "Invitar Miembros",
     action: () => {
-      router.navigate("/home/property-member");
+      router.navigate("/property-member");
     },
   },
 ];
@@ -41,7 +41,7 @@ export function ContentAside() {
 
   const handleLogout = () => {
     logoutUser();
-    router.navigate("/login");
+    router.navigate("/auth/login");
   };
 
   return (

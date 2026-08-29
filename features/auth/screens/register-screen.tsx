@@ -78,7 +78,7 @@ export default function RegisterScreen() {
       setId(data.userId);
       //establecemos la informacion en el storage
       InfoStorage().set({ userId: data.userId, refreshToken: null });
-      router.navigate("/email");
+      router.navigate("/auth/email");
     },
     onError: (err: AxiosError<ApiError>) => {
       const data = err.response?.data;
