@@ -1,4 +1,8 @@
-import type { TypeStreet } from "./schemas/property-registration.schema";
+import type {
+    PropertyMemberType,
+    StatusPropertyMemberType,
+    TypeStreet,
+} from "./schemas/property-registration.schema";
 
 interface ResourcesImagesResponseApi {
     id: string | null;
@@ -60,4 +64,38 @@ export interface PropertyResponseApi {
     resourcesImages: ResourcesImagesResponseApi[];
     economicInfoResponse: EconomicResponseApi | null;
     structureInfoResponse: StructureResponseApi | null;
+}
+
+export interface GetAllPropertiesByPropertyMemberResponseApi {
+    id: string;
+    propertyName: string;
+    propertyDescription: string;
+}
+
+export interface ResourceImagePersistenceResponseApi {
+    id: string;
+    assetId: string | null;
+    width: number | null;
+    height: number | null;
+    format: string | null;
+    url: string;
+    secureUrl: string | null;
+    createAt: Date;
+    updateAt: Date;
+}
+
+export interface PropertyMemberMeResponseApi {
+    info: PropertyMemberType;
+    roles: string[];
+    policies: string[];
+}
+
+export interface GetAllPropertyMemberInfo {
+    userId: string;
+    status?: StatusPropertyMemberType | undefined;
+    assignedAt?: Date | undefined;
+    username: string;
+    email: string;
+    cellphone: string;
+    fullname: string;
 }

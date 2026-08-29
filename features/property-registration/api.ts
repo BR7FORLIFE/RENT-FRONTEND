@@ -1,7 +1,13 @@
 import { api } from "../../core/api/axios-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { Get, GetAll } from "../../types/global";
-import type { PropertyResponseApi } from "./api.response";
+import type {
+    GetAllPropertiesByPropertyMemberResponseApi,
+    GetAllPropertyMemberInfo,
+    PropertyMemberMeResponseApi,
+    PropertyResponseApi,
+    ResourceImagePersistenceResponseApi,
+} from "./api.response";
 import {
     type CreatePropertyType,
     type EditingPropertyInfo,
@@ -64,13 +70,17 @@ export const getAllPropertyMembers = async (
     limit: number,
     status: StatusPropertyMemberType,
 ) => {
-    const { data } = await api.get(`${FINANCIAL_MODULE}/property-member`, {
-        params: { status, page, limit },
-    });
+    const { data } = await api.get<GetAll<GetAllPropertyMemberInfo>>(
+        `${FINANCIAL_MODULE}/property-member`,
+        {
+            params: { status, page, limit },
+        },
+    );
 
     return data;
 };
 
+//property members endpoints
 export const InvitePropertyMember = async (
     email: string, // correo que se pretende invitar
     propertyId: string, // la id de la propiedad
@@ -94,13 +104,53 @@ export const AssignmentRoleToPropertyMember = async (
     propertyId: string,
     roles: PropertyActorRoleType[],
 ) => {
-    const { data } = await api.post(
+    const { data } = await api.post<{ message: string }>(
         `${FINANCIAL_MODULE}/property-member/${memberId}`,
         { propertyId, roles },
     );
 
     return data;
 };
+
+export async function GetAllPropertiesByPropertyMember(
+    propertyMemberStatus: StatusPropertyMemberType,
+    page: number,
+    limit: number,
+) {
+    const { data } = await api.get<
+        GetAll<GetAllPropertiesByPropertyMemberResponseApi>
+    >(`${FINANCIAL_MODULE}/property-member/properties`, {
+        params: {
+            status: propertyMemberStatus,
+            page,
+            limit,
+        },
+    });
+
+    return data;
+}
+
+export async function GetPropertyByPropertyMember(propertyId: string) {
+    const { data } = await api.get<{
+        propertyName: string;
+        propertyDescription: string;
+    }>(`${FINANCIAL_MODULE}/property-member/properties/${propertyId}`);
+    return data;
+}
+
+export async function GetAllDocumentationByPropertyId(propertyId: string) {
+    const { data } = await api.get<GetAll<ResourceImagePersistenceResponseApi>>(
+        `${FINANCIAL_MODULE}/property/${propertyId}/documentation`,
+    );
+    return data;
+}
+
+export async function PropertyMemberMe(propertyId: string) {
+    const { data } = await api.get<PropertyMemberMeResponseApi>(
+        `${FINANCIAL_MODULE}/property-member/${propertyId}/me`,
+    );
+    return data;
+}
 
 export const OpenStreetMapApi = async (
     place: string,
