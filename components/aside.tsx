@@ -15,6 +15,7 @@ import { AsideButton, ButtonForm } from "./buttons/button";
 
 //assets
 import InvitePersonIcon from "../assets/icons/invite-person.svg";
+import JoinIcon from "../assets/icons/join.svg";
 
 interface AsideItems {
   Icon: React.FC<SvgProps>;
@@ -28,6 +29,13 @@ const ASIDE_ITEMS: AsideItems[] = [
     name: "Invitar Miembros",
     action: () => {
       router.navigate("/property-member");
+    },
+  },
+  {
+    Icon: JoinIcon,
+    name: "Asociaciones a propiedades",
+    action: () => {
+      router.navigate("/property/property-associations");
     },
   },
 ];
@@ -117,7 +125,6 @@ export function ContentAside() {
               <View
                 style={{
                   width: "100%",
-                  gap: 6,
                   marginTop: 4,
                 }}
               >

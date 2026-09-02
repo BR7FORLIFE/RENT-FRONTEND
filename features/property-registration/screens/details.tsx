@@ -69,9 +69,9 @@ const propertyDescriptionStyles = StyleSheet.create({
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const ImagesSlider = ({
-  resourcesImages,
+  resources,
 }: {
-  resourcesImages: ResourceImageType[];
+  resources: ResourceImageType[];
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -83,7 +83,7 @@ const ImagesSlider = ({
     setCurrentIndex(index);
   };
 
-  if (!resourcesImages.length) {
+  if (!resources.length) {
     return (
       <View style={imageSliderStyles.emptyContainer}>
         <Text style={imageSliderStyles.emptyText}>
@@ -96,7 +96,7 @@ const ImagesSlider = ({
   return (
     <View style={imageSliderStyles.container}>
       <FlatList
-        data={resourcesImages}
+        data={resources}
         keyExtractor={(item, index) => item.id ?? `${item.url}-${index}`}
         horizontal
         pagingEnabled
@@ -122,9 +122,9 @@ const ImagesSlider = ({
         )}
       />
 
-      {resourcesImages.length > 1 && (
+      {resources.length > 1 && (
         <View style={imageSliderStyles.indicators}>
-          {resourcesImages.map((_, index) => (
+          {resources.map((_, index) => (
             <View
               key={index}
               style={[
@@ -777,8 +777,8 @@ const propertyStructureStyles = StyleSheet.create({
   },
 
   iconContainer: {
-    width: 44,
-    height: 44,
+    width: 32,
+    height: 32,
 
     alignItems: "center",
     justifyContent: "center",
@@ -1036,7 +1036,7 @@ export default function DetailsScreen() {
         contentContainerStyle={detailsStyle.content}
       >
         {/* galeria de imagenes */}
-        <ImagesSlider resourcesImages={property.resourcesImages} />
+        <ImagesSlider resources={property.resources} />
 
         {/**descripcion de la propiedad */}
         <PropertyDescription

@@ -22,7 +22,7 @@ export function normalizePropertyInformation(
             propertyOccupationType,
             typeProperty,
             propertyName,
-            resourcesImages,
+            resources,
         }) => {
             const normalizeDirection = direction
                 ? `${direction.city} - ${direction.neighborhood}`
@@ -36,7 +36,7 @@ export function normalizePropertyInformation(
                 occupationType:
                     propertyOccupationType as PropertyOccupationType,
                 typeProperty: typeProperty as TypePropertyType,
-                resourcesImages: resourcesImages,
+                resources: resources,
             };
         },
     );
@@ -49,8 +49,8 @@ export function normalizePropertyInformation(
 //storages (para reconstruir toda la informacion completa de registro de propiedades)
 
 // 1. STEP resources Images
-export function resourcesImageStorage(): Storage<string[]> {
-    const KEY_STORAGE = "resourcesImages";
+export function resourcesStorage(): Storage<string[]> {
+    const KEY_STORAGE = "resources";
     const get = async () => {
         const data = await AsyncStorage.getItem(KEY_STORAGE);
         if (!data) return [];

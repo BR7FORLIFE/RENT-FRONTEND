@@ -12,7 +12,7 @@ export default function PropertyCard({
   typeProperty,
   occupationType,
   action,
-  resourcesImages,
+  resources,
 }: Props) {
   return (
     <View
@@ -27,10 +27,10 @@ export default function PropertyCard({
     >
       {/*Imagen del inmueble y estado actual de ocupacion del mismo */}
       <View style={{ position: "relative", height: "50%" }}>
-        {resourcesImages?.[0]?.secureUrl ? (
+        {resources?.[0]?.secureUrl ? (
           <Image
             resizeMode="cover"
-            source={{ uri: resourcesImages[0].secureUrl }}
+            source={{ uri: resources[0].secureUrl }}
             style={{
               width: "100%",
               height: "100%",

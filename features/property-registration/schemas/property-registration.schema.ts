@@ -121,7 +121,7 @@ export const propertySchema = z.object({
     typeProperty: TypeProperty,
     propertyOccupationType: PropertyOccupation,
     direction: DirectionSchema,
-    resourceImages: z.array(ResourceImageSchema),
+    resources: z.array(ResourceImageSchema),
     structureInfoResponse: StructurePropertyInfo,
     economicInfoResponse: EconomicPropertyInfo,
 });
@@ -132,7 +132,7 @@ export const createPropertySchema = z.object({
     propertyType: TypeProperty,
     propertyOccupationType: PropertyOccupation,
     direction: createDirectionSchema,
-    resourceImages: z.array(createResourceImageSchema),
+    resources: z.array(createResourceImageSchema),
     propertyName: z.string(),
     propertyDescription: z.string(),
     fmi: z.string(),
@@ -167,7 +167,7 @@ export const editingPropertyInfo = z.object({
     propertyName: z.string().optional(),
     propertyType: TypeProperty.optional(),
     propertyOccupationType: PropertyOccupation.optional(),
-    resourcesImages: z.array(createResourceImageSchema).optional(),
+    resources: z.array(createResourceImageSchema).optional(),
 });
 
 export type EditingPropertyInfo = z.infer<typeof editingPropertyInfo>;

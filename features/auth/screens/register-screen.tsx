@@ -272,7 +272,7 @@ export default function RegisterScreen() {
             <View style={styles.loginRedirect}>
               <Text style={styles.loginText}>¿Tienes una cuenta?</Text>
 
-              <Link href="/login" style={styles.loginLink}>
+              <Link href="/auth/login" style={styles.loginLink}>
                 Iniciar sesión
               </Link>
             </View>

@@ -33,7 +33,7 @@ import type {
   StructurePropertyInfoType,
   TypePropertyType,
 } from "../../schemas/property-registration.schema";
-import { resourcesImageStorage } from "../../services/property-registration.domain.service";
+import { resourcesStorage } from "../../services/property-registration.domain.service";
 
 /**
  * Mejoras a tener en cuenta
@@ -106,14 +106,14 @@ export function DrapAndDropStep({ setStep }: RegisterFormData) {
 
   useEffect(() => {
     const startedData = async () => {
-      const resourcesImages = await resourcesImageStorage().get();
+      const resources = await resourcesStorage().get();
 
-      if (!resourcesImages) {
+      if (!resources) {
         setImagesUris([]);
         return;
       }
 
-      setImagesUris(resourcesImages);
+      setImagesUris(resources);
     };
 
     startedData();
@@ -153,7 +153,7 @@ export function DrapAndDropStep({ setStep }: RegisterFormData) {
   };
 
   const createResourceImage = async () => {
-    await resourcesImageStorage().set(imagesUris);
+    await resourcesStorage().set(imagesUris);
     setStep((prev) => prev + 1);
   };
 

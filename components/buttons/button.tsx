@@ -4,7 +4,7 @@ import
     Pressable,
     StyleSheet,
     Text,
-    View
+    View,
   } from "react-native";
 
 interface ButtonStyle {
@@ -196,11 +196,7 @@ interface AsideButtonProps {
   title: string;
   action: () => void;
 }
-function AsideButton({
-  icon,
-  title,
-  action,
-}: AsideButtonProps) {
+function AsideButton({ icon, title, action }: AsideButtonProps) {
   return (
     <Pressable
       onPress={action}
@@ -209,28 +205,23 @@ function AsideButton({
         pressed && buttonAsideStyles.pressed,
       ]}
     >
-      <View style={buttonAsideStyles.iconContainer}>
-        {icon}
-      </View>
+      <View style={buttonAsideStyles.iconContainer}>{icon}</View>
 
-      <Text style={buttonAsideStyles.title}>
-        {title}
-      </Text>
+      <Text style={buttonAsideStyles.title}>{title}</Text>
     </Pressable>
   );
 }
 
 const buttonAsideStyles = StyleSheet.create({
   container: {
-    width: "90%",
-    minHeight: 58,
-
+    width: "100%",
+    minHeight: 42,
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: 'center',
+    justifyContent: "flex-start",
 
-    paddingHorizontal: 18,
+    paddingHorizontal: 4,
     marginVertical: 5,
 
     backgroundColor: "#FFFFFF",
@@ -255,4 +246,4 @@ const buttonAsideStyles = StyleSheet.create({
   },
 });
 
-export { ButtonForm, FilterButton, AsideButton };
+export { AsideButton, ButtonForm, FilterButton };

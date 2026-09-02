@@ -22,7 +22,7 @@ import
         TypeAndOccupationStep,
     } from "../components/property-registration/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
-import { resourcesImageStorage } from "../services/property-registration.domain.service";
+import { resourcesStorage } from "../services/property-registration.domain.service";
 import { uploadImagesToCloudinary } from "../services/property-registration.service";
 
 export interface RegisterFormData {
@@ -46,7 +46,7 @@ export default function PropertyRegistrationScreen() {
     onError: (err: AxiosError<ApiError>) => {},
     onSuccess: () => {
       setProccesing(false);
-      resourcesImageStorage().clean(); //limpiamos el storage de imagenes
+      resourcesStorage().clean(); //limpiamos el storage de imagenes
       Toast.show({
         type: "success",
         text2: "Propiedad registrada exitosamente",
@@ -64,7 +64,7 @@ export default function PropertyRegistrationScreen() {
   });
 
   const cleanSteps = async () => {
-    await resourcesImageStorage().clean();
+    await resourcesStorage().clean();
     router.navigate("/home/(tabs)/property-registration");
   };
 
@@ -76,7 +76,7 @@ export default function PropertyRegistrationScreen() {
 
     const property = {
       ...registerForm,
-      resourcesImages: cloudImageInfo,
+      resources: cloudImageInfo,
     };
     setRegisterForm(property);
 

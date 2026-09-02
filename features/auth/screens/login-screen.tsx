@@ -193,7 +193,7 @@ function LoginScreen() {
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>¿No tienes cuenta?</Text>
 
-              <Link href={"/register"} style={styles.registerLink}>
+              <Link href={"/auth/register"} style={styles.registerLink}>
                 Regístrate
               </Link>
             </View>
