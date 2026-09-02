@@ -23,6 +23,7 @@ import PlusIcon from "../../../assets/icons/plus.svg";
 import { ContentAside } from "../../../components/aside";
 import { Me } from "../../../core/api/api-endpoints";
 import { useMe } from "../../../stores/auth-store";
+import { InfoStorage } from "../../auth/services/auth.service";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
 
@@ -52,6 +53,8 @@ export default function PropertyScreen() {
   useEffect(() => {
     if (meData) {
       setUser(meData);
+      //insertamos en el infoStorage el User ID del usuario actual para evitar bugs
+      InfoStorage().set({ userId: meData.userId, refreshToken: null });
     }
   }, [meData, setUser]);
 
@@ -135,7 +138,7 @@ export default function PropertyScreen() {
                 item.propertyOccupationType as PropertyOccupationType
               }
               typeProperty={item.typeProperty as TypePropertyType}
-              resourcesImages={item.resourcesImages}
+              resources={item.resources}
               action={() =>
                 router.push({
                   pathname: "/property/property-registration/[id]",

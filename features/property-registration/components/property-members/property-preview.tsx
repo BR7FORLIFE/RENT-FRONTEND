@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import ImagePreview from "../../../../assets/icons/image-preview.svg";
 import QrCode from "../../../../assets/icons/qr.svg";
@@ -17,14 +18,21 @@ export function PropertyPreview({
     setOpen(true); // abrimos el panel para mostrar el qr
   };
 
+  const propertyMemberDetails = () => {
+    router.push({
+      pathname: "/property-member/[id]",
+      params: { id: property.id as string },
+    });
+  };
+
   return (
-    <Pressable>
+    <Pressable onPress={propertyMemberDetails}>
       <View style={propertyPreview.container}>
         {/**imagen de previsualizacion de la propiedad */}
         <View style={propertyPreview.image}>
-          {property.resourcesImages[0].secureUrl ? (
+          {property.resources[0].secureUrl ? (
             <Image
-              source={{ uri: property.resourcesImages[0].secureUrl! }}
+              source={{ uri: property.resources[0].secureUrl! }}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
