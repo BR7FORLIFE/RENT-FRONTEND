@@ -4,7 +4,7 @@ import type {
     TypeStreet,
 } from "./schemas/property-registration.schema";
 
-interface ResourcesImagesResponseApi {
+interface ResourcesResponseApi {
     id: string | null;
     assetId: string | null;
     width: number | null;
@@ -61,7 +61,7 @@ export interface PropertyResponseApi {
     direction: DirectionResponseApi | null;
     typeProperty: string;
     propertyOccupationType: string;
-    resourcesImages: ResourcesImagesResponseApi[];
+    resources: ResourcesResponseApi[];
     economicInfoResponse: EconomicResponseApi | null;
     structureInfoResponse: StructureResponseApi | null;
 }
@@ -98,4 +98,7 @@ export interface GetAllPropertyMemberInfo {
     email: string;
     cellphone: string;
     fullname: string;
+    roles: string[];
+    overrides: string[];
+    policies: string[];
 }

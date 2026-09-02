@@ -14,6 +14,12 @@ interface Metadata {
     totalPages: number;
 }
 
+//interfaz tipica o por defecto para las paginaciones
+export interface PaginationParams {
+    limit: number;
+    page: number;
+}
+
 export type GetAll<T> = {
     data: T;
     metadata: Metadata;

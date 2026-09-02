@@ -66,12 +66,13 @@ export const IAPropertyRegistrationSuggestion = async (
 };
 
 export const getAllPropertyMembers = async (
+    propertyId: string,
     page: number,
     limit: number,
     status: StatusPropertyMemberType,
 ) => {
     const { data } = await api.get<GetAll<GetAllPropertyMemberInfo>>(
-        `${FINANCIAL_MODULE}/property-member`,
+        `${FINANCIAL_MODULE}/property-member/${propertyId}`,
         {
             params: { status, page, limit },
         },

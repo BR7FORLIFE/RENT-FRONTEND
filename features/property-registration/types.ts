@@ -11,7 +11,7 @@ export interface PropertyInfoCard {
     direction?: string;
     occupationType: PropertyOccupationType;
     typeProperty: TypePropertyType;
-    resourcesImages: ResourceImageType[];
+    resources: ResourceImageType[];
     action?: () => void;
 }
 
