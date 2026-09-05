@@ -25,7 +25,7 @@ export async function getContractById(contractId: string, propertyId: string) {
 
 export async function getAllContracts(propertyId: string) {
     const { data } = await api.get<GetAll<ContractInfoResponse>>(
-        `${FINANCIAL_MODULE}/contract/${propertyId}`,
+        `${FINANCIAL_MODULE}/contract/property/${propertyId}`,
     );
     return data;
 }
