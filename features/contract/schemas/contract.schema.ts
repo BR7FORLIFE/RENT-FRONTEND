@@ -36,11 +36,6 @@ export const createContractSchema = z.object({
     propertyId: z.uuid(),
     landlordMemberId: z.uuid(),
     tenantMemberId: z.uuid(),
-    monthlyRent: z.coerce.number(),
-    depositAmount: z.coerce.number(),
-    startDate: z.date(),
-    endDate: z.date(),
-    resources: z.array(createResourceImageSchema),
 });
 
 export type CreateContractType = z.infer<typeof createContractSchema>;
@@ -63,3 +58,17 @@ export const loadContractDocumentSchema = z.object({
 export type LoadContractDocumentType = z.infer<
     typeof loadContractDocumentSchema
 >;
+
+//drafts
+export const createContractDraftSchema = z.object({
+    content: z.string(),
+    propertyId: z.uuid(),
+    landlordMemberId: z.uuid(),
+    tenantMemberId: z.uuid(),
+    monthlyRent: z.coerce.number(),
+    depositAmount: z.coerce.number(),
+    startDate: z.date(),
+    endDate: z.date(),
+});
+
+export type CreateContractDraftType = z.infer<typeof createContractDraftSchema>;

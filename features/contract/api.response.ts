@@ -20,3 +20,20 @@ export interface ContractInfoResponse {
     status: StatusContractType;
     createByUserId: string;
 }
+export interface ContractDraftInfoResponse {
+    id: string;
+    content: string;
+    version: number;
+    landlordAgreed: boolean;
+    tenantAgreed: boolean;
+    createdByPropertyMemberId: string;
+    createdAt: Date;
+    updateAt: Date;
+    propertyId: string;
+    landlordMemberId: string;
+    tenantMemberId: string;
+    monthlyRent: number;
+    depositAmount: number;
+    startDate: Date;
+    endDate: Date;
+}
