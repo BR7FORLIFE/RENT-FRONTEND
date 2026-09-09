@@ -9,7 +9,7 @@ import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
 import SplashScreen from "../../../components/splash-screen";
 import { queryClient } from "../../../core/configs/tanstackconfig";
 import type { ApiError } from "../../../types/global";
-import { saveProperty } from "../api";
+import { SaveProperty } from "../api";
 import { BackButton } from "../components/display";
 import
     {
@@ -41,7 +41,7 @@ export default function PropertyRegistrationScreen() {
 
   //mandar la informacion al servidor
   const mutation = useMutation({
-    mutationFn: saveProperty,
+    mutationFn: SaveProperty,
     mutationKey: ["property", "create"],
     onError: (err: AxiosError<ApiError>) => {},
     onSuccess: () => {

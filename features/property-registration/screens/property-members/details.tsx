@@ -9,7 +9,7 @@ import CommunityIcon from "../../../../assets/icons/community.svg";
 import { PrincipalError } from "../../../../components/error";
 import SplashScreen from "../../../../components/splash-screen";
 import type { PaginationParams } from "../../../../types/global";
-import { getAllPropertyMembers, GetPropertyById } from "../../api";
+import { GetAllPropertyMembers, GetPropertyById } from "../../api";
 import type { StatusPropertyMemberType } from "../../schemas/property-registration.schema";
 
 export function PropertyMemberDetailsScreen() {
@@ -40,7 +40,7 @@ export function PropertyMemberDetailsScreen() {
   } = useQuery({
     queryKey: ["propertyMembers", propertyId], // cache tanstack -> propertyId vinculado con sus miembros
     queryFn: () =>
-      getAllPropertyMembers(
+      GetAllPropertyMembers(
         propertyId,
         search.page,
         search.limit,

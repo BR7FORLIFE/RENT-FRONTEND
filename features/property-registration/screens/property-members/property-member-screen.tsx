@@ -5,10 +5,10 @@ import { SearchInput } from "../../../../components/inputs/input";
 //icon assets
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import SplashScreen from "../../../../components/splash-screen";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
+import SplashScreen from "../../../../components/splash-screen";
 import { GetAllProperties } from "../../api";
 import type { PropertyResponseApi } from "../../api.response";
 import { PropertyPreview } from "../../components/property-members/property-preview";
@@ -23,6 +23,12 @@ export function PropertyMemberScreen() {
   const { isOpen } = useBehaviorQr(); // comportamiento de la card de qr
   const [property, setProperty] = useState<PropertyResponseApi[]>();
   const [openQrScan, setOpenQrScan] = useState<boolean>(false);
+  const [pagination, setPagination] = useState<{ page: number; limit: number }>(
+    {
+      page: 1,
+      limit: 10,
+    },
+  );
 
   //recuperamos las propiedades, gracias a tanstack nosotros podremos
   // obtener las propiedades ya cacheadas en memoria para mostrar sin necesidad de hacer
@@ -30,7 +36,7 @@ export function PropertyMemberScreen() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["properties"],
-    queryFn: GetAllProperties,
+    queryFn: () => GetAllProperties(pagination.page, pagination.limit),
   });
 
   const processScan = () => {

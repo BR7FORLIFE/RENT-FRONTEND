@@ -37,10 +37,14 @@ export default function PropertyScreen() {
   const [debounce, setDebounce] = useState();
   const [Ai, setAI] = useState<boolean>(false);
 
+  const [pagination, setPagination] = useState<{ page: number; limit: number }>(
+    { page: 1, limit: 10 },
+  );
+
   //informacion de todas las propiedades
   const { isLoading, data, isError } = useQuery({
     queryKey: ["properties"],
-    queryFn: GetAllProperties,
+    queryFn: () => GetAllProperties(pagination.page, pagination.limit),
     staleTime: 60000 * 60,
   });
 
