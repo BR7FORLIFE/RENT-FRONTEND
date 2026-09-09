@@ -20,7 +20,7 @@ import type {
     OpenStreetResponse,
 } from "./types";
 
-export const saveProperty = async (property: Partial<CreatePropertyType>) => {
+export const SaveProperty = async (property: Partial<CreatePropertyType>) => {
     const { data } = await api.post<{ id: string; message: string }>(
         `${FINANCIAL_MODULE}/property`,
         property,
@@ -28,9 +28,10 @@ export const saveProperty = async (property: Partial<CreatePropertyType>) => {
     return data;
 };
 
-export const GetAllProperties = async () => {
+export const GetAllProperties = async (page: number, limit: number) => {
     const { data } = await api.get<GetAll<PropertyResponseApi[]>>(
         `${FINANCIAL_MODULE}/property`,
+        { params: { page, limit } },
     );
     return data;
 };
@@ -65,13 +66,13 @@ export const IAPropertyRegistrationSuggestion = async (
     return data;
 };
 
-export const getAllPropertyMembers = async (
+export const GetAllPropertyMembers = async (
     propertyId: string,
     page: number,
     limit: number,
     status: StatusPropertyMemberType,
 ) => {
-    const { data } = await api.get<GetAll<GetAllPropertyMemberInfo>>(
+    const { data } = await api.get<GetAll<GetAllPropertyMemberInfo[]>>(
         `${FINANCIAL_MODULE}/property-member/${propertyId}`,
         {
             params: { status, page, limit },
@@ -139,9 +140,19 @@ export async function GetPropertyByPropertyMember(propertyId: string) {
     return data;
 }
 
-export async function GetAllDocumentationByPropertyId(propertyId: string) {
+export async function GetAllDocumentationByPropertyId(
+    propertyId: string,
+    page: number,
+    limit: number,
+) {
     const { data } = await api.get<GetAll<ResourceImagePersistenceResponseApi>>(
         `${FINANCIAL_MODULE}/property/${propertyId}/documentation`,
+        {
+            params: {
+                page,
+                limit,
+            },
+        },
     );
     return data;
 }
@@ -150,6 +161,23 @@ export async function PropertyMemberMe(propertyId: string) {
     const { data } = await api.get<PropertyMemberMeResponseApi>(
         `${FINANCIAL_MODULE}/property-member/${propertyId}/me`,
     );
+    return data;
+}
+
+export async function ChangeStatusPropertyMember(
+    propertyId: string,
+    status: "ACTIVE" | "DESACTIVE" | "IN_PROCESS",
+    propertyMemberId: string,
+) {
+    const { data } = await api.post<{
+        propertyId: string;
+        propertyMemberId: string;
+        message: string;
+    }>(`${FINANCIAL_MODULE}/property-member/${propertyMemberId}/status`, {
+        propertyId,
+        status,
+    });
+
     return data;
 }
 
