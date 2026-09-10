@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Input } from "../../../components/inputs/input";
 import type { KeyInput } from "../../../constants/constants";
@@ -7,6 +7,7 @@ import type { KeyInput } from "../../../constants/constants";
 //images
 import { Link, router } from "expo-router";
 import EmailIcon from "../../../assets/icons/email-icon.svg";
+import SeeIconPasswordHide from "../../../assets/icons/eye-icon-hide.svg";
 import SeeIconPassword from "../../../assets/icons/eye-icon.svg";
 import { ButtonForm } from "../../../components/buttons/button";
 import { Colors } from "../../../themes/themes";
@@ -39,11 +40,16 @@ const password: KeyInput = {
 
 function LoginScreen() {
   const { setAccessToken } = useAuth();
-
   const [info, setInfo] = useState<LoginType>({
     email: "",
     password: "",
   });
+  const [isHidePassword, setIsHidePassword] = useState(true);
+  const disabledButton = info.email.length === 0 || info.password.length === 0;
+
+  const hidePasswordHandle = () => {
+    setIsHidePassword((prev) => !prev);
+  };
 
   //Montamos el correo el electronico para mejor UX
   useEffect(() => {
@@ -129,13 +135,11 @@ function LoginScreen() {
             resizeMode="contain"
             style={styles.logo}
           />
-
-          <Text style={styles.title}>Bienvenido de nuevo</Text>
-
-          <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
         </View>
 
         <View style={styles.loginCard}>
+          <Text style={styles.subtitle}>Bienvenido una vez mas!</Text>
+
           <View style={styles.loginFormSection}>
             <Input
               field={email.field}
@@ -163,13 +167,19 @@ function LoginScreen() {
               value={info.password}
               key={password.field}
               typeInput="default"
+              secureTextEntry={isHidePassword}
             />
 
-            <SeeIconPassword
-              width={22}
-              height={22}
+            <Pressable
               style={styles.loginFormSectionImage}
-            />
+              onPress={hidePasswordHandle}
+            >
+              {isHidePassword ? (
+                <SeeIconPasswordHide width={22} height={22} />
+              ) : (
+                <SeeIconPassword width={22} height={22} />
+              )}
+            </Pressable>
           </View>
 
           <ButtonForm
@@ -177,6 +187,7 @@ function LoginScreen() {
             title={
               mutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"
             }
+            disabled={disabledButton}
           />
 
           <View style={styles.providersSection}>
@@ -210,7 +221,7 @@ const styles = StyleSheet.create({
   },
 
   backgroundImageContainer: {
-    ...StyleSheet.absoluteFillObject,
+    position: "relative",
   },
 
   imageWrapper: {
@@ -253,7 +264,6 @@ const styles = StyleSheet.create({
   containerInfo: {
     flex: 1,
     justifyContent: "flex-end",
-
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
@@ -273,24 +283,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  title: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: "800",
-
-    textAlign: "center",
-    color: "#111827",
-
-    marginBottom: 4,
-  },
-
   subtitle: {
     fontSize: 15,
     lineHeight: 21,
-    fontWeight: "400",
+    fontWeight: "500",
 
     textAlign: "center",
-    color: "#6B7280",
+    color: "black",
   },
 
   loginCard: {
