@@ -73,7 +73,7 @@ export const GetAllPropertyMembers = async (
     status: StatusPropertyMemberType,
 ) => {
     const { data } = await api.get<GetAll<GetAllPropertyMemberInfo[]>>(
-        `${FINANCIAL_MODULE}/property-member/${propertyId}`,
+        `${FINANCIAL_MODULE}/property-member/property/${propertyId}/getall`,
         {
             params: { status, page, limit },
         },

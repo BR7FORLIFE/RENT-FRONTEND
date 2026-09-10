@@ -92,7 +92,7 @@ export interface PropertyMemberMeResponseApi {
 
 export interface GetAllPropertyMemberInfo {
     userId: string;
-    status?: StatusPropertyMemberType | undefined;
+    status: StatusPropertyMemberType;
     assignedAt?: Date | undefined;
     username: string;
     email: string;
