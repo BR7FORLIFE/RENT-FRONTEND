@@ -21,7 +21,6 @@ import { useBehaviorQr } from "../../stores/property.store";
 
 export function PropertyMemberScreen() {
   const { isOpen } = useBehaviorQr(); // comportamiento de la card de qr
-  const [property, setProperty] = useState<PropertyResponseApi[]>();
   const [openQrScan, setOpenQrScan] = useState<boolean>(false);
   const [pagination, setPagination] = useState<{ page: number; limit: number }>(
     {
@@ -29,11 +28,9 @@ export function PropertyMemberScreen() {
       limit: 10,
     },
   );
-
   //recuperamos las propiedades, gracias a tanstack nosotros podremos
   // obtener las propiedades ya cacheadas en memoria para mostrar sin necesidad de hacer
   // otra peticion
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ["properties"],
     queryFn: () => GetAllProperties(pagination.page, pagination.limit),
@@ -42,12 +39,6 @@ export function PropertyMemberScreen() {
   const processScan = () => {
     setOpenQrScan(true);
   };
-
-  useEffect(() => {
-    if (data) {
-      setProperty(data.data);
-    }
-  }, [data]);
 
   if (openQrScan) {
     return <QrScan />;
@@ -131,7 +122,7 @@ export function PropertyMemberScreen() {
       {/* lista de propiedades */}
       <View style={propertyMemberStyles.list}>
         <FlatList
-          data={property}
+          data={data?.data}
           keyExtractor={(property) => property.fmi}
           renderItem={({ item }) => <PropertyPreview property={item} />}
           showsVerticalScrollIndicator={false}

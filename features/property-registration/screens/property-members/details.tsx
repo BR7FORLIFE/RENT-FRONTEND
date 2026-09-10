@@ -1,20 +1,39 @@
 import { useLocalSearchParams } from "expo-router";
-import { Image, StyleSheet, Text, View } from "react-native";
+import
+  {
+    FlatList,
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+  } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //assets
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import CommunityIcon from "../../../../assets/icons/community.svg";
 import { PrincipalError } from "../../../../components/error";
 import SplashScreen from "../../../../components/splash-screen";
+import { Colors } from "../../../../themes/themes";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllPropertyMembers, GetPropertyById } from "../../api";
+import { PropertyMemberCard } from "../../components/property-members/property-member-card";
 import type { StatusPropertyMemberType } from "../../schemas/property-registration.schema";
+
+//images
+import WaveBackground from "../../../../assets/backgrounds/wave-background.svg";
+import CommunityIcon from "../../../../assets/icons/community.svg";
+import FilterIcon from "../../../../assets/icons/filter.svg";
+
+import { SearchInput } from "../../../../components/inputs/input";
+
+const emptyItems = () => <Text>No items</Text>;
 
 export function PropertyMemberDetailsScreen() {
   const { id: propertyId } = useLocalSearchParams<{ id: string }>();
-  const [search, setSearch] = useState<
+  const [search, setSearch] = useState<string>("");
+  const [pagination, setPagination] = useState<
     PaginationParams & { status: StatusPropertyMemberType }
   >({
     limit: 10,
@@ -42,9 +61,9 @@ export function PropertyMemberDetailsScreen() {
     queryFn: () =>
       GetAllPropertyMembers(
         propertyId,
-        search.page,
-        search.limit,
-        search.status,
+        pagination.page,
+        pagination.limit,
+        pagination.status,
       ),
   });
 
@@ -62,7 +81,13 @@ export function PropertyMemberDetailsScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "white", position: "relative" }}
+    >
+      <View style={{ position: "absolute", bottom: -40, right: 0, left: 0 }}>
+        <WaveBackground />
+      </View>
+
       <View style={styles.header}>
         {/**titulo y cantidad de miembros en la propiedad */}
         <Text style={{ fontSize: 20, fontWeight: "700" }}>RENT</Text>
@@ -70,51 +95,120 @@ export function PropertyMemberDetailsScreen() {
         {/**cantidad de properties members */}
         <View style={styles.headerInfoMembers}>
           <CommunityIcon width={24} height={24} />
-          <Text>25 miembros</Text>
+          <Text>{propertyMemberData.data.length.toString()}</Text>
         </View>
+
+        <Text style={{ fontWeight: "700" }}>Miembros</Text>
       </View>
 
       {/**seccion de imagen y pequeña informacion relevante sobre ella (FIJO) */}
       <View style={styles.propertyInfo}>
-        {/**contenedor de la imagen de la propiedad */}
         <View style={styles.propertyInfoImage}>
           {propertyData?.resources[0].secureUrl ? (
             <Image
-              source={{ uri: propertyData?.resources[0].secureUrl }}
-              style={{ width: "100%", height: "100%", borderRadius: 12 }}
+              source={{ uri: propertyData.resources[0].secureUrl }}
+              style={styles.propertyImage}
               resizeMode="cover"
             />
           ) : (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontSize: 12, fontWeight: "700" }}>
-                Imagen no disponible
-              </Text>
+            <View style={styles.noImage}>
+              <Text style={styles.noImageText}>Imagen no disponible</Text>
             </View>
           )}
         </View>
 
-        {/**la pequeña informacion relacionada a la propiedad */}
         <View style={styles.propertyInfoDescription}>
-          
+          <Text
+            style={styles.propertyName}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {propertyData.propertyName}
+          </Text>
+
+          <View style={styles.identifierRow}>
+            <Text style={styles.label}>ID</Text>
+            <Text style={styles.value} numberOfLines={1}>
+              {propertyData.id}
+            </Text>
+          </View>
+
+          <View style={styles.identifierRow}>
+            <Text style={styles.label}>FMI</Text>
+            <Text style={styles.value} numberOfLines={1}>
+              {propertyData.fmi}
+            </Text>
+          </View>
+
+          <View style={styles.identifierRow}>
+            <Text style={styles.label}>Tipo</Text>
+            <Text style={styles.value} numberOfLines={1}>
+              {propertyData.typeProperty}
+            </Text>
+          </View>
         </View>
       </View>
 
       {/**filtros y busquedas */}
-      <View></View>
+      <View style={styles.searchContainer}>
+        <View style={{ width: "80%", height: "50%" }}>
+          <SearchInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Buscar miembro.."
+          />
+        </View>
+        <Pressable
+          style={{
+            width: "20%",
+            height: "100%",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <FilterIcon width={24} height={24} />
+        </Pressable>
+      </View>
 
       {/**lista de properties members */}
-      <View></View>
+      <View style={styles.propertyMemberContainer}>
+        <View
+          style={{
+            width: "100%",
+            paddingBottom: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: Colors.PRIMARY,
+            borderStyle: "dashed",
+          }}
+        >
+          <Text style={{ fontWeight: "700", color: Colors.NEUTRAL }}>
+            Miembros en la propiedad
+          </Text>
+        </View>
+
+        <FlatList
+          data={propertyMemberData.data}
+          keyExtractor={(item) => item.userId}
+          renderItem={({ item }) => (
+            <PropertyMemberCard
+              name={item.fullname}
+              policies={item.policies}
+              roles={item.roles}
+              status={item.status}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.propertyMemberList}
+          ItemSeparatorComponent={() => <View style={styles.memberSeparator} />}
+          ListEmptyComponent={emptyItems}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  //header
   header: {
     width: "100%",
     height: 56,
@@ -140,37 +234,100 @@ const styles = StyleSheet.create({
     backgroundColor: "#F4F9FF",
   },
 
-  propertyInfo: {
-    marginTop: 24,
+  //search
+  searchContainer: {
     width: "100%",
-    height: "20%",
+    height: 40,
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignContent: "center",
+    justifyContent: "flex-start",
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+
+  //informacion de propiedad
+  propertyInfo: {
+    marginTop: 12,
+    width: "100%",
+    height: 130,
+    flexDirection: "row",
     paddingHorizontal: 20,
   },
 
   propertyInfoImage: {
-    width: "45%",
+    width: "42%",
     height: "100%",
-    borderWidth: 1,
     borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#F2F4F7",
+  },
+
+  propertyImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  noImage: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  noImageText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#667085",
   },
 
   propertyInfoDescription: {
-    width: "55%",
-    height: "100%",
+    flex: 1,
+    justifyContent: "flex-start",
+    paddingLeft: 16,
+    gap: 7,
+  },
+
+  propertyName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#101828",
+    marginBottom: 3,
+  },
+
+  identifierRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+
+  label: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#667085",
+    width: 25,
+  },
+
+  value: {
+    flex: 1,
+    fontSize: 11,
+    color: "#475467",
+  },
+
+  //lista de property members
+  propertyMemberBanner: {},
+
+  propertyMemberContainer: {
+    flex: 1,
     flexDirection: "column",
-    gap: 6,
-    justifyContent: "center",
-    alignItems: "flex-start",
+    gap: 10,
+    width: "100%",
+    marginTop: 20,
     paddingHorizontal: 20,
   },
 
-  propertyInfoDescriptionText: {
-    fontSize: 13,
-    fontWeight: "400",
-    color: "#667085",
-    lineHeight: 19,
+  propertyMemberList: {
+    paddingBottom: 20,
+  },
+
+  memberSeparator: {
+    height: 10,
   },
 });

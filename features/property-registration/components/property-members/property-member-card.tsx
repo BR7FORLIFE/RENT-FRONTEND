@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface Props {
   name: string;
@@ -9,26 +9,106 @@ interface Props {
 
 export function PropertyMemberCard({ name, policies, roles, status }: Props) {
   return (
-    <View style={styles.container}>
-      {/**informacion de perfil de cada property member */}
-      <View></View>
+    <Pressable style={styles.container}>
+      <View style={styles.profile}>
+        <View style={styles.avatar} />
+      </View>
 
-      {/**seccion de informacion de miembro (nombre, rols y policies) */}
-      <View></View>
+      <View style={styles.info}>
+        <Text style={styles.name}>{name}</Text>
 
-      {/**estado de dicho miembro (ACTIVE / INP_PROCCESS / DESACTIVE)*/}
-      <View></View>
-    </View>
+        <View style={styles.row}>
+          {policies.slice(0, 3).map((policy) => (
+            <Text key={policy} style={styles.policy}>
+              {policy}
+            </Text>
+          ))}
+        </View>
+
+        <View style={styles.row}>
+          {roles.map((role) => (
+            <Text key={role} style={styles.role}>
+              {role}
+            </Text>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.statusContainer}>
+        <Text style={styles.status}>{status}</Text>
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 48,
+    minHeight: 80,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: "2%",
+    paddingHorizontal: "4%",
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+  },
+
+  profile: {
+    width: 56,
+    height: 56,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    backgroundColor: "#e5e7eb",
+  },
+
+  info: {
+    flex: 1,
+    justifyContent: "center",
+    gap: 3,
+  },
+
+  name: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 5,
+  },
+
+  policy: {
+    fontSize: 8,
+    color: "#6b7280",
+  },
+
+  role: {
+    fontSize: 8,
+    color: "#4b5563",
+    fontWeight: "600",
+  },
+
+  statusContainer: {
+    marginLeft: 12,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+
+  status: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#16a34a",
   },
 });
