@@ -19,11 +19,11 @@ import type { RegisterFormData } from "../../screens/property-registration-scree
 import { Picker } from "@react-native-picker/picker";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { NumberInput, SearchInput } from "../../../../components/inputs/input";
-import type { ApiError } from "../../../../types/global";
 import AddIcon from "../../../../assets/icons/add-square.svg";
 import IAIcon from "../../../../assets/icons/ai.svg";
 import UploadIcon from "../../../../assets/icons/upload.svg";
+import { NumberInput, SearchInput } from "../../../../components/inputs/input";
+import type { ApiError } from "../../../../types/global";
 import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../../api";
 import type {
   CreateDirectionType,
@@ -455,6 +455,7 @@ export function DirectionStep({ saveData, setStep }: RegisterFormData) {
     const latitude = Number(data.lat);
     const longitude = Number(data.lon);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMark({ latitude, longitude });
 
     mapRef.current?.animateToRegion({
@@ -1778,13 +1779,13 @@ export function EconomicPropertyInfo({ saveData, setStep }: RegisterFormData) {
 
 interface TypeAndOccupationProps {
   typeProperty: TypePropertyType;
-  occupationType: PropertyOccupationType;
+  propertyOccupationType: PropertyOccupationType;
 }
 
 export function TypeAndOccupationStep({
   saveData,
-  setIsCreateProperty,
   disabled,
+  setIsCreateProperty,
 }: {
   disabled: boolean;
   saveData: React.Dispatch<
@@ -1793,7 +1794,7 @@ export function TypeAndOccupationStep({
   setIsCreateProperty: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [info, setInfo] = useState<TypeAndOccupationProps>({
-    occupationType: "DESOCUPADO",
+    propertyOccupationType: "DESOCUPADO",
     typeProperty: "RESIDENCIAL",
   });
 
@@ -1809,7 +1810,7 @@ export function TypeAndOccupationStep({
   const submitData = () => {
     saveData((prev) => ({
       ...prev,
-      propertyOccupationType: info.occupationType,
+      propertyOccupationType: info.propertyOccupationType,
       propertyType: info.typeProperty,
     }));
 
@@ -1974,14 +1975,14 @@ export function TypeAndOccupationStep({
                 height: 54,
                 color: "#111827",
               }}
-              selectedValue={info.occupationType}
+              selectedValue={info.propertyOccupationType}
               onValueChange={(itemValue, _) =>
-                handlePropertyType("occupationType", itemValue)
+                handlePropertyType("propertyOccupationType", itemValue)
               }
             >
-              <Picker.Item label="Arrendado" value="ARRENDADO" />
-              <Picker.Item label="En proceso" value="EN PROCESO" />
-              <Picker.Item label="Disponible" value="DISPONIBLE" />
+              <Picker.Item label="Arrendado" value="OCUPADO" />
+              <Picker.Item label="En proceso" value="EN_PROCESO" />
+              <Picker.Item label="Disponible" value="DESOCUPADO" />
             </Picker>
           </View>
         </View>

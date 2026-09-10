@@ -12,15 +12,15 @@ import type { ApiError } from "../../../types/global";
 import { SaveProperty } from "../api";
 import { BackButton } from "../components/display";
 import
-    {
-        DirectionStep,
-        DrapAndDropStep,
-        EconomicPropertyInfo,
-        FmiAndPredialNumberStep,
-        PropertyInfo,
-        StructurePropertyInfo,
-        TypeAndOccupationStep,
-    } from "../components/property-registration/steps";
+  {
+    DirectionStep,
+    DrapAndDropStep,
+    EconomicPropertyInfo,
+    FmiAndPredialNumberStep,
+    PropertyInfo,
+    StructurePropertyInfo,
+    TypeAndOccupationStep,
+  } from "../components/property-registration/steps";
 import type { CreatePropertyType } from "../schemas/property-registration.schema";
 import { resourcesStorage } from "../services/property-registration.domain.service";
 import { uploadImagesToCloudinary } from "../services/property-registration.service";
@@ -33,9 +33,8 @@ export interface RegisterFormData {
 }
 export default function PropertyRegistrationScreen() {
   const [proccesing, setProccesing] = useState<boolean>(false);
+  const [isCreateProperty, setIsCreateProperty] = useState(false);
   const [step, setStep] = useState<number>(1);
-  //estado que nos permitira renderizar un splash screen cuando se este generando el proceso de registro
-  const [isCreateProperty, setIsCreateProperty] = useState<boolean>(false);
   const [registerForm, setRegisterForm] =
     useState<Partial<CreatePropertyType>>();
 
@@ -68,26 +67,27 @@ export default function PropertyRegistrationScreen() {
     router.navigate("/home/(tabs)/property-registration");
   };
 
-  const registerProperty = async () => {
-    setProccesing(true);
-    // (IMPORTANTE EVALUAR SI NO HAY IMAGENES PUES CREARLO DE TODAS FORMAS)
-    //logica para subir las imagenes a cloudinary
-    const cloudImageInfo = await uploadImagesToCloudinary();
-
-    const property = {
-      ...registerForm,
-      resources: cloudImageInfo,
-    };
-    setRegisterForm(property);
-
-    //mandamos al servidor el objeto completo del inmueble a registrar
-    await mutation.mutateAsync(property as Partial<CreatePropertyType>);
-  };
-
-  //efecto para saber si el usuario acepto crear el inmueble y asi ejecutar la funcion
   useEffect(() => {
     if (!isCreateProperty) return;
+
+    const registerProperty = async () => {
+      setProccesing(true);
+      // (IMPORTANTE EVALUAR SI NO HAY IMAGENES PUES CREARLO DE TODAS FORMAS)
+      //logica para subir las imagenes a cloudinary
+      const cloudImageInfo = await uploadImagesToCloudinary();
+
+      const property = {
+        ...registerForm,
+        resources: cloudImageInfo,
+      };
+      //mandamos al servidor el objeto completo del inmueble a registrar
+      await mutation.mutateAsync(property as Partial<CreatePropertyType>);
+
+      setIsCreateProperty(false)
+    };
+
     registerProperty();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCreateProperty]);
 
   if (proccesing) {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     position: "absolute",
 
-    top: 30,
+    top: 35,
     right: 20,
 
     zIndex: 10,

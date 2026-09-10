@@ -751,15 +751,12 @@ const propertyStructureStyles = StyleSheet.create({
 
   grid: {
     width: "100%",
-
-    flexDirection: "row",
-    flexWrap: "wrap",
-
+    flexDirection: "column",
     gap: 12,
   },
 
   characteristicCard: {
-    width: "45%",
+    width: "100%",
 
     minHeight: 70,
 

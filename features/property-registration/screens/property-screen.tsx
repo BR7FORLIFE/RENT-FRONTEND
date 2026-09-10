@@ -12,7 +12,6 @@ import SplashScreen from "../../../components/splash-screen";
 import { useBehaviorAside } from "../../../stores/global-store";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
-import type { PropertyResponseApi } from "../api.response";
 import type {
   PropertyOccupationType,
   TypePropertyType,
@@ -32,7 +31,6 @@ const emptyItems = () => <Text>No data</Text>;
 export default function PropertyScreen() {
   const { isOpen, toggle } = useBehaviorAside();
   const { setUser } = useMe();
-  const [properties, setProperties] = useState<PropertyResponseApi[]>();
   const [text, setText] = useState("");
   const [debounce, setDebounce] = useState();
   const [Ai, setAI] = useState<boolean>(false);
@@ -68,12 +66,6 @@ export default function PropertyScreen() {
 
     return () => clearInterval(debounce);
   }, [text]);
-
-  useEffect(() => {
-    if (data) {
-      setProperties(data.data);
-    }
-  }, [data]);
 
   if (isLoading) {
     return <SplashScreen />;
@@ -131,10 +123,11 @@ export default function PropertyScreen() {
 
       <View style={styles.propertiesSection}>
         <FlatList
-          data={properties}
+          data={data?.data}
           keyExtractor={(property) => property.fmi}
           renderItem={({ item }) => (
             <PropertyCard
+              id={item.id}
               propertyName={item.propertyName}
               fmi={item.fmi}
               direction={item.direction?.city}
