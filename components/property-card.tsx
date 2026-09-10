@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 import EditIcon from "../assets/icons/edit.svg";
 import HouseIcon from "../assets/icons/house.svg";
@@ -6,6 +7,7 @@ import type { PropertyInfoCard as Props } from "../features/property-registratio
 import { ButtonForm } from "./buttons/button";
 
 export default function PropertyCard({
+  id,
   propertyName,
   fmi,
   direction,
@@ -113,6 +115,12 @@ export default function PropertyCard({
           </View>
 
           <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/property/property-registration/edit",
+                params: { id: id as string },
+              })
+            }
             style={{
               borderWidth: 1,
               alignItems: "center",

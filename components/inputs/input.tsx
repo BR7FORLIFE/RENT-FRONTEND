@@ -21,6 +21,7 @@ function Input({
   value,
   typeInput,
   maxLength = 50,
+  secureTextEntry = false,
 }: {
   field: string;
   label: string;
@@ -28,6 +29,7 @@ function Input({
   value: string;
   typeInput?: TypeInput;
   maxLength?: number;
+  secureTextEntry?: boolean;
   fn: (id: string, value: string) => void;
 }) {
   const [onfocus, setOnFocus] = useState(false);
@@ -66,6 +68,7 @@ function Input({
         autoCorrect={false}
         autoCapitalize="none"
         maxLength={maxLength}
+        secureTextEntry={secureTextEntry}
       />
     </View>
   );
@@ -221,12 +224,22 @@ function NumberInput<T>({
     });
   };
 
+  const editableInput = (text: string) => {
+    const toNumber = Number(text);
+
+    if (isNaN(toNumber)) {
+      return;
+    }
+    setNumber(toNumber);
+  };
+
   return (
     <View style={stylesNumber.container}>
       <TextInput
         value={String(number)}
         style={stylesNumber.input}
         keyboardType="numeric"
+        onChangeText={editableInput}
       />
 
       <View style={stylesNumber.controls}>
