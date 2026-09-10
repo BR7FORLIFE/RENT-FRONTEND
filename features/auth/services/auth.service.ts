@@ -125,7 +125,7 @@ export function InfoStorage(): Storage<{
         await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(updated));
     };
 
-    const clean = async () => await AsyncStorage.clear();
+    const clean = async () => await AsyncStorage.removeItem(KEY_STORAGE);
 
     return { get, set, clean };
 }
@@ -142,18 +142,17 @@ export function FormInfoStorage(): Storage<RegisterType> {
         await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(formData));
     };
 
-    const clean = async () => await AsyncStorage.clear();
+    const clean = async () => await AsyncStorage.removeItem(KEY_STORAGE);
 
     return { get, set, clean };
 }
 
 export async function logoutUser() {
-    const KEY_STORAGE = "refreshToken";
     //hasync acemos saber al servidor que el usuario ha hecho un logout
     await logout();
 
     //elimnamos el refresh token del asynStorage
-    await AsyncStorage.setItem(KEY_STORAGE, "");
+    await AsyncStorage.removeItem("userInfo"); // <- KEY STORAGE del usuario y su refresh token
 
     //elinamos la informacion del store
     useAuth.getState().logout();

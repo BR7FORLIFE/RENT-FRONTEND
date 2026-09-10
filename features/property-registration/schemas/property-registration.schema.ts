@@ -102,8 +102,8 @@ export const StructurePropertyInfo = z.object({
 export type StructurePropertyInfoType = z.infer<typeof StructurePropertyInfo>;
 
 export const EconomicPropertyInfo = z.object({
-    monthlyRent: z.coerce.number(),
-    depositAmount: z.coerce.number(),
+    monthlyRent: z.coerce.number().nonnegative(),
+    depositAmount: z.coerce.number().nonnegative(),
     currency: z.enum(["COP", "USD"]),
     utilitiesIncluded: z.boolean(),
 });
