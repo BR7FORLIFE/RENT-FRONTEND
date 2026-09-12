@@ -23,13 +23,13 @@ function Input({
   maxLength = 50,
   secureTextEntry = false,
 }: {
-  field: string;
-  label: string;
-  placeholder: string;
+  field: string; //id del input
+  label: string; // el titulo del input que se deslizará hacia arriba
+  placeholder: string; //placeholder
   value: string;
   typeInput?: TypeInput;
   maxLength?: number;
-  secureTextEntry?: boolean;
+  secureTextEntry?: boolean; //para contraseñas
   fn: (id: string, value: string) => void;
 }) {
   const [onfocus, setOnFocus] = useState(false);

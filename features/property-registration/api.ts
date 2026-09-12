@@ -120,7 +120,7 @@ export async function GetAllPropertiesByPropertyMember(
     limit: number,
 ) {
     const { data } = await api.get<
-        GetAll<GetAllPropertiesByPropertyMemberResponseApi>
+        GetAll<GetAllPropertiesByPropertyMemberResponseApi[]>
     >(`${FINANCIAL_MODULE}/property-member/properties`, {
         params: {
             status: propertyMemberStatus,
