@@ -82,6 +82,16 @@ export const GetAllPropertyMembers = async (
     return data;
 };
 
+export const GetPropertyMemberByIdAndPropertyId = async (
+    propertyMemberId: string,
+    propertyId: string,
+) => {
+    const { data } = await api.get<GetAllPropertyMemberInfo>(
+        `${FINANCIAL_MODULE}/property-member/${propertyMemberId}/property/${propertyId}/get`,
+    );
+    return data;
+};
+
 //property members endpoints
 export const InvitePropertyMember = async (
     email: string, // correo que se pretende invitar

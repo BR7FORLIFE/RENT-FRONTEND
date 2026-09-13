@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import
   {
     FlatList,
@@ -188,13 +188,19 @@ export function PropertyMemberDetailsScreen() {
 
         <FlatList
           data={propertyMemberData.data}
-          keyExtractor={(item) => item.userId}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <PropertyMemberCard
               name={item.fullname}
               policies={item.policies}
               roles={item.roles}
               status={item.status}
+              action={() =>
+                router.push({
+                  pathname: "/property-member/roles/[id]",
+                  params: { id: item.id, propertyId },
+                })
+              }
             />
           )}
           showsVerticalScrollIndicator={false}

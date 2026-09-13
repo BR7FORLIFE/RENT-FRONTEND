@@ -4,13 +4,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { SearchInput } from "../../../../components/inputs/input";
 //icon assets
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
 import SplashScreen from "../../../../components/splash-screen";
 import { GetAllProperties } from "../../api";
-import type { PropertyResponseApi } from "../../api.response";
 import { PropertyPreview } from "../../components/property-members/property-preview";
 import
   {
@@ -92,10 +91,12 @@ export function PropertyMemberScreen() {
       {/* search y filtros */}
       <View style={propertyMemberStyles.inputSection}>
         <View style={propertyMemberStyles.totalRow}>
-          <Text style={propertyMemberStyles.totalLabel}>Miembros</Text>
+          <Text style={propertyMemberStyles.totalLabel}>Propiedades</Text>
 
           <View style={propertyMemberStyles.totalBadge}>
-            <Text style={propertyMemberStyles.totalValue}>3</Text>
+            <Text style={propertyMemberStyles.totalValue}>
+              {data?.data.length}
+            </Text>
           </View>
         </View>
 

@@ -91,6 +91,7 @@ export interface PropertyMemberMeResponseApi {
 }
 
 export interface GetAllPropertyMemberInfo {
+    id: string;
     userId: string;
     status: StatusPropertyMemberType;
     assignedAt?: Date | undefined;
