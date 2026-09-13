@@ -5,11 +5,12 @@ interface Props {
   policies: string[];
   roles: string[];
   status: string;
+  action: () => void;
 }
 
-export function PropertyMemberCard({ name, policies, roles, status }: Props) {
+export function PropertyMemberCard({ name, policies, roles, status, action }: Props) {
   return (
-    <Pressable style={styles.container}>
+    <Pressable style={styles.container} onPress={action}>
       <View style={styles.profile}>
         <View style={styles.avatar} />
       </View>

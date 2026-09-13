@@ -27,7 +27,58 @@ interface PropertyAssociationPagination {
   limit: number;
 }
 
-const EmptyList = () => <Text>No se encuentra propiedades asociadas!</Text>;
+export function EmptyList() {
+  return (
+    <View style={emptyliststyle.container}>
+      <View style={emptyliststyle.iconContainer}>
+        <HomeIcon width={32} height={32} />
+      </View>
+
+      <Text style={emptyliststyle.title}>No tienes propiedades asociadas</Text>
+
+      <Text style={emptyliststyle.description}>
+        Cuando tengas una asociación, aparecerá aquí para que puedas consultarla
+        y gestionarla.
+      </Text>
+    </View>
+  );
+}
+
+const emptyliststyle = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 50,
+  },
+
+  iconContainer: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F1F5F9",
+    marginBottom: 16,
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#64748B",
+    textAlign: "center",
+    maxWidth: 300,
+  },
+});
 
 function AssociationProperty({
   name,
@@ -122,6 +173,11 @@ const associationsStyles = StyleSheet.create({
 });
 
 export function PropertyAssociationScreen() {
+  const [debounce, setDebounce] = useState<PropertyAssociationPagination>({
+    propertyMemberStatus: "ACTIVE",
+    limit: 10,
+    page: 1,
+  });
   const [pagination, setPagination] = useState<PropertyAssociationPagination>({
     propertyMemberStatus: "ACTIVE",
     limit: 10,
@@ -131,20 +187,24 @@ export function PropertyAssociationScreen() {
   const { data, isLoading, isError } = useQuery({
     queryKey: [
       "associations",
-      pagination.propertyMemberStatus,
-      pagination.page,
-      pagination.limit,
+      debounce.propertyMemberStatus,
+      debounce.page,
+      debounce.limit,
     ],
     queryFn: () =>
       GetAllPropertiesByPropertyMember(
-        pagination.propertyMemberStatus,
-        pagination.page,
-        pagination.limit,
+        debounce.propertyMemberStatus,
+        debounce.page,
+        debounce.limit,
       ),
   });
 
   useEffect(() => {
-    console.log(pagination);
+    const timeout = setTimeout(() => {
+      setDebounce(pagination);
+    }, 1000);
+
+    return () => clearInterval(timeout);
   }, [pagination]);
 
   if (isLoading) {
@@ -183,6 +243,11 @@ export function PropertyAssociationScreen() {
 
         <View style={styles.paginationContainer}>
           <View style={styles.pickerContainer}>
+            <Text
+              style={{ fontSize: 8, fontWeight: "400", alignSelf: "center" }}
+            >
+              Estado
+            </Text>
             <Picker
               style={styles.picker}
               selectedValue={pagination.propertyMemberStatus}
@@ -199,11 +264,13 @@ export function PropertyAssociationScreen() {
           </View>
 
           <View style={styles.numberInputContainer}>
-            <NumberInput field="page" saveData={setPagination} />
+            <Text style={{ fontSize: 8, fontWeight: "400" }}>Página</Text>
+            <NumberInput field="page" saveData={setPagination} initValue={debounce.page} />
           </View>
 
           <View style={styles.numberInputContainer}>
-            <NumberInput field="limit" saveData={setPagination} />
+            <Text style={{ fontSize: 8, fontWeight: "400" }}>Límite</Text>
+            <NumberInput field="limit" saveData={setPagination} initValue={debounce.limit} />
           </View>
         </View>
       </View>
@@ -295,34 +362,36 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
+    paddingBottom: 12,
   },
 
   pickerContainer: {
     flex: 1,
-    height: 56,
+    height: 70,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
     backgroundColor: "#FFFFFF",
   },
 
   picker: {
     width: "100%",
-    height: 56,
+    height: "100%",
     color: "#111827",
   },
 
   numberInputContainer: {
     width: 70,
     height: 56,
+    flexDirection: "column",
     justifyContent: "center",
+    alignItems: "center",
+    gap: 2,
   },
 
   info: {
     textAlign: "center",
-    marginBottom: 5,
+    marginBottom: 15,
   },
 
   asociationProperties: {
