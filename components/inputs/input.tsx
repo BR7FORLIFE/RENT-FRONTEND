@@ -192,11 +192,13 @@ const stylesSearch = StyleSheet.create({
 function NumberInput<T>({
   field,
   saveData,
+  initValue = 0
 }: {
   field: keyof T;
   saveData: React.Dispatch<React.SetStateAction<T>>;
+  initValue?: number;
 }) {
-  const [number, setNumber] = useState<number>(0);
+  const [number, setNumber] = useState<number>(initValue);
 
   const increment = () => {
     setNumber((prev) => {
