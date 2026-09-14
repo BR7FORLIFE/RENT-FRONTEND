@@ -26,9 +26,8 @@ import WaveBackground from "../../../../assets/backgrounds/wave-background.svg";
 import CommunityIcon from "../../../../assets/icons/community.svg";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 
+import { EmptyList } from "../../../../components/info";
 import { SearchInput } from "../../../../components/inputs/input";
-
-const emptyItems = () => <Text>No items</Text>;
 
 export function PropertyMemberDetailsScreen() {
   const { id: propertyId } = useLocalSearchParams<{ id: string }>();
@@ -198,7 +197,11 @@ export function PropertyMemberDetailsScreen() {
               action={() =>
                 router.push({
                   pathname: "/property-member/roles/[id]",
-                  params: { id: item.id, propertyId },
+                  params: {
+                    id: item.id,
+                    propertyId,
+                    propertyName: propertyData.propertyName,
+                  },
                 })
               }
             />
@@ -206,7 +209,12 @@ export function PropertyMemberDetailsScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.propertyMemberList}
           ItemSeparatorComponent={() => <View style={styles.memberSeparator} />}
-          ListEmptyComponent={emptyItems}
+          ListEmptyComponent={
+            <EmptyList
+              title="Miembros nos encontrados"
+              description="Asegurate de invitar o añadir miembros a tu propiedad!"
+            />
+          }
         />
       </View>
     </SafeAreaView>

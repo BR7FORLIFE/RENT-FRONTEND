@@ -8,6 +8,7 @@ import { useState } from "react";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
+import { EmptyList } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
 import { GetAllProperties } from "../../api";
 import { PropertyPreview } from "../../components/property-members/property-preview";
@@ -131,6 +132,12 @@ export function PropertyMemberScreen() {
           ItemSeparatorComponent={() => (
             <View style={propertyMemberStyles.separator} />
           )}
+          ListEmptyComponent={
+            <EmptyList
+              title="No hay propiedades"
+              description="asegurate de registrar una propiedad y vuelve a intentarlo!"
+            />
+          }
         />
       </View>
 

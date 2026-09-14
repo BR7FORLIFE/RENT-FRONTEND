@@ -19,6 +19,8 @@ import type { StatusPropertyMemberType } from "../../schemas/property-registrati
 //iconos
 import ArrowRightIcon from "../../../../assets/icons/arrow-right.svg";
 import HomeIcon from "../../../../assets/icons/home.svg";
+
+import { EmptyList } from "../../../../components/info";
 import { NumberInput } from "../../../../components/inputs/input";
 
 interface PropertyAssociationPagination {
@@ -26,59 +28,6 @@ interface PropertyAssociationPagination {
   page: number;
   limit: number;
 }
-
-export function EmptyList() {
-  return (
-    <View style={emptyliststyle.container}>
-      <View style={emptyliststyle.iconContainer}>
-        <HomeIcon width={32} height={32} />
-      </View>
-
-      <Text style={emptyliststyle.title}>No tienes propiedades asociadas</Text>
-
-      <Text style={emptyliststyle.description}>
-        Cuando tengas una asociación, aparecerá aquí para que puedas consultarla
-        y gestionarla.
-      </Text>
-    </View>
-  );
-}
-
-const emptyliststyle = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 50,
-  },
-
-  iconContainer: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F1F5F9",
-    marginBottom: 16,
-  },
-
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-    textAlign: "center",
-    marginBottom: 6,
-  },
-
-  description: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#64748B",
-    textAlign: "center",
-    maxWidth: 300,
-  },
-});
 
 function AssociationProperty({
   name,
@@ -265,12 +214,20 @@ export function PropertyAssociationScreen() {
 
           <View style={styles.numberInputContainer}>
             <Text style={{ fontSize: 8, fontWeight: "400" }}>Página</Text>
-            <NumberInput field="page" saveData={setPagination} initValue={debounce.page} />
+            <NumberInput
+              field="page"
+              saveData={setPagination}
+              initValue={debounce.page}
+            />
           </View>
 
           <View style={styles.numberInputContainer}>
             <Text style={{ fontSize: 8, fontWeight: "400" }}>Límite</Text>
-            <NumberInput field="limit" saveData={setPagination} initValue={debounce.limit} />
+            <NumberInput
+              field="limit"
+              saveData={setPagination}
+              initValue={debounce.limit}
+            />
           </View>
         </View>
       </View>
@@ -289,7 +246,13 @@ export function PropertyAssociationScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.associationList}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<EmptyList />}
+          ListEmptyComponent={
+            <EmptyList
+              title="No tienes propiedades asociadas"
+              description="Cuando tengas una asociación, aparecerá aquí para que puedas consultarla
+        y gestionarla."
+            />
+          }
         />
       </View>
     </SafeAreaView>

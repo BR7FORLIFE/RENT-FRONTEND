@@ -20,6 +20,7 @@ import type {
 import AsideIcon from "../../../assets/icons/bar-right.svg";
 import PlusIcon from "../../../assets/icons/plus.svg";
 import { ContentAside } from "../../../components/aside";
+import { EmptyList } from "../../../components/info";
 import { Me } from "../../../core/api/api-endpoints";
 import { useMe } from "../../../stores/auth-store";
 import { InfoStorage } from "../../auth/services/auth.service";
@@ -150,13 +151,10 @@ export default function PropertyScreen() {
             <View style={styles.propertySeparator} />
           )}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>No tienes propiedades</Text>
-
-              <Text style={styles.emptyDescription}>
-                Agrega tu primera propiedad para comenzar a administrarla.
-              </Text>
-            </View>
+            <EmptyList
+              title="No tienes propiedades"
+              description="Agrega tu primera propiedad para comenzar a administrarla."
+            />
           }
         />
       </View>
@@ -258,37 +256,5 @@ const styles = StyleSheet.create({
 
   propertySeparator: {
     height: 12,
-  },
-
-  emptyContainer: {
-    flex: 1,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    paddingHorizontal: 32,
-    paddingTop: 80,
-  },
-
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-
-    textAlign: "center",
-
-    color: "#111827",
-
-    marginBottom: 6,
-  },
-
-  emptyDescription: {
-    maxWidth: 300,
-
-    fontSize: 14,
-    lineHeight: 20,
-
-    textAlign: "center",
-
-    color: "#6B7280",
   },
 });
