@@ -171,7 +171,7 @@ export function MemberCard({ name, roles, onInfoPress }: MemberCardProps) {
 const memberCardStyles = StyleSheet.create({
   container: {
     width: "100%",
-    minHeight: 100,
+    minHeight: 120,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
@@ -214,7 +214,7 @@ const memberCardStyles = StyleSheet.create({
   },
 
   role: {
-    fontSize: 11,
+    fontSize: 8,
     fontWeight: "400",
     color: "#64748B",
     maxWidth: "100%",

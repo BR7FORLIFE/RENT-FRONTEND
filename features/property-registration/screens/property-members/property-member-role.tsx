@@ -9,13 +9,17 @@ import { EmptyList } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
 import { GetPropertyMemberByIdAndPropertyId } from "../../api";
 import { MemberCard } from "../../components/property-members/property-member-card";
-import { SelectRole } from "../../components/UI/select-role";
-import { ROLES_AND_POLICIES, type ROLES } from "../../constants";
-
-export type RoleState = {
-  role: ROLES;
-  isSelected: boolean;
-};
+import
+  {
+    SelectPolicyOverride,
+    SelectRole,
+  } from "../../components/UI/select-role";
+import
+  {
+    ROLES_AND_POLICIES,
+    type POLICY_STATEMENT,
+    type ROLES,
+  } from "../../constants";
 
 export function PropertyMemberRolesScreen() {
   // creamos una referencia persistente entre render para solamente insertar una sola vez
@@ -28,14 +32,19 @@ export function PropertyMemberRolesScreen() {
     propertyName: string;
   }>();
 
-  //estado para los roles seleccionados
-  const [selectRole, setSelectRole] = useState<RoleState>();
+  //estado para aquellas politicas que estan desactivados para cierto rol (nivel de cliente o componente)
+  const [selectOverridePolicy, setSelectOverridePolicy] = useState<
+    {
+      role: ROLES;
+      policies: POLICY_STATEMENT[];
+    }[]
+  >([]);
 
   //estado para saber si un rol esta presionado para cambiar la UI y mostrar las politicas vinculadas a ese rol
   const [rolePressed, setRolePressed] = useState<{
     isPressed: boolean;
     role: ROLES;
-  }>();
+  }>({ isPressed: false, role: "ADMINISTRADOR" });
 
   //estado para ir agregando roles y politicas para las previsualizaciones
   const [rolsAndPolicies, setRolsAndPolicies] = useState<{
@@ -54,6 +63,10 @@ export function PropertyMemberRolesScreen() {
   //logica
   const handleMemberInfo = () => {};
 
+  //esto permitira simplificar y obtener las politicas mas facilmente dependiendo del rol
+  const selectedRoleData = ROLES_AND_POLICIES.find(
+    (item) => item.role === rolePressed?.role,
+  );
   //efectos
 
   //inicializamos el estado del miembro activo
@@ -113,13 +126,42 @@ export function PropertyMemberRolesScreen() {
       {/**seccion de roles */}
       <View style={styles.rolesContainer}>
         <View style={styles.rolesHeader}>
-          <Text style={styles.rolesTitle}>ROLES</Text>
+          {rolePressed.isPressed ? (
+            <Text style={styles.rolesTitle}>
+              POLITICAS PARA {rolePressed.role}
+            </Text>
+          ) : (
+            <Text style={styles.rolesTitle}>ROLES</Text>
+          )}
         </View>
 
         {rolePressed?.isPressed ? (
-          <View />
+          <FlatList
+            key="policies-statements"
+            data={selectedRoleData?.policies ?? []}
+            keyExtractor={(item) => item}
+            numColumns={1}
+            contentContainerStyle={styles.rolesList}
+            renderItem={({ item }) => (
+              <View style={styles.roleItem}>
+                <SelectPolicyOverride
+                  rolName={rolePressed.role}
+                  policyName={item}
+                  setOverridePolicy={setSelectOverridePolicy}
+                />
+              </View>
+            )}
+            ListEmptyComponent={
+              <EmptyList
+                title="No se han encontrado politicas en el sistema!"
+                description="intente mas tarde.."
+              />
+            }
+            style={{ height: "50%", marginBottom: 12 }}
+          />
         ) : (
           <FlatList
+            key="roles-statements"
             data={ROLES_AND_POLICIES}
             numColumns={2}
             keyExtractor={(item) => item.role}
@@ -129,8 +171,11 @@ export function PropertyMemberRolesScreen() {
               <View style={styles.roleItem}>
                 <SelectRole
                   name={item.role}
+                  isSelected={selectOverridePolicy.some(
+                    (role) => role.role === item.role,
+                  )}
                   setRolePressed={setRolePressed}
-                  setSelectRole={setSelectRole}
+                  setSelectRole={setSelectOverridePolicy}
                 />
               </View>
             )}
@@ -140,13 +185,24 @@ export function PropertyMemberRolesScreen() {
                 description="intente mas tarde.."
               />
             }
+            style={{ height: "50%", marginBottom: 12 }}
           />
         )}
       </View>
-
-      <View style={{ width: "100%", paddingHorizontal: 20 }}>
-        <ButtonForm title="Asignar Roles" />
-      </View>
+      {rolePressed?.isPressed ? (
+        <View style={{ width: "100%", paddingHorizontal: 20 }}>
+          <ButtonForm
+            title="Regresar"
+            action={() =>
+              setRolePressed((prev) => ({ ...prev, isPressed: false }))
+            }
+          />
+        </View>
+      ) : (
+        <View style={{ width: "100%", paddingHorizontal: 20 }}>
+          <ButtonForm title="Asignar Roles" />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -192,7 +248,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#334155",
-    textAlign: "left",
+    textAlign: "center",
   },
 
   rolesContainer: {
@@ -228,6 +284,7 @@ const styles = StyleSheet.create({
   },
 
   roleItem: {
-    width: "48%",
+    width: "100%",
+    paddingHorizontal: 20,
   },
 });
