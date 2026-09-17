@@ -148,3 +148,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
 });
+
+export function SplashWaveBackground() {
+  return (
+    <View style={{ position: "absolute", bottom: -40, right: 0, left: 0 }}>
+      <WaveBackground />
+    </View>
+  );
+}

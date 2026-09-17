@@ -1,4 +1,11 @@
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import
+  {
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+  } from "react-native";
 import BarIcon from "../assets/icons/bar-right.svg";
 import { useBehaviorAside } from "../stores/global-store";
 import { ContentAside } from "./aside";
@@ -30,3 +37,39 @@ export default function Header() {
     </View>
   );
 }
+
+export function RentHeader({ sectionName }: { sectionName: string }) {
+  return (
+    <View style={rentStyles.header}>
+      <Text style={rentStyles.brand}>RENT</Text>
+      <Text style={rentStyles.title}>{sectionName}</Text>
+    </View>
+  );
+}
+
+const rentStyles = StyleSheet.create({
+  header: {
+    width: "100%",
+    height: 58,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EEF5",
+  },
+
+  brand: {
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    color: "#111827",
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#475569",
+  },
+});

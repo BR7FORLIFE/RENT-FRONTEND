@@ -56,3 +56,42 @@ const emptyliststyle = StyleSheet.create({
     maxWidth: 300,
   },
 });
+
+export function RentDescription({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <View style={descriptionStyles.titleSection}>
+      <Text style={descriptionStyles.title}>{title}</Text>
+      <Text style={descriptionStyles.subtitle}>{description}</Text>
+    </View>
+  );
+}
+
+const descriptionStyles = StyleSheet.create({
+  titleSection: {
+    width: "100%",
+    paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#111827",
+    letterSpacing: -0.3,
+  },
+
+  subtitle: {
+    marginTop: 5,
+    fontSize: 11,
+    lineHeight: 18,
+    color: "#6B7280",
+    maxWidth: "90%",
+  },
+});
