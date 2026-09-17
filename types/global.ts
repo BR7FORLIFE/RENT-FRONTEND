@@ -40,3 +40,17 @@ export interface GlobalBehavior {
     isOpen: boolean;
     toggle: () => void;
 }
+
+export interface UserData {
+    userId: string;
+    username: string;
+    email: string;
+    cellphone: string;
+    fullname: string;
+    isEnabled: boolean;
+}
+
+export interface UserCompleteInfo {
+    propertyMemberId: string;
+    userData: UserData;
+}

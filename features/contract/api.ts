@@ -3,7 +3,9 @@ import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { GetAll } from "../../types/global";
 import type {
     ContractDraftInfoResponse,
+    ContractDraftInfoResponseById,
     ContractInfoResponse,
+    ContractInfoResponseById,
 } from "./api.response";
 import type {
     AcceptedOrRejectedContractType,
@@ -21,7 +23,7 @@ export async function CreateContract(contract: CreateContractType) {
 }
 
 export async function GetContractById(contractId: string, propertyId: string) {
-    const { data } = await api.get<ContractInfoResponse>(
+    const { data } = await api.get<ContractInfoResponseById>(
         `${FINANCIAL_MODULE}/contract/${contractId}/property/${propertyId}`,
     );
     return data;
@@ -100,7 +102,7 @@ export async function GetContractDraftById(
     contractDraftId: string,
     propertyId: string,
 ) {
-    const { data } = await api.get<ContractDraftInfoResponse>(
+    const { data } = await api.get<ContractDraftInfoResponseById>(
         `${FINANCIAL_MODULE}/contract/draft/${contractDraftId}/property/${propertyId}`,
     );
     return data;

@@ -1,4 +1,6 @@
-type StatusContractType =
+import type { UserCompleteInfo } from "../../types/global";
+
+export type StatusContractType =
     | "DRAFT"
     | "PENDING_ACCEPTANCE"
     | "PENDING_DOCUMENTATION"
@@ -7,6 +9,19 @@ type StatusContractType =
     | "CANCELLED"
     | "SUSPENDED"
     | "FINISHED";
+
+export interface ContractInfoResponseById {
+    id: string;
+    propertyId: string;
+    landlordMember: UserCompleteInfo;
+    tenantMember: UserCompleteInfo;
+    monthlyRent: number;
+    depositAmount: number;
+    startDate: Date;
+    endDate: Date;
+    status: StatusContractType;
+    createByUserId: string;
+}
 
 export interface ContractInfoResponse {
     id: string;
@@ -20,6 +35,7 @@ export interface ContractInfoResponse {
     status: StatusContractType;
     createByUserId: string;
 }
+
 export interface ContractDraftInfoResponse {
     id: string;
     content: string;
@@ -32,6 +48,23 @@ export interface ContractDraftInfoResponse {
     propertyId: string;
     landlordMemberId: string;
     tenantMemberId: string;
+    monthlyRent: number;
+    depositAmount: number;
+    startDate: Date;
+    endDate: Date;
+}
+export interface ContractDraftInfoResponseById {
+    id: string;
+    content: string;
+    version: number;
+    landlordAgreed: boolean;
+    tenantAgreed: boolean;
+    createdByPropertyMemberId: string;
+    createdAt: Date;
+    updateAt: Date;
+    propertyId: string;
+    landlordMember: UserCompleteInfo;
+    tenantMember: UserCompleteInfo;
     monthlyRent: number;
     depositAmount: number;
     startDate: Date;
