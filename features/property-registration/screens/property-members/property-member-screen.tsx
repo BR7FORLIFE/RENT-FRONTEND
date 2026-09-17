@@ -8,8 +8,9 @@ import { useState } from "react";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
-import { EmptyList } from "../../../../components/info";
+import { EmptyList, RentDescription } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
+import type { PaginationParams } from "../../../../types/global";
 import { GetAllProperties } from "../../api";
 import { PropertyPreview } from "../../components/property-members/property-preview";
 import
@@ -22,12 +23,10 @@ import { useBehaviorQr } from "../../stores/property.store";
 export function PropertyMemberScreen() {
   const { isOpen } = useBehaviorQr(); // comportamiento de la card de qr
   const [openQrScan, setOpenQrScan] = useState<boolean>(false);
-  const [pagination, setPagination] = useState<{ page: number; limit: number }>(
-    {
-      page: 1,
-      limit: 10,
-    },
-  );
+  const [pagination, setPagination] = useState<PaginationParams>({
+    page: 1,
+    limit: 10,
+  });
   //recuperamos las propiedades, gracias a tanstack nosotros podremos
   // obtener las propiedades ya cacheadas en memoria para mostrar sin necesidad de hacer
   // otra peticion
@@ -81,13 +80,10 @@ export function PropertyMemberScreen() {
       </View>
 
       {/* titulo y descripcion */}
-      <View style={propertyMemberStyles.titleSection}>
-        <Text style={propertyMemberStyles.title}>Invitar miembros</Text>
-
-        <Text style={propertyMemberStyles.subtitle}>
-          Gestiona las personas que tienen acceso a tus propiedades.
-        </Text>
-      </View>
+      <RentDescription
+        title="Invitar miembros"
+        description="Gestiona las personas que tienen acceso a tus propiedades."
+      />
 
       {/* search y filtros */}
       <View style={propertyMemberStyles.inputSection}>
@@ -192,28 +188,6 @@ const propertyMemberStyles = StyleSheet.create({
   iconButtonPressed: {
     backgroundColor: "#F1F5F9",
     transform: [{ scale: 0.96 }],
-  },
-
-  titleSection: {
-    width: "100%",
-    paddingHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 20,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#111827",
-    letterSpacing: -0.3,
-  },
-
-  subtitle: {
-    marginTop: 5,
-    fontSize: 11,
-    lineHeight: 18,
-    color: "#6B7280",
-    maxWidth: "90%",
   },
 
   inputSection: {

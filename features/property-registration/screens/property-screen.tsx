@@ -23,6 +23,7 @@ import { ContentAside } from "../../../components/aside";
 import { EmptyList } from "../../../components/info";
 import { Me } from "../../../core/api/api-endpoints";
 import { useMe } from "../../../stores/auth-store";
+import type { PaginationParams } from "../../../types/global";
 import { InfoStorage } from "../../auth/services/auth.service";
 
 const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
@@ -36,9 +37,10 @@ export default function PropertyScreen() {
   const [debounce, setDebounce] = useState();
   const [Ai, setAI] = useState<boolean>(false);
 
-  const [pagination, setPagination] = useState<{ page: number; limit: number }>(
-    { page: 1, limit: 10 },
-  );
+  const [pagination, setPagination] = useState<PaginationParams>({
+    page: 1,
+    limit: 10,
+  });
 
   //informacion de todas las propiedades
   const { isLoading, data, isError } = useQuery({

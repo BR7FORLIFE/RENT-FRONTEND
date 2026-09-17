@@ -12,7 +12,9 @@ import
   } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PrincipalError } from "../../../../components/error";
-import SplashScreen from "../../../../components/splash-screen";
+import SplashScreen, {
+  SplashWaveBackground,
+} from "../../../../components/splash-screen";
 import { GetAllPropertiesByPropertyMember } from "../../api";
 import type { StatusPropertyMemberType } from "../../schemas/property-registration.schema";
 
@@ -20,6 +22,7 @@ import type { StatusPropertyMemberType } from "../../schemas/property-registrati
 import ArrowRightIcon from "../../../../assets/icons/arrow-right.svg";
 import HomeIcon from "../../../../assets/icons/home.svg";
 
+import { RentHeader } from "../../../../components/header";
 import { EmptyList } from "../../../../components/info";
 import { NumberInput } from "../../../../components/inputs/input";
 
@@ -29,12 +32,14 @@ interface PropertyAssociationPagination {
   limit: number;
 }
 
-function AssociationProperty({
+export function AssociationProperty({
   name,
   description,
+  action,
 }: {
   name: string;
   description: string;
+  action: () => void;
 }) {
   return (
     <View style={associationsStyles.associationCard}>
@@ -52,7 +57,7 @@ function AssociationProperty({
         </Text>
       </View>
 
-      <Pressable style={associationsStyles.arrowButton}>
+      <Pressable style={associationsStyles.arrowButton} onPress={action}>
         <ArrowRightIcon width={20} height={20} />
       </Pressable>
     </View>
@@ -172,10 +177,8 @@ export function PropertyAssociationScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>RENT</Text>
-        <Text style={styles.title}>Asociaciones</Text>
-      </View>
+      <RentHeader sectionName="ASOCIACIONES" />
+      <SplashWaveBackground />
 
       <View style={styles.headerPicker}>
         <View>
@@ -241,6 +244,7 @@ export function PropertyAssociationScreen() {
             <AssociationProperty
               name={item.propertyName}
               description={item.propertyDescription}
+              action={() => null}
             />
           )}
           keyExtractor={(item) => item.id}

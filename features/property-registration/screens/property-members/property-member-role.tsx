@@ -5,8 +5,11 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ButtonForm } from "../../../../components/buttons/button";
 import { PrincipalError } from "../../../../components/error";
+import { RentHeader } from "../../../../components/header";
 import { EmptyList } from "../../../../components/info";
-import SplashScreen from "../../../../components/splash-screen";
+import SplashScreen, {
+  SplashWaveBackground,
+} from "../../../../components/splash-screen";
 import { GetPropertyMemberByIdAndPropertyId } from "../../api";
 import { MemberCard } from "../../components/property-members/property-member-card";
 import
@@ -105,10 +108,8 @@ export function PropertyMemberRolesScreen() {
         paddingHorizontal: 12,
       }}
     >
-      <View style={styles.header}>
-        <Text style={styles.brand}>RENT</Text>
-        <Text style={styles.title}>Roles</Text>
-      </View>
+      <SplashWaveBackground />
+      <RentHeader sectionName="ROLES" />
 
       {/**titulo de la propiedad y previsualizacion de la tarjeta de miembro */}
       <View style={styles.memberSection}>
@@ -221,10 +222,10 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: "800",
+    letterSpacing: 1.2,
     color: "#111827",
-    letterSpacing: 0.5,
   },
 
   title: {
