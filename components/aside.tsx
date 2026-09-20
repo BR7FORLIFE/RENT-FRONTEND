@@ -141,27 +141,24 @@ const styles = StyleSheet.create({
 
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(15, 23, 42, 0.28)",
+    backgroundColor: "rgba(15, 23, 42, 0.32)",
   },
 
   aside: {
     position: "absolute",
     backgroundColor: "#FFFFFF",
     zIndex: 1,
-    borderRadius: 20,
+    borderRadius: 22,
     overflow: "hidden",
-
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-
-    shadowColor: "#000",
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 10,
     },
     shadowOpacity: 0.16,
-    shadowRadius: 18,
-
+    shadowRadius: 20,
     elevation: 12,
   },
 
@@ -172,34 +169,34 @@ const styles = StyleSheet.create({
 
   profileSection: {
     width: "100%",
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingTop: 14,
     paddingBottom: 18,
-    paddingHorizontal: 14,
-
+    backgroundColor: "#F8FAFC",
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: "#E2E8F0",
   },
 
   menuSection: {
     flex: 1,
     width: "100%",
-    paddingHorizontal: 18,
-    paddingTop: 24,
+    paddingHorizontal: 16,
+    paddingTop: 22,
   },
 
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    marginBottom: 14,
+    marginBottom: 12,
     gap: 10,
   },
 
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#64748B",
-    letterSpacing: 1,
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#94A3B8",
+    letterSpacing: 1.2,
   },
 
   sectionLine: {
@@ -210,26 +207,30 @@ const styles = StyleSheet.create({
 
   itemsContainer: {
     width: "100%",
-    gap: 6,
+    gap: 8,
   },
 
   itemWrapper: {
     width: "100%",
-    borderRadius: 12,
+    borderRadius: 13,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    backgroundColor: "#FFFFFF",
   },
 
   footer: {
     width: "100%",
-    paddingHorizontal: 22,
-    paddingBottom: 22,
-    paddingTop: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    paddingTop: 10,
+    backgroundColor: "#FFFFFF",
   },
 
   footerLine: {
     width: "100%",
     height: 1,
     backgroundColor: "#E2E8F0",
-    marginBottom: 18,
+    marginBottom: 14,
   },
 });
