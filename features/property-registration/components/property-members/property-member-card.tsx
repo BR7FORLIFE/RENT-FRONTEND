@@ -17,17 +17,25 @@ export function PropertyMemberCard({
   action,
 }: Props) {
   return (
-    <Pressable style={styles.container} onPress={action}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
+      onPress={action}
+    >
       <View style={styles.profile}>
         <View style={styles.avatar} />
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.name} numberOfLines={1}>
+          {name}
+        </Text>
 
         <View style={styles.row}>
           {policies.slice(0, 3).map((policy) => (
-            <Text key={policy} style={styles.policy}>
+            <Text key={policy} style={styles.policy} numberOfLines={1}>
               {policy}
             </Text>
           ))}
@@ -44,6 +52,7 @@ export function PropertyMemberCard({
 
       <View style={styles.statusContainer}>
         <Text style={styles.status}>{status}</Text>
+        <Text style={styles.actionIndicator}>›</Text>
       </View>
     </Pressable>
   );
@@ -52,41 +61,50 @@ export function PropertyMemberCard({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    minHeight: 80,
+    minHeight: 78,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: "4%",
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: "#fff",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+
+  containerPressed: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#CBD5E1",
+    transform: [{ scale: 0.99 }],
   },
 
   profile: {
-    width: 56,
-    height: 56,
+    width: 48,
+    height: 48,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
+    marginRight: 12,
   },
 
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#EFF6FF",
     borderWidth: 1,
-    borderColor: "#d1d5db",
-    backgroundColor: "#e5e7eb",
+    borderColor: "#DBEAFE",
   },
 
   info: {
     flex: 1,
+    minWidth: 0,
     justifyContent: "center",
-    gap: 3,
+    gap: 4,
   },
 
   name: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "600",
     color: "#111827",
   },
 
@@ -98,26 +116,36 @@ const styles = StyleSheet.create({
   },
 
   policy: {
-    fontSize: 8,
-    color: "#6b7280",
+    fontSize: 10,
+    fontWeight: "400",
+    color: "#64748B",
   },
 
   role: {
-    fontSize: 8,
-    color: "#4b5563",
-    fontWeight: "600",
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#334155",
   },
 
   statusContainer: {
-    marginLeft: 12,
-    alignItems: "flex-end",
+    flexDirection: "row",
+    marginLeft: 10,
+    alignItems: "center",
     justifyContent: "center",
+    gap: 6,
   },
 
   status: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#16a34a",
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#2563EB",
+  },
+
+  actionIndicator: {
+    fontSize: 20,
+    lineHeight: 20,
+    fontWeight: "400",
+    color: "#94A3B8",
   },
 });
 
@@ -167,29 +195,36 @@ export function MemberCard({ name, roles, onInfoPress }: MemberCardProps) {
     </View>
   );
 }
-
 const memberCardStyles = StyleSheet.create({
   container: {
     width: "100%",
-    minHeight: 120,
+    minHeight: 86,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1.5,
-    borderColor: "#2563EB",
-    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+    shadowColor: "#0F172A",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
 
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1.5,
-    borderColor: "#2563EB",
-    marginRight: 14,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#DBEAFE",
+    marginRight: 12,
   },
 
   infoContainer: {
@@ -199,46 +234,54 @@ const memberCardStyles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: "700",
     color: "#111827",
-    marginBottom: 7,
+    marginBottom: 6,
   },
 
   rolesContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
-    columnGap: 4,
-    rowGap: 2,
+    columnGap: 5,
+    rowGap: 4,
   },
 
   role: {
-    fontSize: 8,
-    fontWeight: "400",
-    color: "#64748B",
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#475569",
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 7,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
     maxWidth: "100%",
   },
 
   moreRoles: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#94A3B8",
+    color: "#64748B",
+    marginLeft: 1,
   },
 
   infoButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 11,
     marginLeft: 10,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#EFF6FF",
     borderWidth: 1,
-    borderColor: "#BFDBFE",
+    borderColor: "#DBEAFE",
   },
 
   infoButtonPressed: {
     backgroundColor: "#DBEAFE",
+    transform: [{ scale: 0.96 }],
   },
 });
