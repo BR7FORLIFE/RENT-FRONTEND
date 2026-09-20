@@ -9,7 +9,9 @@ import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
 import { EmptyList, RentDescription } from "../../../../components/info";
-import SplashScreen from "../../../../components/splash-screen";
+import SplashScreen, {
+  SplashWaveBackground,
+} from "../../../../components/splash-screen";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllProperties } from "../../api";
 import { PropertyPreview } from "../../components/property-members/property-preview";
@@ -53,6 +55,7 @@ export function PropertyMemberScreen() {
 
   return (
     <SafeAreaView style={propertyMemberStyles.container}>
+      <SplashWaveBackground bottom={-70} />
       {/* header y botones de notificacion y scan */}
       <View style={propertyMemberStyles.header}>
         <Text style={propertyMemberStyles.logo}>RENT</Text>
@@ -260,7 +263,7 @@ const propertyMemberStyles = StyleSheet.create({
   },
 
   list: {
-    flex: 1,
+    height: "50%",
     width: "100%",
     paddingHorizontal: 20,
     paddingTop: 20,

@@ -247,9 +247,10 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 4,
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#334155",
     textAlign: "center",
+    marginTop: 12,
   },
 
   rolesContainer: {
