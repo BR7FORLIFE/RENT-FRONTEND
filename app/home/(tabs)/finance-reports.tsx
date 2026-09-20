@@ -1,5 +1,5 @@
-import { Text } from "react-native";
+import { FinancialScreen } from "../../../features/finance-reports/screens/finance-screen";
 
 export default function FinanceReportTab() {
-  return <Text>Bienvenido a finance report tab</Text>;
+  return <FinancialScreen />;
 }

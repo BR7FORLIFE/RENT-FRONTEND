@@ -1,12 +1,12 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RentHeader } from "../../../components/header";
 
-export default function PropertyServiceScreen() {
+export function PublicServicesScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "white", flexDirection: "column" }}
     >
-      <RentHeader sectionName="Prestacion de Servicios" />
+      <RentHeader sectionName="Servicios Publicos" />
     </SafeAreaView>
   );
 }
