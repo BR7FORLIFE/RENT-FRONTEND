@@ -8,7 +8,9 @@ import { FilterButton } from "../../../components/buttons/button";
 import { PrincipalError } from "../../../components/error";
 import { SearchInput } from "../../../components/inputs/input";
 import PropertyCard from "../../../components/property-card";
-import SplashScreen from "../../../components/splash-screen";
+import SplashScreen, {
+  SplashWaveBackground,
+} from "../../../components/splash-screen";
 import { useBehaviorAside } from "../../../stores/global-store";
 import { Colors } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
@@ -81,6 +83,7 @@ export default function PropertyScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <AIButton onPress={() => setAI((prev) => !prev)} />
+      <SplashWaveBackground bottom={-140}/>
 
       {isOpen && <ContentAside />}
 

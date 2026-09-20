@@ -42,7 +42,7 @@ export function AssociationProperty({
   action: () => void;
 }) {
   return (
-    <View style={associationsStyles.associationCard}>
+    <Pressable style={associationsStyles.associationCard} onPress={action}>
       <View style={associationsStyles.iconContainer}>
         <HomeIcon width={23} height={23} />
       </View>
@@ -57,10 +57,10 @@ export function AssociationProperty({
         </Text>
       </View>
 
-      <Pressable style={associationsStyles.arrowButton} onPress={action}>
+      <View style={associationsStyles.arrowButton}>
         <ArrowRightIcon width={20} height={20} />
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -223,15 +223,6 @@ export function PropertyAssociationScreen() {
               initValue={debounce.page}
             />
           </View>
-
-          <View style={styles.numberInputContainer}>
-            <Text style={{ fontSize: 8, fontWeight: "400" }}>Límite</Text>
-            <NumberInput
-              field="limit"
-              saveData={setPagination}
-              initValue={debounce.limit}
-            />
-          </View>
         </View>
       </View>
 
@@ -342,9 +333,10 @@ const styles = StyleSheet.create({
   },
 
   picker: {
-    width: "100%",
+    width: "80%",
     height: "100%",
     color: "#111827",
+    marginLeft: 12,
   },
 
   numberInputContainer: {
@@ -354,6 +346,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 2,
+    marginRight: 12,
   },
 
   info: {
