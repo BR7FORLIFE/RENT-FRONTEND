@@ -62,7 +62,7 @@ export function ContractScreen() {
               action={() =>
                 router.push({
                   pathname: "/contracts/[id]",
-                  params: { id: item.id },
+                  params: { id: item.id, propertyName: item.propertyName },
                 })
               }
             />
