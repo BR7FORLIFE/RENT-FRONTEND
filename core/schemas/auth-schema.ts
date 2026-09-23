@@ -1,5 +1,13 @@
 import * as z from "zod";
 
+export const IdentificationTypeEnum = z.enum([
+    "CC",
+    "CE",
+    "TI",
+    "PPT",
+    "PASSPORT",
+]);
+
 //register
 export const registerSchema = z.object({
     username: z.string(),
@@ -8,7 +16,7 @@ export const registerSchema = z.object({
     cellphone: z.string(),
     fullname: z.string(),
     identificationNumber: z.string(),
-    identificationType: z.enum(["CC", "CE", "TI", "PPT", "PASSPORT"]),
+    identificationType: IdentificationTypeEnum,
 });
 
 export const RegisterResponseSchema = z.object({
@@ -54,6 +62,8 @@ export const MeResponseSchema = z.object({
     email: z.email(),
     cellphone: z.string(),
     fullname: z.string(),
+    identificationType: IdentificationTypeEnum,
+    identificationNumber: z.string(),
     isEnabled: z.boolean(),
 });
 
