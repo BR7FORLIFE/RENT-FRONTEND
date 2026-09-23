@@ -108,10 +108,12 @@ export function ButtonContractAction({
   propertyName,
   sectionName,
   setSection,
+  hidden = false,
 }: {
   propertyName: string;
   sectionName: Sections;
   setSection: React.Dispatch<React.SetStateAction<Sections>>;
+  hidden?: boolean;
 }) {
   const [toggle, setToggle] = useState<boolean>(false);
 
@@ -140,14 +142,18 @@ export function ButtonContractAction({
           ))}
         </View>
       ) : (
-        <View style={styles.cloudInfo}>
-          <Text style={styles.cloudTitle}>Acciones</Text>
+        <>
+          {hidden === false && (
+            <View style={styles.cloudInfo}>
+              <Text style={styles.cloudTitle}>Acciones</Text>
 
-          <Text style={styles.cloudDescription}>
-            Gestiona las acciones del contrato para{" "}
-            <Text style={{ fontWeight: "900" }}>{propertyName}</Text>
-          </Text>
-        </View>
+              <Text style={styles.cloudDescription}>
+                Gestiona las acciones del contrato para{" "}
+                <Text style={{ fontWeight: "900" }}>{propertyName}</Text>
+              </Text>
+            </View>
+          )}
+        </>
       )}
     </>
   );

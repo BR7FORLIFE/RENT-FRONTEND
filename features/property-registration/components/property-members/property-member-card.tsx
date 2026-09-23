@@ -3,7 +3,7 @@ import InfoIcon from "../../../../assets/icons/info.svg";
 
 interface Props {
   name: string;
-  policies: string[];
+  policies?: string[];
   roles: string[];
   status: string;
   action: () => void;
@@ -33,13 +33,15 @@ export function PropertyMemberCard({
           {name}
         </Text>
 
-        <View style={styles.row}>
-          {policies.slice(0, 3).map((policy) => (
-            <Text key={policy} style={styles.policy} numberOfLines={1}>
-              {policy}
-            </Text>
-          ))}
-        </View>
+        {policies && (
+          <View style={styles.row}>
+            {policies.slice(0, 3).map((policy) => (
+              <Text key={policy} style={styles.policy} numberOfLines={1}>
+                {policy}
+              </Text>
+            ))}
+          </View>
+        )}
 
         <View style={styles.row}>
           {roles.map((role) => (

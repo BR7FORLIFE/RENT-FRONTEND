@@ -99,6 +99,8 @@ export interface GetAllPropertyMemberInfo {
     email: string;
     cellphone: string;
     fullname: string;
+    identificationType: 'CC' | 'CE' | 'TI' | 'PPT' | 'PASSPORT';
+    identificationNumber: string;
     roles: string[];
     overrides: string[];
     policies: string[];

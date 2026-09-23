@@ -108,7 +108,7 @@ export const EconomicPropertyInfo = z.object({
     utilitiesIncluded: z.boolean(),
 });
 
-export type EconomicPropertyInfoType = z.infer<typeof EconomicPropertyInfo>
+export type EconomicPropertyInfoType = z.infer<typeof EconomicPropertyInfo>;
 
 export const propertySchema = z.object({
     id: z.uuid(),
@@ -144,7 +144,7 @@ export const createPropertySchema = z.object({
 export type CreatePropertyType = z.infer<typeof createPropertySchema>;
 
 export const PropertyMemberSchema = z.object({
-    id: z.uuid().optional(),
+    id: z.uuid(),
     userId: z.uuid(),
     propertyId: z.uuid(),
     assignedBy: z.uuid(),
