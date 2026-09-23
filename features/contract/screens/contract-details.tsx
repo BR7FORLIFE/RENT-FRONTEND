@@ -10,8 +10,10 @@ import SplashScreen, {
   SplashWaveBackground,
 } from "../../../components/splash-screen";
 import type { PaginationParams } from "../../../types/global";
+import { PropertyMemberMe } from "../../property-registration/api";
 import { GetAllContractDraft, GetAllContracts } from "../api";
 import { ButtonContractAction } from "../components/UI/button-contract-action";
+import { GenerateContractDraft } from "../components/contract-draft-generation";
 import
   {
     ContractDraftCard,
@@ -75,6 +77,7 @@ export function ContractDetailsScreen() {
     page: 1,
   });
 
+  //lista de contratos
   const {
     isLoading: contractLoading,
     isError: contractError,
@@ -85,6 +88,7 @@ export function ContractDetailsScreen() {
       GetAllContracts(propertyId, pagination.page, pagination.limit),
   });
 
+  //lista de borradores de contrato
   const {
     isLoading: contractDraftLoading,
     isError: contractDraftError,
@@ -95,17 +99,27 @@ export function ContractDetailsScreen() {
       GetAllContractDraft(propertyId, pagination.page, pagination.limit),
   });
 
-  if (contractLoading && contractDraftLoading) {
+  //property Member Me para la propiedad actual
+  const {
+    isLoading: propertyMemberMeLoading,
+    isError: propertyMemberMeError,
+    data: propertyMemberMe,
+  } = useQuery({
+    queryKey: ["propertyMemberMe", propertyId],
+    queryFn: () => PropertyMemberMe(propertyId),
+  });
+
+  if (contractLoading && contractDraftLoading && propertyMemberMeLoading) {
     return <SplashScreen />;
   }
 
-  if (contractError && contractDraftError) {
+  if (contractError && contractDraftError && propertyMemberMeError) {
     return (
       <PrincipalError error="Error al obtener los contratos para esta propiedad!" />
     );
   }
 
-  if (!contractData || !contractDraftData) {
+  if (!contractData || !contractDraftData || !propertyMemberMe) {
     return null;
   }
 
@@ -114,19 +128,13 @@ export function ContractDetailsScreen() {
       style={{
         flex: 1,
         flexDirection: "column",
-        paddingHorizontal: 12,
+        paddingHorizontal: 4,
         backgroundColor: "white",
         position: "relative",
       }}
     >
       <SplashWaveBackground />
       <RentHeader sectionName="CONTRATOS" />
-
-      <ButtonContractAction
-        propertyName={propertyName}
-        sectionName={section}
-        setSection={setSection}
-      />
 
       {section === "LIST-CONTRACTS" && (
         <ContractList
@@ -165,6 +173,29 @@ export function ContractDetailsScreen() {
           emptyDescription="Crea tu primer borrador de contrato!"
           rentTitle="Lista de borradores de contratos"
           rentDescription="Visualiza tus borradores generados para esta propiedad!"
+        />
+      )}
+
+      {section === "GENERATE-CONTRACT-DRAFT" ? (
+        <ButtonContractAction
+          propertyName={propertyName}
+          sectionName={section}
+          setSection={setSection}
+          hidden
+        />
+      ) : (
+        <ButtonContractAction
+          propertyName={propertyName}
+          sectionName={section}
+          setSection={setSection}
+        />
+      )}
+
+      {section === "GENERATE-CONTRACT-DRAFT" && (
+        <GenerateContractDraft
+          propertyId={propertyId}
+          propertyName={propertyName}
+          propertyMemberId={propertyMemberMe.info.id}
         />
       )}
     </SafeAreaView>
