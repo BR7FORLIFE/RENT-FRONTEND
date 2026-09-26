@@ -1,4 +1,4 @@
-import { api } from "../../core/api/axios-config";
+import { api } from "../../core/api/api-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { GetAll } from "../../types/global";
 import type {
@@ -95,7 +95,17 @@ export async function GetAllContractDraft(
         `${FINANCIAL_MODULE}/contract/draft/property/${propertyId}/getall`,
         { params: { page, limit } },
     );
-    return data;
+
+    return {
+        ...data,
+        data: data.data.map((draft) => ({
+            ...draft,
+            startDate: new Date(draft.startDate),
+            endDate: new Date(draft.endDate),
+            monthlyRent: Number(draft.monthlyRent),
+            depositAmount: Number(draft.depositAmount),
+        })),
+    };
 }
 
 export async function GetContractDraftById(

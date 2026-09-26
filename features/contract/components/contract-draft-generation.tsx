@@ -13,6 +13,7 @@ import type { StatusPropertyMemberType } from "../../property-registration/schem
 
 //rich text editor
 import { RichEditor } from "react-native-pell-rich-editor";
+import { queryClient } from "../../../core/configs/tanstackconfig";
 import { useMe } from "../../../stores/auth-store";
 import { CreateContractDraft } from "../api";
 import type { CreateContractDraftType } from "../schemas/contract.schema";
@@ -158,7 +159,7 @@ export function GenerateContractDraft({
 
     if (!data) return;
 
-    const req = {
+    await mutation.mutateAsync({
       content,
       depositAmount: data.depositAmount,
       startDate: new Date(data.startDate),
@@ -167,11 +168,12 @@ export function GenerateContractDraft({
       tenantMemberId: selectedMember!.id,
       propertyId,
       monthlyRent: data.monthlyRent,
-    };
+    });
 
-    console.log(req);
-
-    await mutation.mutateAsync(req);
+    //invalidamos la cache para que refleje todos los borradores de contratos
+    queryClient.invalidateQueries({
+      queryKey: ["GetAllContractDraft", propertyId],
+    });
   };
 
   return (
