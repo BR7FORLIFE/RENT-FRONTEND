@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import HomeIcon from "../assets/icons/home.svg";
 
 export function EmptyList({
@@ -93,5 +93,88 @@ const descriptionStyles = StyleSheet.create({
     lineHeight: 18,
     color: "#6B7280",
     maxWidth: "90%",
+  },
+});
+
+export function RentPropertyCard({
+  propertyName,
+  propertyDescription,
+}: {
+  propertyName: string;
+  propertyDescription: string;
+}) {
+  return (
+    <View style={rentPropertyCardStyles.container}>
+      {/* imagen de rent */}
+      <View style={rentPropertyCardStyles.imageContainer}>
+        <Image
+          source={require("../assets/images/logo-recortado.png")}
+          resizeMode="contain"
+          style={rentPropertyCardStyles.logo}
+        />
+      </View>
+
+      {/* informacion de la propiedad */}
+      <View style={rentPropertyCardStyles.content}>
+        <Text style={rentPropertyCardStyles.title} numberOfLines={1}>
+          {propertyName}
+        </Text>
+
+        <Text style={rentPropertyCardStyles.description} numberOfLines={2}>
+          {propertyDescription}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+const rentPropertyCardStyles = StyleSheet.create({
+  container: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+
+    padding: 14,
+
+    backgroundColor: "#FFFFFF",
+
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+  },
+
+  imageContainer: {
+    width: 64,
+    height: 64,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 14,
+
+    backgroundColor: "#EFF6FF",
+    borderRadius: 12,
+  },
+
+  logo: {
+    width: 48,
+    height: 48,
+  },
+
+  content: {
+    flex: 1,
+    gap: 5,
+  },
+
+  title: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1E293B",
+  },
+
+  description: {
+    fontSize: 11,
+    lineHeight: 19,
+    color: "#64748B",
   },
 });

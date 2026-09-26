@@ -18,6 +18,7 @@ import { AsideButton, ButtonForm } from "./buttons/button";
 
 import InvitePersonIcon from "../assets/icons/invite-person.svg";
 import JoinIcon from "../assets/icons/join.svg";
+import NotificationIcon from "../assets/icons/notification.svg";
 
 import { useEffect } from "react";
 
@@ -33,7 +34,7 @@ interface AsideItems {
   action: () => void;
 }
 
-const ASIDE_ITEMS: AsideItems[] = [
+const ACTIONS_ITEMS: AsideItems[] = [
   {
     Icon: InvitePersonIcon,
     name: "Miembros",
@@ -47,6 +48,14 @@ const ASIDE_ITEMS: AsideItems[] = [
     action: () => {
       router.navigate("/property/property-associations");
     },
+  },
+];
+
+const ACTIVITIES_ITEMS: AsideItems[] = [
+  {
+    Icon: NotificationIcon,
+    name: "Notificaciones",
+    action: () => null,
   },
 ];
 
@@ -110,12 +119,30 @@ export function ContentAside() {
             </View>
 
             <View style={styles.itemsContainer}>
-              {ASIDE_ITEMS.map(({ name, action, Icon }) => (
+              {ACTIONS_ITEMS.map(({ name, action, Icon }) => (
                 <View key={name} style={styles.itemWrapper}>
                   <AsideButton
                     title={name}
                     action={action}
                     icon={<Icon width={17} height={17} />}
+                  />
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>ACTIVIDAD</Text>
+
+              <View style={styles.sectionLine} />
+            </View>
+
+            <View style={styles.itemsContainer}>
+              {ACTIVITIES_ITEMS.map(({ name, action, Icon }) => (
+                <View key={name} style={styles.itemWrapper}>
+                  <AsideButton
+                    title={name}
+                    action={action}
+                    icon={<Icon width={24} height={24} />}
                   />
                 </View>
               ))}
@@ -181,7 +208,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     paddingHorizontal: 16,
-    paddingTop: 22,
+    paddingTop: 6,
   },
 
   sectionHeader: {
@@ -189,6 +216,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginBottom: 12,
+    marginTop: 18,
     gap: 10,
   },
 

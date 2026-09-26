@@ -151,7 +151,9 @@ const styles = StyleSheet.create({
 
 export function SplashWaveBackground({ bottom = -40 }: { bottom?: number }) {
   return (
-    <View style={{ position: "absolute", bottom, right: 0, left: 0 }}>
+    <View
+      style={{ position: "absolute", bottom, right: 0, left: 0, zIndex: -1 }}
+    >
       <WaveBackground />
     </View>
   );
