@@ -63,15 +63,7 @@ export function ContractList<T>({
   );
 }
 
-export function ContractDetailsScreen() {
-  const { id: propertyId, propertyName } = useLocalSearchParams<{
-    id: string;
-    propertyName: string;
-  }>();
-
-  //estado para cambiar las vistas de los contratos para no crear un nuevo path
-  const [section, setSection] = useState<Sections>("LIST-CONTRACTS");
-
+export function ContractListSection({ propertyId }: { propertyId: string }) {
   const [pagination, setPagination] = useState<PaginationParams>({
     limit: 10,
     page: 1,
@@ -88,16 +80,105 @@ export function ContractDetailsScreen() {
       GetAllContracts(propertyId, pagination.page, pagination.limit),
   });
 
+  if (contractLoading) {
+    return <SplashScreen />;
+  }
+
+  if (contractError) {
+    return (
+      <PrincipalError error="Error al obtener la lista de contratos para la propiedad actual!" />
+    );
+  }
+
+  if (!contractData) {
+    return null;
+  }
+
+  return (
+    <ContractList
+      data={contractData.data}
+      renderItem={(item) => (
+        <ContractPreviewCard
+          endDate={item.endDate}
+          montlyRent={item.monthlyRent}
+          startDate={item.startDate}
+          status={item.status}
+          action={() => {}}
+        />
+      )}
+      emptyTitle="No hay contratos generados"
+      emptyDescription="Genera tu primer contrato para visualizarlo!"
+      rentTitle="Lista de contratos"
+      rentDescription="Visualiza los distintos contratos para esta propiedad!"
+    />
+  );
+}
+
+export function ContractDraftListSection({
+  propertyId,
+}: {
+  propertyId: string;
+}) {
+  const [pagination, setPagination] = useState<PaginationParams>({
+    limit: 10,
+    page: 1,
+  });
+
   //lista de borradores de contrato
   const {
     isLoading: contractDraftLoading,
     isError: contractDraftError,
     data: contractDraftData,
   } = useQuery({
-    queryKey: ["contracts", propertyId],
+    queryKey: ["GetAllContractDraft", propertyId],
     queryFn: () =>
       GetAllContractDraft(propertyId, pagination.page, pagination.limit),
   });
+
+  if (contractDraftLoading) {
+    return <SplashScreen />;
+  }
+
+  if (contractDraftError) {
+    return (
+      <PrincipalError error="Error al recuperar la lista de borradores de contratos para esta propiedad!" />
+    );
+  }
+
+  if (!contractDraftData) {
+    return null;
+  }
+
+  return (
+    <ContractList
+      data={contractDraftData.data}
+      renderItem={(item) => (
+        <ContractDraftCard
+          startDate={item.startDate}
+          endDate={item.endDate}
+          landlordAgreed={item.landlordAgreed}
+          tenantAgreed={item.tenantAgreed}
+          action={() => {}}
+          monthlyRent={item.monthlyRent}
+          version={item.version}
+        />
+      )}
+      emptyTitle="No hay borradores creados"
+      emptyDescription="Crea tu primer borrador de contrato!"
+      rentTitle="Lista de borradores de contratos"
+      rentDescription="Visualiza tus borradores generados para esta propiedad!"
+    />
+  );
+}
+
+export function ContractDetailsScreen() {
+  const { id: propertyId, propertyName } = useLocalSearchParams<{
+    id: string;
+    propertyName: string;
+  }>();
+
+  //estado para cambiar las vistas de los contratos para no crear un nuevo path
+  const [section, setSection] = useState<Sections>("LIST-CONTRACTS");
 
   //property Member Me para la propiedad actual
   const {
@@ -109,17 +190,17 @@ export function ContractDetailsScreen() {
     queryFn: () => PropertyMemberMe(propertyId),
   });
 
-  if (contractLoading && contractDraftLoading && propertyMemberMeLoading) {
+  if (propertyMemberMeLoading) {
     return <SplashScreen />;
   }
 
-  if (contractError && contractDraftError && propertyMemberMeError) {
+  if (propertyMemberMeError) {
     return (
-      <PrincipalError error="Error al obtener los contratos para esta propiedad!" />
+      <PrincipalError error="Error al obtener la información de esta propiedad!" />
     );
   }
 
-  if (!contractData || !contractDraftData || !propertyMemberMe) {
+  if (!propertyMemberMe) {
     return null;
   }
 
@@ -137,43 +218,11 @@ export function ContractDetailsScreen() {
       <RentHeader sectionName="CONTRATOS" />
 
       {section === "LIST-CONTRACTS" && (
-        <ContractList
-          data={contractData.data}
-          renderItem={(item) => (
-            <ContractPreviewCard
-              endDate={item.endDate}
-              montlyRent={item.monthlyRent}
-              startDate={item.startDate}
-              status={item.status}
-              action={() => {}}
-            />
-          )}
-          emptyTitle="No hay contratos generados"
-          emptyDescription="Genera tu primer contrato para visualizarlo!"
-          rentTitle="Lista de contratos"
-          rentDescription="Visualiza los distintos contratos para esta propiedad!"
-        />
+        <ContractListSection propertyId={propertyId} />
       )}
 
       {section === "LIST-CONTRACT-DRAFT" && (
-        <ContractList
-          data={contractDraftData.data}
-          renderItem={(item) => (
-            <ContractDraftCard
-              startDate={item.startDate}
-              endDate={item.endDate}
-              landlordAgreed={item.landlordAgreed}
-              tenantAgreed={item.tenantAgreed}
-              action={() => {}}
-              monthlyRent={item.monthlyRent}
-              version={item.version}
-            />
-          )}
-          emptyTitle="No hay borradores creados"
-          emptyDescription="Crea tu primer borrador de contrato!"
-          rentTitle="Lista de borradores de contratos"
-          rentDescription="Visualiza tus borradores generados para esta propiedad!"
-        />
+        <ContractDraftListSection propertyId={propertyId} />
       )}
 
       {section === "GENERATE-CONTRACT-DRAFT" ? (
@@ -204,7 +253,7 @@ export function ContractDetailsScreen() {
 
 const styles = StyleSheet.create({
   contractListSection: {
-    flex: 1,
+    height: "60%",
     width: "100%",
   },
 
