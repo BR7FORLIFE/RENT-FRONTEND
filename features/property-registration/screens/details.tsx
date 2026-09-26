@@ -68,11 +68,7 @@ const propertyDescriptionStyles = StyleSheet.create({
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const ImagesSlider = ({
-  resources,
-}: {
-  resources: ResourceImageType[];
-}) => {
+const ImagesSlider = ({ resources }: { resources: ResourceImageType[] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleScroll = (event: any) => {
@@ -995,8 +991,10 @@ const propertyLocationStyles = StyleSheet.create({
   },
 });
 
-export default function DetailsScreen() {
-  const { id } = useLocalSearchParams();
+export default function DetailsScreen({ propertyId }: { propertyId?: string }) {
+  const { id: searchId } = useLocalSearchParams();
+
+  const id = propertyId ?? (searchId as string);
 
   const {
     data: property,

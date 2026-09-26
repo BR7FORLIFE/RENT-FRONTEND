@@ -1,4 +1,4 @@
-import { api } from "../../core/api/axios-config";
+import { api } from "../../core/api/api-config";
 import { FINANCIAL_MODULE } from "../../core/api/paths";
 import type { Get, GetAll } from "../../types/global";
 import type {

@@ -22,6 +22,7 @@ import type { StatusPropertyMemberType } from "../../schemas/property-registrati
 import ArrowRightIcon from "../../../../assets/icons/arrow-right.svg";
 import HomeIcon from "../../../../assets/icons/home.svg";
 
+import { router } from "expo-router";
 import { RentHeader } from "../../../../components/header";
 import { EmptyList } from "../../../../components/info";
 import { NumberInput } from "../../../../components/inputs/input";
@@ -235,7 +236,16 @@ export function PropertyAssociationScreen() {
             <AssociationProperty
               name={item.propertyName}
               description={item.propertyDescription}
-              action={() => null}
+              action={() =>
+                router.push({
+                  pathname: "/property/property-associations/[id]",
+                  params: {
+                    id: item.id,
+                    propertyName: item.propertyName,
+                    propertyDescription: item.propertyDescription,
+                  },
+                })
+              }
             />
           )}
           keyExtractor={(item) => item.id}
