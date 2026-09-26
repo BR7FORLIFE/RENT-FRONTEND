@@ -9,7 +9,7 @@ import {
     type RegisterResponseType,
     type RegisterType,
 } from "../schemas/auth-schema";
-import { api } from "./axios-config";
+import { api } from "./api-config";
 import { AUTHPATHS } from "./paths";
 
 export async function register(
