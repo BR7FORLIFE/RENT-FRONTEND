@@ -42,7 +42,7 @@ export function PropertyMemberScreen() {
   };
 
   if (openQrScan) {
-    return <QrScan />;
+    return <QrScan setOpenQrScan={setOpenQrScan}/>;
   }
 
   if (isLoading) {

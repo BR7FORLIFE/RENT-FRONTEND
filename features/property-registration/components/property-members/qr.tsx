@@ -39,7 +39,11 @@ export function Qr({
 }
 
 //componente cuando se escanea el componente
-export function QrScan() {
+export function QrScan({
+  setOpenQrScan,
+}: {
+  setOpenQrScan: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const { user } = useMe();
   const [permission, setPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<boolean>(false);
@@ -66,6 +70,14 @@ export function QrScan() {
       setScanned(true);
 
       mutation.mutate({ propertyId, userId });
+
+      //notificamos al usuario que se ha invitado correctamente
+      Toast.show({
+        type: "success",
+        text2: "Has sido invitado exitosamente!",
+      });
+
+      setOpenQrScan(false); //cerramos el scanner de qr
     } catch (error) {
       //ignoramos hasta que encontremos un codigo valido XD
     }
