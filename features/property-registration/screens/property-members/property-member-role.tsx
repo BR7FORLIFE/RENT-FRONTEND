@@ -1,16 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { ButtonForm } from "../../../../components/buttons/button";
 import { PrincipalError } from "../../../../components/error";
 import { RentHeader } from "../../../../components/header";
-import { EmptyList } from "../../../../components/info";
+import { EmptyList, RentDescription } from "../../../../components/info";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../../components/splash-screen";
-import { GetPropertyMemberByIdAndPropertyId } from "../../api";
+import { queryClient } from "../../../../core/configs/tanstackconfig";
+import
+  {
+    ChangeStatusPropertyMember,
+    GetPropertyMemberByIdAndPropertyId,
+  } from "../../api";
 import { MemberCard } from "../../components/property-members/property-member-card";
 import
   {
@@ -63,6 +69,44 @@ export function PropertyMemberRolesScreen() {
     queryFn: () => GetPropertyMemberByIdAndPropertyId(id, propertyId),
   });
 
+  //mutation para poder activar al miembro en cuestion
+  const mutation = useMutation({
+    mutationKey: ["propertyMember", id, propertyId],
+    mutationFn: ({
+      propertyId,
+      status,
+      propertyMemberId,
+    }: {
+      propertyId: string;
+      status: "ACTIVE" | "DESACTIVE" | "IN_PROCESS";
+      propertyMemberId: string;
+    }) => ChangeStatusPropertyMember(propertyId, status, propertyMemberId),
+  });
+
+  const activeProperyMember = async () => {
+    await mutation.mutateAsync({
+      propertyId,
+      status: "ACTIVE",
+      propertyMemberId: id,
+    });
+
+    Toast.show({
+      type: "info",
+      text2: "Miembro activado exitosamente!",
+    });
+
+    //invalidamos cache para que refresque la informacion
+    queryClient.invalidateQueries({
+      queryKey: ["properties", propertyId],
+    });
+
+    //redirigimos a miembros
+    router.push({
+      pathname: "/property-member/[id]",
+      params: { id: propertyId },
+    });
+  };
+
   //logica
   const handleMemberInfo = () => {};
 
@@ -86,6 +130,10 @@ export function PropertyMemberRolesScreen() {
 
   //logica de renderizado
   if (isLoading) {
+    return <SplashScreen />;
+  }
+
+  if (mutation.isPending) {
     return <SplashScreen />;
   }
 
@@ -124,85 +172,110 @@ export function PropertyMemberRolesScreen() {
         />
       </View>
 
-      {/**seccion de roles */}
-      <View style={styles.rolesContainer}>
-        <View style={styles.rolesHeader}>
-          {rolePressed.isPressed ? (
-            <Text style={styles.rolesTitle}>
-              POLITICAS PARA {rolePressed.role}
-            </Text>
-          ) : (
-            <Text style={styles.rolesTitle}>ROLES</Text>
-          )}
-        </View>
+      {/**seccion de roles y activacion de usuarios */}
+      {data.status === "ACTIVE" && (
+        <>
+          <View style={styles.rolesContainer}>
+            <View style={styles.rolesHeader}>
+              {rolePressed.isPressed ? (
+                <Text style={styles.rolesTitle}>
+                  POLITICAS PARA {rolePressed.role}
+                </Text>
+              ) : (
+                <Text style={styles.rolesTitle}>ROLES</Text>
+              )}
+            </View>
 
-        {rolePressed?.isPressed ? (
-          <FlatList
-            key="policies-statements"
-            data={selectedRoleData?.policies ?? []}
-            keyExtractor={(item) => item}
-            numColumns={1}
-            contentContainerStyle={styles.rolesList}
-            renderItem={({ item }) => (
-              <View style={styles.roleItem}>
-                <SelectPolicyOverride
-                  rolName={rolePressed.role}
-                  policyName={item}
-                  setOverridePolicy={setSelectOverridePolicy}
-                />
-              </View>
-            )}
-            ListEmptyComponent={
-              <EmptyList
-                title="No se han encontrado politicas en el sistema!"
-                description="intente mas tarde.."
+            {rolePressed?.isPressed ? (
+              <FlatList
+                key="policies-statements"
+                data={selectedRoleData?.policies ?? []}
+                keyExtractor={(item) => item}
+                numColumns={1}
+                contentContainerStyle={styles.rolesList}
+                renderItem={({ item }) => (
+                  <View style={styles.roleItem}>
+                    <SelectPolicyOverride
+                      rolName={rolePressed.role}
+                      policyName={item}
+                      setOverridePolicy={setSelectOverridePolicy}
+                    />
+                  </View>
+                )}
+                ListEmptyComponent={
+                  <EmptyList
+                    title="No se han encontrado politicas en el sistema!"
+                    description="intente mas tarde.."
+                  />
+                }
+                style={{ height: "50%", marginBottom: 12 }}
               />
-            }
-            style={{ height: "50%", marginBottom: 12 }}
-          />
-        ) : (
-          <FlatList
-            key="roles-statements"
-            data={ROLES_AND_POLICIES}
-            numColumns={2}
-            keyExtractor={(item) => item.role}
-            columnWrapperStyle={styles.rolesRow}
-            contentContainerStyle={styles.rolesList}
-            renderItem={({ item }) => (
-              <View style={styles.roleItem}>
-                <SelectRole
-                  name={item.role}
-                  isSelected={selectOverridePolicy.some(
-                    (role) => role.role === item.role,
-                  )}
-                  setRolePressed={setRolePressed}
-                  setSelectRole={setSelectOverridePolicy}
-                />
-              </View>
-            )}
-            ListEmptyComponent={
-              <EmptyList
-                title="No se han encontrado roles en el sistema!"
-                description="intente mas tarde.."
+            ) : (
+              <FlatList
+                key="roles-statements"
+                data={ROLES_AND_POLICIES}
+                numColumns={2}
+                keyExtractor={(item) => item.role}
+                columnWrapperStyle={styles.rolesRow}
+                contentContainerStyle={styles.rolesList}
+                renderItem={({ item }) => (
+                  <View style={styles.roleItem}>
+                    <SelectRole
+                      name={item.role}
+                      isSelected={selectOverridePolicy.some(
+                        (role) => role.role === item.role,
+                      )}
+                      setRolePressed={setRolePressed}
+                      setSelectRole={setSelectOverridePolicy}
+                    />
+                  </View>
+                )}
+                ListEmptyComponent={
+                  <EmptyList
+                    title="No se han encontrado roles en el sistema!"
+                    description="intente mas tarde.."
+                  />
+                }
+                style={{ height: "50%", marginBottom: 12 }}
               />
-            }
-            style={{ height: "50%", marginBottom: 12 }}
+            )}
+          </View>
+          {rolePressed?.isPressed ? (
+            <View style={{ width: "100%", paddingHorizontal: 20 }}>
+              <ButtonForm
+                title="Regresar"
+                action={() =>
+                  setRolePressed((prev) => ({ ...prev, isPressed: false }))
+                }
+              />
+            </View>
+          ) : (
+            <View style={{ width: "100%", paddingHorizontal: 20 }}>
+              <ButtonForm title="Asignar Roles" />
+            </View>
+          )}
+        </>
+      )}
+
+      {/**cuando el miembro tiene un estado distinto a active y esta en proceso para activarse */}
+      {data.status === "IN_PROCESS" && (
+        <>
+          <View style={{ marginTop: 24 }}></View>
+          <RentDescription
+            title={`Necesitas activar al miembro ${data.fullname}`}
+            description="Presiona el boton de activar para que el miembro pueda realizar acciones en la app!"
           />
-        )}
-      </View>
-      {rolePressed?.isPressed ? (
-        <View style={{ width: "100%", paddingHorizontal: 20 }}>
-          <ButtonForm
-            title="Regresar"
-            action={() =>
-              setRolePressed((prev) => ({ ...prev, isPressed: false }))
-            }
-          />
-        </View>
-      ) : (
-        <View style={{ width: "100%", paddingHorizontal: 20 }}>
-          <ButtonForm title="Asignar Roles" />
-        </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.activateButton,
+              pressed && styles.activateButtonPressed,
+            ]}
+            onPress={activeProperyMember}
+          >
+            <Text style={styles.activateButtonText}>Activar miembro</Text>
+          </Pressable>
+        </>
       )}
     </SafeAreaView>
   );
@@ -288,5 +361,27 @@ const styles = StyleSheet.create({
   roleItem: {
     width: "100%",
     paddingHorizontal: 20,
+  },
+
+  activateButton: {
+    width: "100%",
+    height: 46,
+    marginTop: 18,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    backgroundColor: "#2563EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  activateButtonPressed: {
+    backgroundColor: "#1D4ED8",
+  },
+
+  activateButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 0.2,
   },
 });

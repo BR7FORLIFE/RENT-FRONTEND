@@ -29,6 +29,24 @@ import FilterIcon from "../../../../assets/icons/filter.svg";
 import { EmptyList } from "../../../../components/info";
 import { SearchInput } from "../../../../components/inputs/input";
 
+const statusOptions: {
+  label: string;
+  value: StatusPropertyMemberType;
+}[] = [
+  {
+    label: "Activos",
+    value: "ACTIVE",
+  },
+  {
+    label: "En proceso",
+    value: "IN_PROCESS",
+  },
+  {
+    label: "Desactivados",
+    value: "DESACTIVE",
+  },
+];
+
 export function PropertyMemberDetailsScreen() {
   const { id: propertyId } = useLocalSearchParams<{ id: string }>();
   const [search, setSearch] = useState<string>("");
@@ -39,6 +57,7 @@ export function PropertyMemberDetailsScreen() {
     page: 1,
     status: "ACTIVE",
   });
+  const [isFilter, setFilter] = useState<boolean>(false);
 
   const {
     data: propertyData,
@@ -56,7 +75,7 @@ export function PropertyMemberDetailsScreen() {
     isLoading: memberLoading,
     isError: memberError,
   } = useQuery({
-    queryKey: ["propertyMembers", propertyId], // cache tanstack -> propertyId vinculado con sus miembros
+    queryKey: ["propertyMembers", propertyId, pagination.status], // cache tanstack -> propertyId vinculado con sus miembros
     queryFn: () =>
       GetAllPropertyMembers(
         propertyId,
@@ -164,9 +183,50 @@ export function PropertyMemberDetailsScreen() {
             justifyContent: "center",
             alignItems: "center",
           }}
+          onPress={() => setFilter((prev) => !prev)}
         >
           <FilterIcon width={24} height={24} />
         </Pressable>
+
+        {isFilter && (
+          <View style={styles.filterContainer}>
+            <Text style={styles.filterTitle}>Estado</Text>
+
+            {statusOptions.map((option) => {
+              const isSelected = pagination.status === option.value;
+
+              return (
+                <Pressable
+                  key={option.value}
+                  style={[
+                    styles.filterOption,
+                    isSelected && styles.filterOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setPagination((prev) => ({
+                      ...prev,
+                      page: 1,
+                      status: option.value,
+                    }));
+                  }}
+                >
+                  <View
+                    style={[styles.radio, isSelected && styles.radioSelected]}
+                  />
+
+                  <Text
+                    style={[
+                      styles.filterText,
+                      isSelected && styles.filterTextSelected,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
       </View>
 
       {/**lista de properties members */}
@@ -250,12 +310,93 @@ const styles = StyleSheet.create({
 
   //search
   searchContainer: {
+    position: "relative",
     width: "100%",
     height: 40,
     flexDirection: "row",
     justifyContent: "flex-start",
     paddingHorizontal: 12,
     marginTop: 12,
+  },
+
+  filterContainer: {
+    position: "absolute",
+
+    top: 48,
+    right: 0,
+
+    width: 190,
+
+    padding: 8,
+
+    backgroundColor: "#FFFFFF",
+
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 14,
+
+    elevation: 5,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+
+    zIndex: 100,
+  },
+
+  filterTitle: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64748B",
+  },
+
+  filterOption: {
+    minHeight: 42,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: 10,
+
+    borderRadius: 10,
+  },
+
+  filterOptionSelected: {
+    backgroundColor: "#EFF6FF",
+  },
+
+  filterText: {
+    marginLeft: 10,
+
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#334155",
+  },
+
+  filterTextSelected: {
+    color: "#1D4ED8",
+    fontWeight: "600",
+  },
+
+  radio: {
+    width: 16,
+    height: 16,
+
+    borderWidth: 1.5,
+    borderColor: "#CBD5E1",
+    borderRadius: 8,
+  },
+
+  radioSelected: {
+    borderWidth: 4,
+    borderColor: "#2563EB",
   },
 
   //informacion de propiedad
