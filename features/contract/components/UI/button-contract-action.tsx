@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { Sections } from "../../screens/contract-details";
+import type { Sections } from "../../screens/contract-list-details";
 
 //icons
 import ActionIcon from "../../../../assets/icons/action.svg";
