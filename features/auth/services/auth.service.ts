@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "../../../core/api/api-endpoints";
+import { queryClient } from "../../../core/configs/tanstackconfig";
 import {
     registerSchema,
     type RegisterType,
@@ -150,6 +151,9 @@ export function FormInfoStorage(): Storage<RegisterType> {
 export async function logoutUser() {
     //hasync acemos saber al servidor que el usuario ha hecho un logout
     await logout();
+
+    //borramos toda la cache del queryClient
+    queryClient.invalidateQueries();
 
     //elimnamos el refresh token del asynStorage
     await AsyncStorage.removeItem("userInfo"); // <- KEY STORAGE del usuario y su refresh token
