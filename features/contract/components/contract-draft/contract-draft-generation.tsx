@@ -1,27 +1,28 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import { ButtonForm } from "../../../components/buttons/button";
-import { PrincipalError } from "../../../components/error";
-import { EmptyList, RentDescription } from "../../../components/info";
-import SplashScreen from "../../../components/splash-screen";
-import type { PaginationParams } from "../../../types/global";
-import { GetAllPropertyMembers } from "../../property-registration/api";
-import type { GetAllPropertyMemberInfo } from "../../property-registration/api.response";
-import { PropertyMemberCard } from "../../property-registration/components/property-members/property-member-card";
-import type { StatusPropertyMemberType } from "../../property-registration/schemas/property-registration.schema";
+import { ButtonForm } from "../../../../components/buttons/button";
+import { PrincipalError } from "../../../../components/error";
+import { EmptyList, RentDescription } from "../../../../components/info";
+import SplashScreen from "../../../../components/splash-screen";
+import type { PaginationParams } from "../../../../types/global";
+import { GetAllPropertyMembers } from "../../../property-registration/api";
+import type { GetAllPropertyMemberInfo } from "../../../property-registration/api.response";
+import { PropertyMemberCard } from "../../../property-registration/components/property-members/property-member-card";
+import type { StatusPropertyMemberType } from "../../../property-registration/schemas/property-registration.schema";
 
 //rich text editor
+import { router } from "expo-router";
 import { RichEditor } from "react-native-pell-rich-editor";
-import { queryClient } from "../../../core/configs/tanstackconfig";
-import { useMe } from "../../../stores/auth-store";
-import { CreateContractDraft } from "../api";
-import type { CreateContractDraftType } from "../schemas/contract.schema";
+import { queryClient } from "../../../../core/configs/tanstackconfig";
+import { useMe } from "../../../../stores/auth-store";
+import { CreateContractDraft } from "../../api";
+import type { CreateContractDraftType } from "../../schemas/contract.schema";
 import
   {
     ExtractContractInformationOfHTML,
     INITIAL_CONTRACT_DRAFT,
-  } from "../services/helper";
+  } from "../../services/helper";
 
 //este componente nos permite seleccionar al miembro que deseamos crearle su respectivo contrato
 export function SelectedPropertyMemberForContractDraft({
@@ -174,6 +175,8 @@ export function GenerateContractDraft({
     queryClient.invalidateQueries({
       queryKey: ["GetAllContractDraft", propertyId],
     });
+
+    router.push({ pathname: "/contracts/[id]", params: { id: propertyId } });
   };
 
   return (
