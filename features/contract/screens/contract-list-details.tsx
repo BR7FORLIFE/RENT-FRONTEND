@@ -14,6 +14,7 @@ import { PropertyMemberMe } from "../../property-registration/api";
 import { GetAllContractDraft, GetAllContracts } from "../api";
 import { ButtonContractAction } from "../components/UI/button-contract-action";
 import { GenerateContractDraft } from "../components/contract-draft/contract-draft-generation";
+import { SeeContractAccepted } from "../components/contract-draft/see-contract-draft-accepted";
 import
   {
     ContractDraftCard,
@@ -24,7 +25,8 @@ import
 export type Sections =
   | "LIST-CONTRACTS"
   | "LIST-CONTRACT-DRAFT"
-  | "GENERATE-CONTRACT-DRAFT";
+  | "GENERATE-CONTRACT-DRAFT"
+  | "VER-ACEPTACIONES-BORRADORES";
 
 interface ContractListProps<T> {
   data: T[];
@@ -264,6 +266,10 @@ export function ContractDetailsScreen() {
           propertyName={propertyName}
           propertyMemberId={propertyMemberMe.info.id}
         />
+      )}
+
+      {section === "VER-ACEPTACIONES-BORRADORES" && (
+        <SeeContractAccepted propertyId={propertyId} />
       )}
     </SafeAreaView>
   );

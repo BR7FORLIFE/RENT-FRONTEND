@@ -1,0 +1,234 @@
+.
+├── AGENTS.md
+├── app
+│   ├── auth
+│   │   ├── email
+│   │   │   └── index.tsx
+│   │   ├── login
+│   │   │   ├── index.tsx
+│   │   │   └── oauth2
+│   │   │       └── callback
+│   │   │           └── index.tsx
+│   │   └── register
+│   │       └── index.tsx
+│   ├── contracts
+│   │   ├── details
+│   │   │   └── draft.tsx
+│   │   └── [id].tsx
+│   ├── home
+│   │   └── (tabs)
+│   │       ├── contract.tsx
+│   │       ├── finance-reports.tsx
+│   │       ├── _layout.tsx
+│   │       ├── properties-services.tsx
+│   │       ├── property-registration.tsx
+│   │       └── public-services.tsx
+│   ├── index.tsx
+│   ├── _layout.tsx
+│   ├── property
+│   │   ├── property-associations
+│   │   │   ├── [id].tsx
+│   │   │   ├── index.tsx
+│   │   │   └── template.tsx
+│   │   └── property-registration
+│   │       ├── edit.tsx
+│   │       ├── [id].tsx
+│   │       └── index.tsx
+│   └── property-member
+│       ├── [id].tsx
+│       ├── index.tsx
+│       └── roles
+│           └── [id].tsx
+├── app.json
+├── assets
+│   ├── backgrounds
+│   │   └── wave-background.svg
+│   ├── fonts
+│   │   └── arimo.ttf
+│   ├── icons
+│   │   ├── action.svg
+│   │   ├── add-square.svg
+│   │   ├── ai.svg
+│   │   ├── arrow-right.svg
+│   │   ├── bar-right.svg
+│   │   ├── bathroom.svg
+│   │   ├── bed.svg
+│   │   ├── check.svg
+│   │   ├── close.svg
+│   │   ├── community.svg
+│   │   ├── contract-tab.svg
+│   │   ├── edit.svg
+│   │   ├── email-icon.svg
+│   │   ├── eye-icon-hide.svg
+│   │   ├── eye-icon.svg
+│   │   ├── favorite.svg
+│   │   ├── filter.svg
+│   │   ├── financial-report-tab.svg
+│   │   ├── google-icon.svg
+│   │   ├── home.svg
+│   │   ├── house.svg
+│   │   ├── image-preview.svg
+│   │   ├── info.svg
+│   │   ├── invite-person.svg
+│   │   ├── invoice-tab.svg
+│   │   ├── join.svg
+│   │   ├── local.svg
+│   │   ├── notification.svg
+│   │   ├── plus.svg
+│   │   ├── property-registration-tab.svg
+│   │   ├── property-services-tab.svg
+│   │   ├── qr.svg
+│   │   ├── rule.svg
+│   │   ├── scan.svg
+│   │   ├── search-input.svg
+│   │   ├── share.svg
+│   │   ├── undo.svg
+│   │   ├── upload.svg
+│   │   ├── user.svg
+│   │   └── wallet.svg
+│   └── images
+│       ├── communication.png
+│       ├── login-house-image.jpg
+│       └── logo-recortado.png
+├── CLAUDE.md
+├── components
+│   ├── ai.tsx
+│   ├── aside.tsx
+│   ├── buttons
+│   │   └── button.tsx
+│   ├── error.tsx
+│   ├── header.tsx
+│   ├── info.tsx
+│   ├── inputs
+│   │   └── input.tsx
+│   ├── property-card.tsx
+│   ├── selects
+│   │   └── selects.tsx
+│   └── splash-screen.tsx
+├── constants
+│   └── constants.ts
+├── core
+│   ├── api
+│   │   ├── api-config.ts
+│   │   ├── api-endpoints.ts
+│   │   └── paths.ts
+│   ├── configs
+│   │   ├── cloudinaryconfig.ts
+│   │   └── tanstackconfig.ts
+│   ├── env.ts
+│   └── schemas
+│       └── auth-schema.ts
+├── documentation
+│   └── auth.test.txt
+├── eslint.config.js
+├── expo-env.d.ts
+├── features
+│   ├── auth
+│   │   ├── components
+│   │   │   ├── auth-provider.tsx
+│   │   │   └── me.tsx
+│   │   ├── screens
+│   │   │   ├── email-verification.tsx
+│   │   │   ├── login-screen.tsx
+│   │   │   └── register-screen.tsx
+│   │   ├── services
+│   │   │   └── auth.service.ts
+│   │   └── test
+│   │       ├── auth.service.test.ts
+│   │       └── storage.test.ts
+│   ├── contract
+│   │   ├── api.response.ts
+│   │   ├── api.ts
+│   │   ├── components
+│   │   │   ├── contract-draft
+│   │   │   │   ├── contract-draft-generation.tsx
+│   │   │   │   ├── contract-draft-sections.tsx
+│   │   │   │   └── see-contract-draft-accepted.tsx
+│   │   │   ├── contract-preview-card.tsx
+│   │   │   └── UI
+│   │   │       └── button-contract-action.tsx
+│   │   ├── schemas
+│   │   │   └── contract.schema.ts
+│   │   ├── screens
+│   │   │   ├── contract-details.tsx
+│   │   │   ├── contract-list-details.tsx
+│   │   │   └── contract-screen.tsx
+│   │   ├── services
+│   │   │   └── helper.ts
+│   │   ├── stores
+│   │   ├── test
+│   │   └── types.ts
+│   ├── finance-reports
+│   │   ├── components
+│   │   └── screens
+│   │       └── finance-screen.tsx
+│   ├── properties-services
+│   │   ├── components
+│   │   ├── screens
+│   │   │   └── properties-services.tsx
+│   │   └── services
+│   ├── property-registration
+│   │   ├── api.response.ts
+│   │   ├── api.ts
+│   │   ├── components
+│   │   │   ├── display.tsx
+│   │   │   ├── property-associations
+│   │   │   │   └── template.tsx
+│   │   │   ├── property-members
+│   │   │   │   ├── notification.tsx
+│   │   │   │   ├── property-member-card.tsx
+│   │   │   │   ├── property-preview.tsx
+│   │   │   │   ├── qr.tsx
+│   │   │   │   └── scan.tsx
+│   │   │   ├── property-registration
+│   │   │   │   └── steps.tsx
+│   │   │   └── UI
+│   │   │       └── select-role.tsx
+│   │   ├── constants.ts
+│   │   ├── schemas
+│   │   │   ├── help-schemas.ts
+│   │   │   └── property-registration.schema.ts
+│   │   ├── screens
+│   │   │   ├── details.tsx
+│   │   │   ├── edit.tsx
+│   │   │   ├── property-associations
+│   │   │   │   ├── details.tsx
+│   │   │   │   └── property-associations-screen.tsx
+│   │   │   ├── property-members
+│   │   │   │   ├── details.tsx
+│   │   │   │   ├── property-member-role.tsx
+│   │   │   │   └── property-member-screen.tsx
+│   │   │   ├── property-registration-screen.tsx
+│   │   │   └── property-screen.tsx
+│   │   ├── services
+│   │   │   ├── property-registration.domain.service.ts
+│   │   │   └── property-registration.service.ts
+│   │   ├── stores
+│   │   │   └── property.store.ts
+│   │   ├── test
+│   │   └── types.ts
+│   └── public-services
+│       ├── components
+│       └── screens
+│           └── public-services-screen.tsx
+├── hooks
+│   └── hooks.tsx
+├── metro.config.js
+├── package.json
+├── pnpm-lock.yaml
+├── README.md
+├── scripts
+│   ├── credentials.ts
+│   └── reset-project.js
+├── stores
+│   ├── auth-store.ts
+│   └── global-store.ts
+├── themes
+│   └── themes.ts
+├── tree.txt
+├── tsconfig.json
+└── types
+    ├── global.ts
+    └── svg.d.ts
+
+447 directories, 648 files

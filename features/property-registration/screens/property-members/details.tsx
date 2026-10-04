@@ -12,9 +12,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 //assets
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PrincipalError } from "../../../../components/error";
 import SplashScreen from "../../../../components/splash-screen";
+import { useAuth } from "../../../../stores/auth-store";
 import { Colors } from "../../../../themes/themes";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllPropertyMembers, GetPropertyById } from "../../api";
@@ -49,6 +50,7 @@ const statusOptions: {
 
 export function PropertyMemberDetailsScreen() {
   const { id: propertyId } = useLocalSearchParams<{ id: string }>();
+  const userId = useAuth((state) => state.userId);
   const [search, setSearch] = useState<string>("");
   const [pagination, setPagination] = useState<
     PaginationParams & { status: StatusPropertyMemberType }
@@ -85,6 +87,16 @@ export function PropertyMemberDetailsScreen() {
       ),
   });
 
+  // el usuario en sesion no debe poder asignarse roles a si mismo, ademas aplicamos la busqueda
+  const members = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (propertyMemberData?.data ?? []).filter(
+      (member) =>
+        member.userId !== userId &&
+        (!term || member.fullname.toLowerCase().includes(term)),
+    );
+  }, [propertyMemberData, userId, search]);
+
   if (propertyLoading && memberLoading) {
     return <SplashScreen />;
   }
@@ -108,15 +120,15 @@ export function PropertyMemberDetailsScreen() {
 
       <View style={styles.header}>
         {/**titulo y cantidad de miembros en la propiedad */}
-        <Text style={{ fontSize: 20, fontWeight: "700" }}>RENT</Text>
+        <Text style={styles.logo}>RENT</Text>
 
         {/**cantidad de properties members */}
         <View style={styles.headerInfoMembers}>
           <CommunityIcon width={24} height={24} />
-          <Text>{propertyMemberData.data.length.toString()}</Text>
+          <Text style={styles.headerCount}>{members.length}</Text>
         </View>
 
-        <Text style={{ fontWeight: "700" }}>Miembros</Text>
+        <Text style={styles.headerTitle}>Miembros</Text>
       </View>
 
       {/**seccion de imagen y pequeña informacion relevante sobre ella (FIJO) */}
@@ -231,22 +243,12 @@ export function PropertyMemberDetailsScreen() {
 
       {/**lista de properties members */}
       <View style={styles.propertyMemberContainer}>
-        <View
-          style={{
-            width: "100%",
-            paddingBottom: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: Colors.PRIMARY,
-            borderStyle: "dashed",
-          }}
-        >
-          <Text style={{ fontWeight: "700", color: Colors.NEUTRAL }}>
-            Miembros en la propiedad
-          </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Miembros en la propiedad</Text>
         </View>
 
         <FlatList
-          data={propertyMemberData.data}
+          data={members}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <PropertyMemberCard
@@ -467,22 +469,53 @@ const styles = StyleSheet.create({
   },
 
   //lista de property members
-  propertyMemberBanner: {},
+  logo: {
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    color: "#111827",
+  },
+
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  headerCount: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1D4ED8",
+  },
+
+  sectionHeader: {
+    width: "100%",
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EEF5",
+  },
+
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Colors.SECONDARY,
+  },
 
   propertyMemberContainer: {
     flex: 1,
     flexDirection: "column",
-    gap: 10,
+    gap: 12,
     width: "100%",
-    marginTop: 20,
+    marginTop: 24,
     paddingHorizontal: 20,
   },
 
   propertyMemberList: {
-    paddingBottom: 20,
+    paddingTop: 4,
+    paddingBottom: 24,
   },
 
   memberSeparator: {
-    height: 10,
+    height: 12,
   },
 });

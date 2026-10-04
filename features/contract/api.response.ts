@@ -24,35 +24,38 @@ export interface ContractInfoResponseById {
 }
 
 export interface ContractInfoResponse {
-    id: string;
-    propertyId: string;
-    landlordMemberId: string;
-    tenantMemberId: string;
-    monthlyRent: number;
-    depositAmount: number;
-    startDate: Date;
-    endDate: Date;
-    status: StatusContractType;
-    createByUserId: string;
+  id: string;
+  propertyId: string;
+  landlordMemberId: string;
+  tenantMemberId: string;
+  monthlyRent: string;
+  depositAmount: string;
+  startDate: string;
+  endDate: string;
+  status: StatusContractType;
+  createByUserId: string;
+  createAt: string;
+  updateAt: string;
 }
 
 export interface ContractDraftInfoResponse {
-    id: string;
-    content: string;
-    version: number;
-    landlordAgreed: boolean;
-    tenantAgreed: boolean;
-    createdByPropertyMemberId: string;
-    createdAt: Date;
-    updateAt: Date;
-    propertyId: string;
-    landlordMemberId: string;
-    tenantMemberId: string;
-    monthlyRent: number;
-    depositAmount: number;
-    startDate: Date;
-    endDate: Date;
+  id: string;
+  content: string;
+  version: number;
+  landlordAgreed: boolean;
+  tenantAgreed: boolean;
+  createdByPropertyMemberId: string;
+  createdAt: string;
+  updateAt: string;
+  propertyId: string;
+  landlordMemberId: string;
+  tenantMemberId: string;
+  monthlyRent: string;
+  depositAmount: string;
+  startDate: string;
+  endDate: string;
 }
+
 export interface ContractDraftInfoResponseById {
     id: string;
     content: string;

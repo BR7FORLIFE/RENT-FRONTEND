@@ -11,10 +11,10 @@ import { RentDescription } from "../../../components/info";
 import SplashScreen from "../../../components/splash-screen";
 import { AgreeContractDraft, GetContractDraftById } from "../api";
 import
-    {
-        FinancialAndDatesContractDraft,
-        VersionContractDraft,
-    } from "../components/contract-draft/contract-draft-sections";
+  {
+    FinancialAndDatesContractDraft,
+    VersionContractDraft,
+  } from "../components/contract-draft/contract-draft-sections";
 
 export function ContractDetailsDraftScreen() {
   const ref = useRef<RichEditor>(null);
@@ -135,9 +135,9 @@ export function ContractDetailsDraftScreen() {
         ) : (
           <ButtonForm
             title="REGRESAR"
-            action={() =>   
+            action={() =>
               router.push({
-                pathname: "/contracts/[id]",
+                pathname: "/home/(tabs)/property-registration",
                 params: { id: propertyId, propertyName },
               })
             }

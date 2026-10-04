@@ -7,10 +7,10 @@ import type { StatusContractType } from "../api.response";
 import InfoIcon from "../../../assets/icons/info.svg";
 
 interface ContractPreviewCardProps {
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   status: StatusContractType;
-  montlyRent: number;
+  montlyRent: string;
   action: () => void;
 }
 
@@ -28,10 +28,14 @@ export function ContractPreviewCard({
         {/*fechas */}
         <View style={styles.dateContainer}>
           <Text style={styles.dateLabel}>Inicio</Text>
-          <Text style={styles.date}>{startDate.toISOString()}</Text>
+          <Text style={styles.date}>
+            {new Date(startDate).toLocaleDateString()}
+          </Text>
 
           <Text style={styles.dateLabel}>Finalización</Text>
-          <Text style={styles.date}>{endDate.toISOString()}</Text>
+          <Text style={styles.date}>
+            {new Date(endDate).toLocaleDateString()}
+          </Text>
         </View>
 
         {/*estado */}
@@ -166,9 +170,7 @@ export function ContractDraftCard({
       <View style={contractdraftcardstyles.header}>
         <View style={contractdraftcardstyles.versionContainer}>
           <Text style={contractdraftcardstyles.versionLabel}>Borrador</Text>
-          <Text style={contractdraftcardstyles.version}>
-            Versión {version}
-          </Text>
+          <Text style={contractdraftcardstyles.version}>Versión {version}</Text>
         </View>
 
         <View style={contractdraftcardstyles.statusContainer}>
@@ -212,9 +214,7 @@ export function ContractDraftCard({
 
         {/*renta mensual (valor) */}
         <View style={contractdraftcardstyles.rentContent}>
-          <Text style={contractdraftcardstyles.rentLabel}>
-            Renta Mensual
-          </Text>
+          <Text style={contractdraftcardstyles.rentLabel}>Renta Mensual</Text>
           <Text style={contractdraftcardstyles.rent}>
             ${monthlyRent.toLocaleString()}
           </Text>

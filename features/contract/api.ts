@@ -130,3 +130,20 @@ export async function AgreeContractDraft(
     });
     return data;
 }
+
+export async function getAllContractDraftAccepted(propertyId: string) {
+    const { data } = await api.get<GetAll<ContractDraftInfoResponse[]>>(
+        `${FINANCIAL_MODULE}/contract/draft/getAcceptedContracts/property/${propertyId}`,
+    );
+    return data;
+}
+
+export async function getContractDraftAcceptedById(
+    propertyId: string,
+    contractDraftId: string,
+) {
+    const { data } = await api.get<ContractDraftInfoResponse>(
+        `${FINANCIAL_MODULE}/contract/draft/getAcceptedContracts/property/${propertyId}/id/${contractDraftId}`,
+    );
+    return data;
+}

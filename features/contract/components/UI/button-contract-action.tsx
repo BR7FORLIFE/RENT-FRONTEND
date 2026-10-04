@@ -25,6 +25,10 @@ const items: ActionProps[] = [
     name: "Generar borradores",
     typeAction: "GENERATE-CONTRACT-DRAFT",
   },
+  {
+    name: "Ver aceptaciones borradores",
+    typeAction: "VER-ACEPTACIONES-BORRADORES"
+  }
 ];
 
 function ItemAction({
