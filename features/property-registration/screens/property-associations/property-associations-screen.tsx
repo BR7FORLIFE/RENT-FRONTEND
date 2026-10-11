@@ -43,7 +43,13 @@ export function AssociationProperty({
   action: () => void;
 }) {
   return (
-    <Pressable style={associationsStyles.associationCard} onPress={action}>
+    <Pressable
+      style={({ pressed }) => [
+        associationsStyles.associationCard,
+        pressed && associationsStyles.associationCardPressed,
+      ]}
+      onPress={action}
+    >
       <View style={associationsStyles.iconContainer}>
         <HomeIcon width={23} height={23} />
       </View>
@@ -78,14 +84,11 @@ const associationsStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+  },
+
+  associationCardPressed: {
+    backgroundColor: "#F8FAFC",
+    transform: [{ scale: 0.99 }],
   },
 
   iconContainer: {
@@ -94,7 +97,7 @@ const associationsStyles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: "#EFF6FF",
   },
 
   infoContainer: {

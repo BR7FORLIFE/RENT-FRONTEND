@@ -1,104 +1,77 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
-import
-  {
-    FlatList,
-    Image,
-    Pressable,
-    Text,
-    TextInput,
-    View,
-  } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
 import Toast from "react-native-toast-message";
-import { ButtonForm } from "../../../../components/buttons/button";
-import { Colors } from "../../../../themes/themes";
-import type { RegisterFormData } from "../../screens/property-registration-screen";
 
-import { Picker } from "@react-native-picker/picker";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 import AddIcon from "../../../../assets/icons/add-square.svg";
 import IAIcon from "../../../../assets/icons/ai.svg";
 import UploadIcon from "../../../../assets/icons/upload.svg";
+import { ButtonForm } from "../../../../components/buttons/button";
 import { NumberInput, SearchInput } from "../../../../components/inputs/input";
+import { Palette } from "../../../../themes/themes";
 import type { ApiError } from "../../../../types/global";
 import { IAPropertyRegistrationSuggestion, OpenStreetMapApi } from "../../api";
-import type {
-  CreateDirectionType,
-  CreatePropertyType,
-  EconomicPropertyInfoType,
-  PropertyOccupationType,
-  StructurePropertyInfoType,
-  TypePropertyType,
+import {
+  EconomicPropertyInfo as EconomicInfoSchema,
+  StructurePropertyInfo as StructureInfoSchema,
+  type CreateDirectionType,
+  type EconomicPropertyInfoType,
+  type PropertyOccupationType,
+  type StructurePropertyInfoType,
+  type TypePropertyType,
+  type TypeStreet,
 } from "../../schemas/property-registration.schema";
 import { resourcesStorage } from "../../services/property-registration.domain.service";
+import type { RegisterFormData } from "../../screens/property-registration-screen";
+import {
+  Counter,
+  Field,
+  FormCard,
+  HintBox,
+  OptionChips,
+  StepLayout,
+  TextField,
+} from "./step-ui";
 
-/**
- * Mejoras a tener en cuenta
- *
- * - hacer persistente en los steps, precargar los datos para no perder progreso por si se sale el usuario
- */
+const MAX_IMAGES = 6;
 
-const ImagePreview = ({
+// Bogotá: región por defecto si el usuario no concede permiso de ubicación
+const DEFAULT_REGION: Region = {
+  latitude: 4.711,
+  longitude: -74.0721,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
+};
+
+/* ------------------------------ Paso 1: imágenes ------------------------------ */
+
+function ImagePreview({
   uri,
   setImageUri,
 }: {
   uri: string;
   setImageUri: React.Dispatch<React.SetStateAction<string[]>>;
-}) => (
-  <View
-    style={{
-      position: "relative",
-      width: "31%",
-      aspectRatio: 1,
-      marginBottom: 10,
-      borderRadius: 14,
-      overflow: "hidden",
-      backgroundColor: "#F3F4F6",
-      borderWidth: 1,
-      borderColor: "#E5E7EB",
-    }}
-  >
-    <Image
-      source={{ uri }}
-      style={{
-        width: "100%",
-        height: "100%",
-      }}
-      resizeMode="cover"
-    />
+}) {
+  return (
+    <View style={imageStyles.item}>
+      <Image source={{ uri }} style={imageStyles.image} resizeMode="cover" />
 
-    <Pressable
-      style={{
-        position: "absolute",
-        top: 6,
-        right: 6,
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,0.65)",
-      }}
-      onPress={() =>
-        setImageUri((prev) => prev.filter((image) => image !== uri))
-      }
-    >
-      <Text
-        style={{
-          color: "#FFFFFF",
-          fontSize: 16,
-          fontWeight: "700",
-          lineHeight: 18,
-        }}
+      <Pressable
+        style={imageStyles.remove}
+        hitSlop={6}
+        onPress={() =>
+          setImageUri((prev) => prev.filter((image) => image !== uri))
+        }
       >
-        ×
-      </Text>
-    </Pressable>
-  </View>
-);
+        <Text style={imageStyles.removeText}>×</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 export function DrapAndDropStep({ setStep }: RegisterFormData) {
   const [imagesUris, setImagesUris] = useState<string[]>([]);
@@ -107,13 +80,7 @@ export function DrapAndDropStep({ setStep }: RegisterFormData) {
   useEffect(() => {
     const startedData = async () => {
       const resources = await resourcesStorage().get();
-
-      if (!resources) {
-        setImagesUris([]);
-        return;
-      }
-
-      setImagesUris(resources);
+      setImagesUris(resources ?? []);
     };
 
     startedData();
@@ -122,338 +89,300 @@ export function DrapAndDropStep({ setStep }: RegisterFormData) {
   const submitImage = async () => {
     setLoading(true);
 
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!permission.granted) {
-      setLoading(false);
+      if (!permission.granted) {
+        Toast.show({
+          type: "error",
+          text2: "Necesitamos permisos para adjuntar la imagen!",
+        });
+        return;
+      }
 
-      Toast.show({
-        type: "error",
-        text2: "Necesitamos permisos para adjuntar la imagen!",
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        quality: 0.8,
       });
 
-      return;
-    }
+      if (result.canceled) return;
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      quality: 0.8,
-    });
-
-    if (result.canceled) {
+      const uri = result.assets[0].uri;
+      // evitamos duplicados: el uri se usa como key
+      setImagesUris((prev) => (prev.includes(uri) ? prev : [...prev, uri]));
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const image = result.assets[0];
-
-    setImagesUris((prev) => [...prev, image.uri]);
-    setLoading(false);
   };
 
-  const createResourceImage = async () => {
+  const goNext = async () => {
     await resourcesStorage().set(imagesUris);
     setStep((prev) => prev + 1);
   };
 
+  const hasImages = imagesUris.length > 0;
+
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-      }}
+    <StepLayout
+      title="Registra tu inmueble"
+      subtitle={`Adjunta hasta ${MAX_IMAGES} imágenes de la propiedad que deseas agregar.`}
+      footer={
+        <ButtonForm
+          title={hasImages ? "Continuar" : "Continuar sin imágenes"}
+          action={goNext}
+          disabled={loading}
+        />
+      }
     >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 24,
-          lineHeight: 30,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginTop: 8,
-        }}
-      >
-        Registra tu inmueble!
-      </Text>
+      {hasImages ? (
+        <>
+          <View style={imageStyles.grid}>
+            {imagesUris.map((uri) => (
+              <ImagePreview key={uri} uri={uri} setImageUri={setImagesUris} />
+            ))}
+          </View>
 
-      <Text
-        style={{
-          width: "90%",
-          marginTop: 10,
-          fontSize: 14,
-          lineHeight: 21,
-          textAlign: "center",
-          fontWeight: "400",
-          color: "#6B7280",
-        }}
-      >
-        Adjunta una o varias imágenes para la propiedad que deseas agregar.
-      </Text>
-
-      {imagesUris.length !== 0 ? (
-        <View
-          style={{
-            width: "100%",
-            flex: 1,
-            alignItems: "center",
-            marginTop: 20,
-          }}
-        >
-          <FlatList
-            data={imagesUris}
-            keyExtractor={(item) => item}
-            numColumns={3}
-            renderItem={({ item }) => (
-              <ImagePreview uri={item} setImageUri={setImagesUris} />
-            )}
-            style={{
-              width: "100%",
-              flexGrow: 0,
-            }}
-            contentContainerStyle={{
-              paddingHorizontal: 4,
-              paddingBottom: 8,
-            }}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-            }}
-            showsVerticalScrollIndicator={false}
-          />
-
-          {imagesUris.length !== 6 ? (
+          {imagesUris.length < MAX_IMAGES ? (
             <Pressable
               disabled={loading}
               onPress={submitImage}
               style={({ pressed }) => [
-                {
-                  minHeight: 44,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 7,
-                  paddingHorizontal: 16,
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderStyle: "dashed",
-                  borderColor: Colors.TERTIARY,
-                  backgroundColor: "#FFFFFF",
-                },
-                pressed && {
-                  opacity: 0.65,
-                  transform: [{ scale: 0.98 }],
-                },
-                loading && {
-                  opacity: 0.5,
-                },
+                imageStyles.addMore,
+                pressed && styles.pressed,
+                loading && styles.disabled,
               ]}
             >
               <AddIcon height={20} width={20} />
-
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: "600",
-                  color: Colors.TERTIARY,
-                }}
-              >
+              <Text style={imageStyles.addMoreText}>
                 {loading ? "Abriendo galería..." : "Añadir otra imagen"}
               </Text>
             </Pressable>
           ) : (
-            <View
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 10,
-                backgroundColor: "#FEF3C7",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: "600",
-                  color: "#92400E",
-                }}
-              >
-                Capacidad máxima de imágenes alcanzada
-              </Text>
-            </View>
+            <HintBox>Alcanzaste el máximo de imágenes permitidas.</HintBox>
           )}
-          <View
-            style={{
-              width: "100%",
-              maxWidth: 400,
-              marginTop: 20,
-              paddingHorizontal: 8,
-            }}
-          >
-            <ButtonForm title="Aceptar" action={createResourceImage} />
-          </View>
-        </View>
+        </>
       ) : (
         <Pressable
           onPress={submitImage}
           disabled={loading}
           style={({ pressed }) => [
-            {
-              width: "100%",
-              maxWidth: 400,
-              minHeight: 230,
-
-              alignItems: "center",
-              justifyContent: "center",
-
-              marginTop: 28,
-              paddingHorizontal: 24,
-
-              borderRadius: 20,
-              borderWidth: 1.5,
-              borderStyle: "dashed",
-              borderColor: Colors.TERTIARY,
-
-              backgroundColor: "#F9FAFB",
-            },
-
-            pressed && {
-              transform: [{ scale: 0.98 }],
-            },
-
-            loading && {
-              opacity: 0.5,
-            },
+            imageStyles.dropzone,
+            pressed && styles.pressed,
+            loading && styles.disabled,
           ]}
         >
-          <View
-            style={{
-              width: 82,
-              height: 82,
-              alignItems: "center",
-              justifyContent: "center",
-
-              borderRadius: 41,
-
-              backgroundColor: "#FFFFFF",
-
-              marginBottom: 16,
-
-              shadowColor: "#000000",
-              shadowOffset: {
-                width: 0,
-                height: 3,
-              },
-              shadowOpacity: 0.08,
-              shadowRadius: 8,
-              elevation: 3,
-            }}
-          >
-            <UploadIcon width={54} height={54} />
+          <View style={imageStyles.dropzoneIcon}>
+            <UploadIcon width={44} height={44} />
           </View>
 
-          <Text
-            style={{
-              fontSize: loading ? 13 : 16,
-              fontWeight: "700",
-              color: "#111827",
-              textAlign: "center",
-            }}
-          >
-            {loading ? "Abriendo panel de selección..." : "Cargar imágenes"}
+          <Text style={imageStyles.dropzoneTitle}>
+            {loading ? "Abriendo galería..." : "Cargar imágenes"}
           </Text>
-
-          {!loading && (
-            <Text
-              style={{
-                marginTop: 7,
-                fontSize: 13,
-                lineHeight: 19,
-                color: "#6B7280",
-                textAlign: "center",
-              }}
-            >
-              Puedes seleccionar hasta 6 imágenes de tu propiedad.
-            </Text>
-          )}
+          <Text style={imageStyles.dropzoneText}>
+            Toca para seleccionar fotos de tu propiedad.
+          </Text>
         </Pressable>
       )}
-    </View>
+    </StepLayout>
   );
 }
 
-export function DirectionStep({ saveData, setStep }: RegisterFormData) {
-  //le pedimos permiso al usuario para acceder a su ubicacion y poder ubicarlo en el Map View
-  const [coords, setCoords] = useState<Region>();
-  const [mark, setMark] = useState<LatLng>();
+const imageStyles = StyleSheet.create({
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+
+  item: {
+    width: "31%",
+    aspectRatio: 1,
+    overflow: "hidden",
+    borderRadius: 14,
+    backgroundColor: Palette.surfaceMuted,
+    borderWidth: 1,
+    borderColor: Palette.border,
+  },
+
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+
+  remove: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(15, 23, 42, 0.7)",
+  },
+
+  removeText: {
+    fontSize: 16,
+    lineHeight: 18,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+
+  addMore: {
+    minHeight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: Palette.accent,
+    backgroundColor: Palette.accentSoft,
+  },
+
+  addMoreText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Palette.accentStrong,
+  },
+
+  dropzone: {
+    minHeight: 240,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: Palette.accent,
+    backgroundColor: Palette.surfaceMuted,
+  },
+
+  dropzoneIcon: {
+    width: 80,
+    height: 80,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    borderRadius: 40,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
+  },
+
+  dropzoneTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: Palette.textPrimary,
+  },
+
+  dropzoneText: {
+    marginTop: 6,
+    fontSize: 13,
+    textAlign: "center",
+    color: Palette.textMuted,
+  },
+});
+
+/* ------------------------------ Paso 2: dirección ------------------------------ */
+
+// Deduce el tipo y número de vía a partir de lo que devuelve el geocodificador
+function parseStreet(
+  street?: string | null,
+  streetNumber?: string | null,
+): { typeStreet: TypeStreet; numberStreet: number } {
+  const text = `${street ?? ""}`.toLowerCase();
+
+  let typeStreet: TypeStreet = "CALLE";
+  if (/\b(avenida|av)\b/.test(text)) typeStreet = "AVENIDA";
+  else if (/\b(diagonal|diag)\b/.test(text)) typeStreet = "DIAGONAL";
+  else if (/\b(carrera|cra|kr)\b/.test(text)) typeStreet = "CARRERA";
+
+  const digits = /\d+/.exec(street ?? "") ?? /\d+/.exec(streetNumber ?? "");
+
+  return { typeStreet, numberStreet: digits ? Number(digits[0]) : 0 };
+}
+
+export function DirectionStep({ saveData, setStep, data }: RegisterFormData) {
+  const previous = data?.direction;
+
+  const [coords, setCoords] = useState<Region | undefined>(
+    previous
+      ? {
+          latitude: previous.latitute,
+          longitude: previous.longitud,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }
+      : undefined,
+  );
+  const [mark, setMark] = useState<LatLng | undefined>(
+    previous
+      ? { latitude: previous.latitute, longitude: previous.longitud }
+      : undefined,
+  );
   const [inputPlace, setInputPlace] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [saving, setSaving] = useState(false);
 
   const mapRef = useRef<MapView>(null);
 
-  const { data, isSuccess, error } = useQuery({
+  const {
+    data: place,
+    error: searchError,
+    isFetching,
+  } = useQuery({
     queryKey: ["openstreet", search],
-    queryFn: () => {
-      return OpenStreetMapApi(search);
-    },
+    queryFn: () => OpenStreetMapApi(search),
     retry: false,
     enabled: search.trim().length >= 3,
   });
 
+  // ubicación inicial: la del usuario, o una por defecto si no hay permiso
   useEffect(() => {
-    const getPermission = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+    if (previous) return;
 
-      if (status !== "granted") {
-        Toast.show({
-          type: "error",
-          text2:
-            "Necesitamos permisos para obtener informacion de la ubicación!",
-        });
+    const getLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") {
+          Toast.show({
+            type: "info",
+            text2: "Sin permiso de ubicación. Busca o marca la dirección.",
+          });
+          setCoords(DEFAULT_REGION);
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync();
+        const region: Region = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        };
+
+        setMark({ latitude: region.latitude, longitude: region.longitude });
+        setCoords(region);
+      } catch {
+        setCoords(DEFAULT_REGION);
       }
-
-      let location = await Location.getCurrentPositionAsync();
-
-      const initialRegion: Region = {
-        latitude: location.coords.latitude,
-        latitudeDelta: 0.005,
-        longitude: location.coords.longitude,
-        longitudeDelta: 0.005,
-      };
-      setMark({
-        latitude: initialRegion.latitude,
-        longitude: initialRegion.longitude,
-      });
-      setCoords(initialRegion);
     };
-    getPermission();
+
+    getLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleInformation = () => {
-    // setSearch(inputPlace); -> ejecuta la api de geolocalizacion
-
-    //hardcodeamos para despues probar con la API
-    const direction: CreateDirectionType = {
-      city: "Cartagena",
-      department: "Bolivar",
-      latitute: 90,
-      longitud: 90,
-      neighborhood: "Barrio Bocagrande",
-      numberStreet: 12,
-      typeStreet: "CARRERA",
-      complement: "cerca al mar",
-    };
-
-    saveData((prev) => ({ ...prev, direction }));
-
-    setStep((prev) => prev + 1);
-  };
-
+  // resultado de la búsqueda: movemos el marcador y la cámara
   useEffect(() => {
-    if (!data) return;
+    if (!place) return;
 
-    const latitude = Number(data.lat);
-    const longitude = Number(data.lon);
+    const latitude = Number(place.lat);
+    const longitude = Number(place.lon);
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMark({ latitude, longitude });
@@ -464,456 +393,248 @@ export function DirectionStep({ saveData, setStep }: RegisterFormData) {
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     });
-  }, [data]);
+  }, [place]);
+
+  useEffect(() => {
+    if (!searchError) return;
+
+    Toast.show({
+      type: "error",
+      text2:
+        searchError.message === "PLACE_NOT_FOUND"
+          ? "No encontramos esa dirección. Prueba con otra o marca el punto en el mapa."
+          : "No se pudo buscar la dirección. Inténtalo de nuevo.",
+    });
+  }, [searchError]);
+
+  const handleSearch = () => {
+    const term = inputPlace.trim();
+    if (term.length < 3) return;
+    setSearch(term);
+  };
+
+  // armamos la dirección a partir del punto marcado en el mapa
+  const handleInformation = async () => {
+    if (!mark) return;
+
+    setSaving(true);
+
+    try {
+      const [found] = await Location.reverseGeocodeAsync(mark);
+
+      const city = found?.city ?? found?.subregion;
+
+      if (!found || !city) {
+        Toast.show({
+          type: "error",
+          text2: "No pudimos identificar la ciudad. Mueve el marcador.",
+        });
+        return;
+      }
+
+      const { typeStreet, numberStreet } = parseStreet(
+        found.street,
+        found.streetNumber,
+      );
+
+      const direction: CreateDirectionType = {
+        city,
+        department: found.region ?? city,
+        neighborhood: found.district ?? found.subregion ?? city,
+        latitute: mark.latitude,
+        longitud: mark.longitude,
+        typeStreet,
+        numberStreet,
+        complement: found.name ?? (inputPlace.trim() || undefined),
+      };
+
+      saveData((prev) => ({ ...prev, direction }));
+      setStep((prev) => prev + 1);
+    } catch {
+      Toast.show({
+        type: "error",
+        text2: "No se pudo obtener la dirección del punto seleccionado.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 12,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 6,
-        }}
-      >
-        Registra la dirección de tu inmueble
-      </Text>
-
-      <Text
-        style={{
-          width: "92%",
-          fontSize: 11,
-          lineHeight: 17,
-          fontWeight: "400",
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 12,
-        }}
-      >
-        Busca la ubicación de tu inmueble o selecciónala directamente en el
-        mapa.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          marginBottom: 10,
-        }}
-      >
-        <SearchInput
-          value={inputPlace}
-          onChangeText={(text) => setInputPlace(text)}
-          placeholder="Busca una dirección..."
+    <StepLayout
+      title="Dirección del inmueble"
+      subtitle="Busca la ubicación o márcala directamente en el mapa."
+      footer={
+        <ButtonForm
+          title="Continuar"
+          action={handleInformation}
+          disabled={!coords || !mark || saving || isFetching}
+          isPending={saving}
         />
-      </View>
+      }
+    >
+      <SearchInput
+        value={inputPlace}
+        onChangeText={setInputPlace}
+        onSubmit={handleSearch}
+        placeholder="Busca una dirección..."
+      />
 
       {coords ? (
-        <View
-          style={{
-            width: "100%",
-            maxWidth: 500,
-
-            height: 220,
-
-            overflow: "hidden",
-
-            borderRadius: 18,
-            borderWidth: 1,
-            borderColor: "#E5E7EB",
-
-            backgroundColor: "#F3F4F6",
-
-            shadowColor: "#000000",
-            shadowOffset: {
-              width: 0,
-              height: 3,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-
-            elevation: 3,
-
-            marginBottom: 10,
-          }}
-        >
+        <View style={directionStyles.mapContainer}>
           <MapView
             ref={mapRef}
             initialRegion={coords}
-            style={{
-              flex: 1,
-            }}
+            style={directionStyles.map}
             onPress={(e) => setMark(e.nativeEvent.coordinate)}
           >
             {mark && <Marker coordinate={mark} />}
           </MapView>
 
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              top: 10,
-              left: 10,
-
-              paddingHorizontal: 9,
-              paddingVertical: 6,
-
-              borderRadius: 9,
-
-              backgroundColor: "rgba(255,255,255,0.92)",
-
-              shadowColor: "#000000",
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-
-              elevation: 2,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "600",
-                color: "#374151",
-              }}
-            >
-              📍 Selecciona la ubicación
+          <View pointerEvents="none" style={directionStyles.mapBadge}>
+            <Text style={directionStyles.mapBadgeText}>
+              {isFetching ? "Buscando..." : "Toca el mapa para ajustar"}
             </Text>
           </View>
         </View>
       ) : (
-        <View
-          style={{
-            width: "100%",
-            maxWidth: 500,
-
-            height: 220,
-
-            alignItems: "center",
-            justifyContent: "center",
-
-            borderRadius: 18,
-            borderWidth: 1,
-            borderColor: "#E5E7EB",
-
-            backgroundColor: "#F9FAFB",
-
-            marginBottom: 10,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "500",
-              color: "#6B7280",
-            }}
-          >
-            Cargando mapa...
-          </Text>
+        <View style={[directionStyles.mapContainer, directionStyles.mapLoading]}>
+          <Text style={directionStyles.mapLoadingText}>Cargando mapa...</Text>
         </View>
       )}
 
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 500,
-
-          paddingHorizontal: 12,
-          paddingVertical: 9,
-
-          borderRadius: 10,
-
-          backgroundColor: "#F8FAFC",
-
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-
-          marginBottom: 12,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 11,
-            lineHeight: 16,
-
-            color: "#64748B",
-
-            textAlign: "center",
-          }}
-        >
-          Puedes tocar cualquier punto del mapa para ajustar la ubicación exacta
-          del inmueble.
-        </Text>
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 340,
-
-          paddingHorizontal: 16,
-
-          marginBottom: 8,
-        }}
-      >
-        <ButtonForm
-          title="Continuar"
-          action={handleInformation}
-          disabled={!coords || inputPlace.trim().length === 0 || !mark}
-        />
-      </View>
-    </View>
+      <HintBox>
+        Usaremos el punto marcado para registrar la ciudad, el barrio y la
+        vía del inmueble.
+      </HintBox>
+    </StepLayout>
   );
 }
+
+const directionStyles = StyleSheet.create({
+  mapContainer: {
+    height: 260,
+    overflow: "hidden",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    backgroundColor: Palette.surfaceMuted,
+  },
+
+  map: {
+    flex: 1,
+  },
+
+  mapBadge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.94)",
+  },
+
+  mapBadgeText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: Palette.textSecondary,
+  },
+
+  mapLoading: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  mapLoadingText: {
+    fontSize: 13,
+    color: Palette.textMuted,
+  },
+});
+
+/* --------------------------- Paso 3: FMI y predial --------------------------- */
 
 export function FmiAndPredialNumberStep({
   saveData,
   setStep,
+  data: saved,
 }: RegisterFormData) {
   const [data, setData] = useState({
-    FMI: "",
-    PredialNumber: "",
+    FMI: saved?.fmi ?? "",
+    PredialNumber: saved?.predialNumber ?? "",
   });
-
-  const handleData = (key: keyof typeof data, value: string) => {
-    const info = {
-      ...data,
-      [key]: value,
-    };
-    setData(info);
-  };
 
   const isValid = data.FMI.trim() !== "" && data.PredialNumber.trim() !== "";
 
   const handleSubmit = () => {
     saveData((prev) => ({
       ...prev,
-      fmi: data.FMI,
-      predialNumber: data.PredialNumber,
+      fmi: data.FMI.trim(),
+      predialNumber: data.PredialNumber.trim(),
     }));
     setStep((prev) => prev + 1);
   };
 
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 6,
-        }}
-      >
-        Ingresa el FMI y el número predial de tu vivienda
-      </Text>
-
-      <Text
-        style={{
-          width: "90%",
-          fontSize: 11,
-          lineHeight: 17,
-          fontWeight: "400",
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 18,
-        }}
-      >
-        Esta información se utilizará para identificar el inmueble.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 500,
-          padding: 16,
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-          backgroundColor: "#FFFFFF",
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.06,
-          shadowRadius: 6,
-          elevation: 2,
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            marginBottom: 16,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 6,
-            }}
-          >
-            FMI
-          </Text>
-
-          <TextInput
-            placeholder="Ej. 060-123456"
-            placeholderTextColor="#9CA3AF"
-            style={{
-              width: "100%",
-              height: 48,
-              borderWidth: 1,
-              borderColor:
-                data.FMI.trim().length > 0 ? Colors.TERTIARY : "#D1D5DB",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              fontSize: 14,
-              color: "#111827",
-              backgroundColor: "#FFFFFF",
-            }}
-            value={data.FMI}
-            onChangeText={(text) => handleData("FMI", text)}
-            autoCapitalize="characters"
-            autoCorrect={false}
-          />
-        </View>
-
-        <View
-          style={{
-            width: "100%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 6,
-            }}
-          >
-            Número Predial
-          </Text>
-
-          <TextInput
-            inputMode="numeric"
-            keyboardType="number-pad"
-            placeholder="Ej. 010203040506"
-            placeholderTextColor="#9CA3AF"
-            style={{
-              width: "100%",
-              height: 48,
-              borderWidth: 1,
-              borderColor:
-                data.PredialNumber.trim().length > 0
-                  ? Colors.TERTIARY
-                  : "#D1D5DB",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              fontSize: 14,
-              color: "#111827",
-              backgroundColor: "#FFFFFF",
-            }}
-            value={data.PredialNumber}
-            onChangeText={(text) => handleData("PredialNumber", text)}
-          />
-        </View>
-      </View>
-
-      <View
-        style={{
-          width: "90%",
-          maxWidth: 460,
-          marginTop: 14,
-          marginBottom: 14,
-          paddingHorizontal: 12,
-          paddingVertical: 9,
-          borderRadius: 10,
-          backgroundColor: "#F8FAFC",
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 11,
-            lineHeight: 16,
-            color: "#64748B",
-            textAlign: "center",
-          }}
-        >
-          Verifica que ambos números coincidan con los documentos oficiales del
-          inmueble.
-        </Text>
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          paddingHorizontal: 16,
-          marginTop: 2,
-        }}
-      >
+    <StepLayout
+      title="FMI y número predial"
+      subtitle="Esta información se utilizará para identificar el inmueble."
+      footer={
         <ButtonForm
           title="Continuar"
           disabled={!isValid}
           action={handleSubmit}
         />
-      </View>
-    </View>
+      }
+    >
+      <FormCard>
+        <Field label="FMI">
+          <TextField
+            placeholder="Ej. 060-123456"
+            value={data.FMI}
+            onChangeText={(text) => setData((prev) => ({ ...prev, FMI: text }))}
+            autoCapitalize="characters"
+            autoCorrect={false}
+          />
+        </Field>
+
+        <Field label="Número predial">
+          <TextField
+            placeholder="Ej. 010203040506"
+            value={data.PredialNumber}
+            onChangeText={(text) =>
+              setData((prev) => ({ ...prev, PredialNumber: text }))
+            }
+            inputMode="numeric"
+            keyboardType="number-pad"
+          />
+        </Field>
+      </FormCard>
+
+      <HintBox>
+        Verifica que ambos números coincidan con los documentos oficiales del
+        inmueble.
+      </HintBox>
+    </StepLayout>
   );
 }
 
-export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
-  //estado de el nombre de la propiedad y descripcion de esta misma
-  const [info, setInfo] = useState<{
-    propertyName: string;
-    propertyDescription: string;
-  }>({
-    propertyName: "",
-    propertyDescription: "",
-  });
+/* ------------------------- Paso 4: nombre y descripción ------------------------- */
 
-  //estasync async async ado que controla cuando la IA esta trabajando
-  const [IsGeneratePrompt, setGeneratePrompt] = useState<boolean>();
+export function PropertyInfo({ saveData, setStep, data: saved }: RegisterFormData) {
+  const [info, setInfo] = useState({
+    propertyName: saved?.propertyName ?? "",
+    propertyDescription: saved?.propertyDescription ?? "",
+  });
 
   const mutation = useMutation({
     mutationFn: IAPropertyRegistrationSuggestion,
     mutationKey: ["IA-registration-suggestion"],
-    onError: (err: AxiosError<ApiError>) => {
-      const data = err.response?.data;
-
-      if (data) {
-        Toast.show({
-          text1: "Error en la generacion con IA",
-          type: "error",
-        });
-      }
+    onError: (_err: AxiosError<ApiError>) => {
+      Toast.show({
+        text1: "Error en la generación con IA",
+        type: "error",
+      });
     },
     onSuccess: (data) => {
       setInfo({
@@ -923,889 +644,323 @@ export function PropertyInfo({ saveData, setStep }: RegisterFormData) {
     },
   });
 
-  //generacion de contenido con IA
-  const generationIA = async () => {
-    setGeneratePrompt(true);
-
-    //limpiamos el estado de propertyName y descripcion para no montar sobre capas
-    setInfo({ propertyName: "", propertyDescription: "" });
-
-    mutation.mutate("PropertyName"); //llamamos al servidor para sugerir los nombres y descripcion
-
-    setGeneratePrompt(false);
-  };
-
-  const onChangeText = (id: string, value: string) => {
-    const currentInfo = {
-      ...info,
-      [id]: value,
-    };
-
-    setInfo(currentInfo);
-  };
+  const isValid =
+    info.propertyName.trim() !== "" && info.propertyDescription.trim() !== "";
 
   const submitInfo = () => {
     saveData((prev) => ({
       ...prev,
-      propertyName: info.propertyName,
-      propertyDescription: info.propertyDescription,
+      propertyName: info.propertyName.trim(),
+      propertyDescription: info.propertyDescription.trim(),
     }));
     setStep((prev) => prev + 1);
   };
 
-  const isValid =
-    info.propertyName.trim() !== "" && info.propertyDescription.trim() !== "";
-
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 6,
-        }}
-      >
-        Describe tu inmueble
-      </Text>
-
-      <Text
-        style={{
-          width: "90%",
-          fontSize: 11,
-          lineHeight: 17,
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 16,
-        }}
-      >
-        Añade un nombre y una descripción para que los posibles arrendatarios
-        conozcan mejor tu propiedad.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 500,
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-          backgroundColor: "#FFFFFF",
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.06,
-          shadowRadius: 6,
-          elevation: 2,
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 6,
-            }}
-          >
-            Nombre de la propiedad
-          </Text>
-
-          <TextInput
-            value={info.propertyName}
-            style={{
-              width: "100%",
-              height: 48,
-              borderWidth: 1,
-              borderColor:
-                info.propertyName.trim().length > 0
-                  ? Colors.TERTIARY
-                  : "#D1D5DB",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              fontSize: 14,
-              color: "#111827",
-              backgroundColor: "#FFFFFF",
-            }}
-            placeholder="Ej. Apartamento Vista al Mar"
-            placeholderTextColor="#9CA3AF"
-            onChangeText={(text) => onChangeText("propertyName", text)}
-            maxLength={80}
-            autoCapitalize="sentences"
-          />
-
-          <Text
-            style={{
-              fontSize: 10,
-              color: "#9CA3AF",
-              textAlign: "right",
-              marginTop: 4,
-            }}
-          >
-            {info.propertyName.length}/80
-          </Text>
-        </View>
-
-        <View
-          style={{
-            width: "100%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 13,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 6,
-            }}
-          >
-            Descripción de la propiedad
-          </Text>
-
-          <TextInput
-            value={info.propertyDescription}
-            style={{
-              width: "100%",
-              height: 110,
-              borderWidth: 1,
-              borderColor:
-                info.propertyDescription.trim().length > 0
-                  ? Colors.TERTIARY
-                  : "#D1D5DB",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              fontSize: 14,
-              lineHeight: 19,
-              color: "#111827",
-              backgroundColor: "#FFFFFF",
-              textAlignVertical: "top",
-            }}
-            multiline
-            numberOfLines={5}
-            placeholder="Ej. Apartamento amplio, iluminado y ubicado cerca de zonas comerciales..."
-            placeholderTextColor="#9CA3AF"
-            onChangeText={(text) => onChangeText("propertyDescription", text)}
-            maxLength={500}
-            autoCapitalize="sentences"
-          />
-
-          <Text
-            style={{
-              fontSize: 10,
-              color: "#9CA3AF",
-              textAlign: "right",
-              marginTop: 4,
-            }}
-          >
-            {info.propertyDescription.length}/500
-          </Text>
-        </View>
-      </View>
-
-      <Pressable
-        onPress={generationIA}
-        disabled={mutation.isPending}
-        style={({ pressed }) => [
-          {
-            width: "100%",
-            maxWidth: 500,
-            minHeight: 44,
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 7,
-            marginTop: 12,
-            borderWidth: 1,
-            borderColor: "#1B81FF",
-            borderRadius: 10,
-            backgroundColor: "#EFF6FF",
-            paddingHorizontal: 14,
-          },
-          pressed && {
-            opacity: 0.7,
-            transform: [{ scale: 0.98 }],
-          },
-          mutation.isPending && {
-            opacity: 0.55,
-          },
-        ]}
-      >
-        <IAIcon width={20} height={20} />
-
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: "700",
-            color: "#1B81FF",
-          }}
-        >
-          {mutation.isPending ? "Generando sugerencia..." : "Generar con IA"}
-        </Text>
-      </Pressable>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          paddingHorizontal: 16,
-          marginTop: 12,
-          marginBottom: 4,
-        }}
-      >
+    <StepLayout
+      title="Describe tu inmueble"
+      subtitle="Añade un nombre y una descripción para que conozcan mejor tu propiedad."
+      footer={
         <ButtonForm
           title="Continuar"
           action={submitInfo}
           disabled={!isValid || mutation.isPending}
         />
-      </View>
-    </View>
+      }
+    >
+      <FormCard>
+        <Field label="Nombre de la propiedad">
+          <TextField
+            value={info.propertyName}
+            placeholder="Ej. Apartamento Vista al Mar"
+            onChangeText={(text) =>
+              setInfo((prev) => ({ ...prev, propertyName: text }))
+            }
+            maxLength={80}
+          />
+          <Counter current={info.propertyName.length} max={80} />
+        </Field>
+
+        <Field label="Descripción de la propiedad">
+          <TextField
+            value={info.propertyDescription}
+            placeholder="Ej. Apartamento amplio, iluminado y cerca de zonas comerciales..."
+            onChangeText={(text) =>
+              setInfo((prev) => ({ ...prev, propertyDescription: text }))
+            }
+            maxLength={500}
+            multiline
+          />
+          <Counter current={info.propertyDescription.length} max={500} />
+        </Field>
+      </FormCard>
+
+      <Pressable
+        onPress={() => mutation.mutate("PropertyName")}
+        disabled={mutation.isPending}
+        style={({ pressed }) => [
+          infoStyles.aiButton,
+          pressed && styles.pressed,
+          mutation.isPending && styles.disabled,
+        ]}
+      >
+        <IAIcon width={20} height={20} />
+        <Text style={infoStyles.aiText}>
+          {mutation.isPending ? "Generando sugerencia..." : "Generar con IA"}
+        </Text>
+      </Pressable>
+    </StepLayout>
   );
 }
 
-export function StructurePropertyInfo({ saveData, setStep }: RegisterFormData) {
+const infoStyles = StyleSheet.create({
+  aiButton: {
+    minHeight: 46,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Palette.accentBorder,
+    backgroundColor: Palette.accentSoft,
+  },
+
+  aiText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: Palette.accentStrong,
+  },
+});
+
+/* ------------------------- Paso 5: características ------------------------- */
+
+const STRUCTURE_FIELDS: {
+  field: keyof StructurePropertyInfoType;
+  label: string;
+}[] = [
+  { field: "bedrooms", label: "Habitaciones" },
+  { field: "bathrooms", label: "Baños" },
+  { field: "floors", label: "Pisos" },
+  { field: "parkingSpaces", label: "Parqueaderos" },
+  // area = construida, lotArea = terreno (las etiquetas estaban invertidas)
+  { field: "area", label: "Área construida (m²)" },
+  { field: "lotArea", label: "Área del terreno (m²)" },
+  { field: "constructionYear", label: "Año de construcción" },
+];
+
+export function StructurePropertyInfo({
+  saveData,
+  setStep,
+  data,
+}: RegisterFormData) {
   const [structureProperty, setStructureProperty] =
     useState<StructurePropertyInfoType>({
-      area: 0,
-      bathrooms: 0,
-      bedrooms: 0,
-      constructionYear: 0,
-      floors: 0,
-      lotArea: 0,
-      parkingSpaces: 0,
+      area: data?.structurePropertyInfo?.area ?? 0,
+      bathrooms: data?.structurePropertyInfo?.bathrooms ?? 0,
+      bedrooms: data?.structurePropertyInfo?.bedrooms ?? 0,
+      constructionYear: data?.structurePropertyInfo?.constructionYear ?? 0,
+      floors: data?.structurePropertyInfo?.floors ?? 0,
+      lotArea: data?.structurePropertyInfo?.lotArea ?? 0,
+      parkingSpaces: data?.structurePropertyInfo?.parkingSpaces ?? 0,
     });
 
-  //guardamos la informacion estructural de la vivienda
+  // el backend exige valores positivos en todos los campos
+  const isValid = StructureInfoSchema.safeParse(structureProperty).success;
+
   const submitData = () => {
     saveData((prev) => ({ ...prev, structurePropertyInfo: structureProperty }));
     setStep((prev) => prev + 1);
   };
 
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingBottom: 16,
-        marginTop: 4,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 5,
-        }}
-      >
-        Características del inmueble
-      </Text>
-
-      <Text
-        style={{
-          width: "90%",
-          fontSize: 11,
-          lineHeight: 17,
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 14,
-        }}
-      >
-        Cuéntanos un poco más sobre las características físicas de tu inmueble.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 500,
-          flexDirection: "row",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          paddingHorizontal: 14,
-          paddingVertical: 14,
-          borderRadius: 18,
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-          backgroundColor: "#FFFFFF",
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.06,
-          shadowRadius: 6,
-          elevation: 2,
-        }}
-      >
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            N° de baños
-          </Text>
-
-          <NumberInput field="bathrooms" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            N° de habitaciones
-          </Text>
-
-          <NumberInput field="bedrooms" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            N° de pisos
-          </Text>
-
-          <NumberInput field="floors" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            N° de parqueaderos
-          </Text>
-
-          <NumberInput field="parkingSpaces" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Área del terreno (m²)
-          </Text>
-
-          <NumberInput field="area" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Área construida (m²)
-          </Text>
-
-          <NumberInput field="lotArea" saveData={setStructureProperty} />
-        </View>
-
-        <View
-          style={{
-            width: "48%",
-            marginBottom: 2,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Año de construcción
-          </Text>
-
-          <NumberInput
-            field="constructionYear"
-            saveData={setStructureProperty}
-          />
-        </View>
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 340,
-          paddingHorizontal: 16,
-          marginTop: 14,
-          marginBottom: 4,
-        }}
-      >
-        <ButtonForm title="Continuar" action={submitData} />
-      </View>
-    </View>
-  );
-}
-
-export function EconomicPropertyInfo({ saveData, setStep }: RegisterFormData) {
-  const [economicInfo, setEconomicInfo] = useState<EconomicPropertyInfoType>({
-    currency: "COP",
-    depositAmount: 0,
-    monthlyRent: 0,
-    utilitiesIncluded: false,
-  });
-
-  return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 8,
-        paddingTop: 2,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 4,
-        }}
-      >
-        Información económica del inmueble
-      </Text>
-
-      <Text
-        style={{
-          width: "90%",
-          fontSize: 11,
-          lineHeight: 17,
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 12,
-        }}
-      >
-        Define el valor de renta, depósito y los servicios incluidos.
-      </Text>
-
-      <View
-        style={{
-          width: "94%",
-          maxWidth: 500,
-
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-
-          backgroundColor: "#FFFFFF",
-
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.06,
-          shadowRadius: 5,
-
-          elevation: 2,
-        }}
-      >
-        <View style={{ marginBottom: 10 }}>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Valor de renta mensual
-          </Text>
-
-          <View
-            style={{
-              height: 42,
-              flexDirection: "row",
-              alignItems: "center",
-
-              borderWidth: 1,
-              borderColor: "#D1D5DB",
-              borderRadius: 9,
-
-              backgroundColor: "#FFFFFF",
-            }}
-          >
-            <Text
-              style={{
-                paddingLeft: 10,
-                fontSize: 14,
-                color: "#6B7280",
-              }}
-            >
-              $
-            </Text>
-
-            <TextInput
-              value={
-                economicInfo.monthlyRent === 0
-                  ? ""
-                  : String(economicInfo.monthlyRent)
-              }
-              onChangeText={(value) =>
-                setEconomicInfo((prev) => ({
-                  ...prev,
-                  monthlyRent: Number(value.replace(/[^0-9]/g, "")),
-                }))
-              }
-              keyboardType="numeric"
-              placeholder="0"
-              placeholderTextColor="#9CA3AF"
-              style={{
-                flex: 1,
-                height: "100%",
-                paddingHorizontal: 8,
-                fontSize: 14,
-                color: "#111827",
-              }}
-            />
-          </View>
-        </View>
-
-        <View style={{ marginBottom: 10 }}>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Valor del depósito
-          </Text>
-
-          <View
-            style={{
-              height: 42,
-              flexDirection: "row",
-              alignItems: "center",
-
-              borderWidth: 1,
-              borderColor: "#D1D5DB",
-              borderRadius: 9,
-
-              backgroundColor: "#FFFFFF",
-            }}
-          >
-            <Text
-              style={{
-                paddingLeft: 10,
-                fontSize: 14,
-                color: "#6B7280",
-              }}
-            >
-              $
-            </Text>
-
-            <TextInput
-              value={
-                economicInfo.depositAmount === 0
-                  ? ""
-                  : String(economicInfo.depositAmount)
-              }
-              onChangeText={(value) =>
-                setEconomicInfo((prev) => ({
-                  ...prev,
-                  depositAmount: Number(value.replace(/[^0-9]/g, "")),
-                }))
-              }
-              keyboardType="numeric"
-              placeholder="0"
-              placeholderTextColor="#9CA3AF"
-              style={{
-                flex: 1,
-                height: "100%",
-                paddingHorizontal: 8,
-                fontSize: 14,
-                color: "#111827",
-              }}
-            />
-          </View>
-        </View>
-
-        <View style={{ marginBottom: 10 }}>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            Tipo de moneda
-          </Text>
-
-          <View
-            style={{
-              height: 42,
-              justifyContent: "center",
-
-              borderWidth: 1,
-              borderColor: "#D1D5DB",
-              borderRadius: 9,
-
-              backgroundColor: "#FFFFFF",
-              overflow: "hidden",
-            }}
-          >
-            <Picker
-              selectedValue={economicInfo.currency}
-              onValueChange={(itemValue) =>
-                setEconomicInfo((prev) => ({
-                  ...prev,
-                  currency: itemValue,
-                }))
-              }
-              style={{
-                width: "100%",
-                height: 56,
-                color: "#111827",
-              }}
-            >
-              <Picker.Item label="Peso colombiano (COP)" value="COP" />
-              <Picker.Item label="Dólar estadounidense (USD)" value="USD" />
-            </Picker>
-          </View>
-        </View>
-
-        <View>
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: "600",
-              color: "#374151",
-              marginBottom: 5,
-            }}
-          >
-            ¿Servicios incluidos?
-          </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              gap: 8,
-            }}
-          >
-            <Pressable
-              onPress={() =>
-                setEconomicInfo((prev) => ({
-                  ...prev,
-                  utilitiesIncluded: true,
-                }))
-              }
-              style={{
-                flex: 1,
-                height: 38,
-
-                alignItems: "center",
-                justifyContent: "center",
-
-                borderWidth: 1,
-                borderColor: economicInfo.utilitiesIncluded
-                  ? "#111827"
-                  : "#D1D5DB",
-
-                borderRadius: 8,
-
-                backgroundColor: economicInfo.utilitiesIncluded
-                  ? "#F3F4F6"
-                  : "#FFFFFF",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                Sí
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() =>
-                setEconomicInfo((prev) => ({
-                  ...prev,
-                  utilitiesIncluded: false,
-                }))
-              }
-              style={{
-                flex: 1,
-                height: 38,
-
-                alignItems: "center",
-                justifyContent: "center",
-
-                borderWidth: 1,
-                borderColor: !economicInfo.utilitiesIncluded
-                  ? "#111827"
-                  : "#D1D5DB",
-
-                borderRadius: 8,
-
-                backgroundColor: !economicInfo.utilitiesIncluded
-                  ? "#F3F4F6"
-                  : "#FFFFFF",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 13,
-                  fontWeight: "600",
-                  color: "#374151",
-                }}
-              >
-                No
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 320,
-          paddingHorizontal: 20,
-          marginTop: 12,
-        }}
-      >
+    <StepLayout
+      title="Características del inmueble"
+      subtitle="Cuéntanos las características físicas de tu inmueble. Todos los campos son obligatorios."
+      footer={
         <ButtonForm
           title="Continuar"
-          action={() => {
-            saveData((prev) => ({
-              ...prev,
-              economicPropertyInfo: economicInfo,
-            }));
-
-            return setStep((prev) => prev + 1);
-          }}
+          action={submitData}
+          disabled={!isValid}
         />
-      </View>
-    </View>
+      }
+    >
+      <FormCard>
+        <View style={structureStyles.grid}>
+          {STRUCTURE_FIELDS.map(({ field, label }) => (
+            <View key={field} style={structureStyles.cell}>
+              <Field label={label}>
+                <NumberInput
+                  field={field}
+                  saveData={setStructureProperty}
+                  initValue={structureProperty[field]}
+                />
+              </Field>
+            </View>
+          ))}
+        </View>
+      </FormCard>
+
+      {!isValid && (
+        <HintBox>Completa todos los campos con valores mayores a cero.</HintBox>
+      )}
+    </StepLayout>
   );
 }
 
-interface TypeAndOccupationProps {
-  typeProperty: TypePropertyType;
-  propertyOccupationType: PropertyOccupationType;
+const structureStyles = StyleSheet.create({
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 16,
+  },
+
+  cell: {
+    width: "48%",
+  },
+});
+
+/* ------------------------- Paso 6: información económica ------------------------- */
+
+export function EconomicPropertyInfo({
+  saveData,
+  setStep,
+  data,
+}: RegisterFormData) {
+  const [economicInfo, setEconomicInfo] = useState<EconomicPropertyInfoType>({
+    currency: data?.economicPropertyInfo?.currency ?? "COP",
+    depositAmount: data?.economicPropertyInfo?.depositAmount ?? 0,
+    monthlyRent: data?.economicPropertyInfo?.monthlyRent ?? 0,
+    utilitiesIncluded: data?.economicPropertyInfo?.utilitiesIncluded ?? false,
+  });
+
+  // la renta debe ser mayor a cero; el depósito puede ser cero
+  const isValid =
+    EconomicInfoSchema.safeParse(economicInfo).success &&
+    economicInfo.monthlyRent > 0;
+
+  const toNumber = (value: string) => Number(value.replace(/[^0-9]/g, ""));
+  const format = (value: number) =>
+    value === 0 ? "" : value.toLocaleString("es-CO");
+
+  const submit = () => {
+    saveData((prev) => ({ ...prev, economicPropertyInfo: economicInfo }));
+    setStep((prev) => prev + 1);
+  };
+
+  return (
+    <StepLayout
+      title="Información económica"
+      subtitle="Define el valor de renta, el depósito y los servicios incluidos."
+      footer={
+        <ButtonForm title="Continuar" action={submit} disabled={!isValid} />
+      }
+    >
+      <FormCard>
+        <Field label="Valor de renta mensual">
+          <TextField
+            prefix="$"
+            value={format(economicInfo.monthlyRent)}
+            onChangeText={(value) =>
+              setEconomicInfo((prev) => ({
+                ...prev,
+                monthlyRent: toNumber(value),
+              }))
+            }
+            keyboardType="numeric"
+            placeholder="0"
+          />
+        </Field>
+
+        <Field label="Valor del depósito">
+          <TextField
+            prefix="$"
+            value={format(economicInfo.depositAmount)}
+            onChangeText={(value) =>
+              setEconomicInfo((prev) => ({
+                ...prev,
+                depositAmount: toNumber(value),
+              }))
+            }
+            keyboardType="numeric"
+            placeholder="0"
+          />
+        </Field>
+
+        <Field label="Tipo de moneda">
+          <OptionChips
+            value={economicInfo.currency}
+            onChange={(currency) =>
+              setEconomicInfo((prev) => ({ ...prev, currency }))
+            }
+            options={[
+              { label: "Peso colombiano (COP)", value: "COP" },
+              { label: "Dólar (USD)", value: "USD" },
+            ]}
+          />
+        </Field>
+
+        <Field label="¿Servicios incluidos?">
+          <OptionChips
+            value={economicInfo.utilitiesIncluded ? "yes" : "no"}
+            onChange={(value) =>
+              setEconomicInfo((prev) => ({
+                ...prev,
+                utilitiesIncluded: value === "yes",
+              }))
+            }
+            options={[
+              { label: "Sí", value: "yes" },
+              { label: "No", value: "no" },
+            ]}
+          />
+        </Field>
+      </FormCard>
+
+      {economicInfo.monthlyRent === 0 && (
+        <HintBox>Ingresa un valor de renta mayor a cero para continuar.</HintBox>
+      )}
+    </StepLayout>
+  );
 }
+
+/* ------------------------- Paso 7: tipo y ocupación ------------------------- */
+
+const PROPERTY_TYPES: { label: string; value: TypePropertyType }[] = [
+  { label: "Residencial", value: "RESIDENCIAL" },
+  { label: "Comercial", value: "COMERCIAL" },
+  { label: "Industrial", value: "INDUSTRIAL" },
+  { label: "Terreno", value: "TERRENO" },
+  { label: "Urbano", value: "URBANO" },
+  { label: "Agrario", value: "AGRARIO" },
+  { label: "Mixto", value: "MIXTO" },
+];
+
+const OCCUPATION_TYPES: { label: string; value: PropertyOccupationType }[] = [
+  { label: "Disponible", value: "DESOCUPADO" },
+  { label: "En proceso", value: "EN_PROCESO" },
+  { label: "Arrendado", value: "OCUPADO" },
+];
 
 export function TypeAndOccupationStep({
   saveData,
   disabled,
   setIsCreateProperty,
+  data,
 }: {
   disabled: boolean;
-  saveData: React.Dispatch<
-    React.SetStateAction<Partial<CreatePropertyType> | undefined>
-  >;
+  data?: RegisterFormData["data"];
+  saveData: RegisterFormData["saveData"];
   setIsCreateProperty: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [info, setInfo] = useState<TypeAndOccupationProps>({
-    propertyOccupationType: "DESOCUPADO",
-    typeProperty: "RESIDENCIAL",
+  const [info, setInfo] = useState<{
+    typeProperty: TypePropertyType;
+    propertyOccupationType: PropertyOccupationType;
+  }>({
+    propertyOccupationType: data?.propertyOccupationType ?? "DESOCUPADO",
+    typeProperty: data?.propertyType ?? "RESIDENCIAL",
   });
-
-  const handlePropertyType = (key: string, value: string) => {
-    const data = {
-      ...info,
-      [key]: value,
-    };
-
-    setInfo(data);
-  };
 
   const submitData = () => {
     saveData((prev) => ({
@@ -1818,221 +973,55 @@ export function TypeAndOccupationStep({
   };
 
   return (
-    <View
-      style={{
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        paddingHorizontal: 4,
-        marginTop: 8,
-      }}
-    >
-      <Text
-        style={{
-          width: "100%",
-          fontSize: 18,
-          lineHeight: 24,
-          fontWeight: "800",
-          color: "#111827",
-          textAlign: "center",
-          marginBottom: 4,
-        }}
-      >
-        Últimos detalles de tu inmueble
-      </Text>
-
-      <Text
-        style={{
-          width: "90%",
-          fontSize: 11,
-          lineHeight: 17,
-          fontWeight: "400",
-          color: "#6B7280",
-          textAlign: "center",
-          marginBottom: 12,
-        }}
-      >
-        Selecciona el tipo y el estado actual de ocupación de tu propiedad.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 500,
-
-          paddingHorizontal: 18,
-          paddingVertical: 20,
-
-          borderRadius: 20,
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-
-          backgroundColor: "#FFFFFF",
-
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: 3,
-          },
-          shadowOpacity: 0.07,
-          shadowRadius: 8,
-
-          elevation: 3,
-        }}
-      >
-        <View
-          style={{
-            width: "100%",
-            marginBottom: 22,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#374151",
-              marginBottom: 8,
-            }}
-          >
-            Tipo de inmueble
-          </Text>
-
-          <View
-            style={{
-              width: "100%",
-              height: 54,
-
-              justifyContent: "center",
-
-              borderWidth: 1,
-              borderColor: "#D1D5DB",
-
-              borderRadius: 12,
-
-              backgroundColor: "#FFFFFF",
-
-              overflow: "hidden",
-            }}
-          >
-            <Picker
-              style={{
-                width: "100%",
-                height: 54,
-                color: "#111827",
-              }}
-              selectedValue={info.typeProperty}
-              onValueChange={(itemValue, _) =>
-                handlePropertyType("typeProperty", itemValue)
-              }
-            >
-              <Picker.Item label="Residencial" value="RESIDENCIAL" />
-              <Picker.Item label="Comercial" value="COMERCIAL" />
-              <Picker.Item label="Industrial" value="INDUSTRIAL" />
-              <Picker.Item label="Terreno" value="TERRENO" />
-              <Picker.Item label="Urbano" value="URBANO" />
-              <Picker.Item label="Agrario" value="AGRARIO" />
-              <Picker.Item label="Mixto" value="MIXTO" />
-            </Picker>
-          </View>
-        </View>
-
-        <View
-          style={{
-            width: "100%",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#374151",
-              marginBottom: 8,
-            }}
-          >
-            Estado de ocupación
-          </Text>
-
-          <View
-            style={{
-              width: "100%",
-              height: 54,
-
-              justifyContent: "center",
-
-              borderWidth: 1,
-              borderColor: "#D1D5DB",
-
-              borderRadius: 12,
-
-              backgroundColor: "#FFFFFF",
-
-              overflow: "hidden",
-            }}
-          >
-            <Picker
-              style={{
-                width: "100%",
-                height: 54,
-                color: "#111827",
-              }}
-              selectedValue={info.propertyOccupationType}
-              onValueChange={(itemValue, _) =>
-                handlePropertyType("propertyOccupationType", itemValue)
-              }
-            >
-              <Picker.Item label="Arrendado" value="OCUPADO" />
-              <Picker.Item label="En proceso" value="EN_PROCESO" />
-              <Picker.Item label="Disponible" value="DESOCUPADO" />
-            </Picker>
-          </View>
-        </View>
-      </View>
-
-      <View
-        style={{
-          width: "90%",
-          maxWidth: 460,
-
-          marginTop: 16,
-          marginBottom: 18,
-
-          paddingHorizontal: 14,
-          paddingVertical: 11,
-
-          borderRadius: 12,
-
-          backgroundColor: "#F8FAFC",
-
-          borderWidth: 1,
-          borderColor: "#E5E7EB",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 12,
-            lineHeight: 18,
-            color: "#64748B",
-            textAlign: "center",
-          }}
-        >
-          Revisa que la información seleccionada sea correcta antes de registrar
-          tu propiedad.
-        </Text>
-      </View>
-
-      <View
-        style={{
-          width: "100%",
-          maxWidth: 360,
-          paddingHorizontal: 20,
-        }}
-      >
+    <StepLayout
+      title="Últimos detalles"
+      subtitle="Selecciona el tipo y el estado actual de ocupación de tu propiedad."
+      footer={
         <ButtonForm
           title="Registrar propiedad"
           action={submitData}
           disabled={disabled}
+          isPending={disabled}
         />
-      </View>
-    </View>
+      }
+    >
+      <FormCard>
+        <Field label="Tipo de inmueble">
+          <OptionChips
+            options={PROPERTY_TYPES}
+            value={info.typeProperty}
+            onChange={(typeProperty) =>
+              setInfo((prev) => ({ ...prev, typeProperty }))
+            }
+          />
+        </Field>
+
+        <Field label="Estado de ocupación">
+          <OptionChips
+            options={OCCUPATION_TYPES}
+            value={info.propertyOccupationType}
+            onChange={(propertyOccupationType) =>
+              setInfo((prev) => ({ ...prev, propertyOccupationType }))
+            }
+          />
+        </Field>
+      </FormCard>
+
+      <HintBox>
+        Revisa que la información sea correcta antes de registrar tu
+        propiedad.
+      </HintBox>
+    </StepLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.98 }],
+  },
+
+  disabled: {
+    opacity: 0.5,
+  },
+});

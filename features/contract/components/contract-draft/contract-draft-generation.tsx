@@ -1,10 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { ButtonForm } from "../../../../components/buttons/button";
 import { PrincipalError } from "../../../../components/error";
-import { EmptyList, RentDescription } from "../../../../components/info";
+import { EmptyList } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
+import { Palette } from "../../../../themes/themes";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllPropertyMembers } from "../../../property-registration/api";
 import type { GetAllPropertyMemberInfo } from "../../../property-registration/api.response";
@@ -76,12 +77,18 @@ export function SelectedPropertyMemberForContractDraft({
 
   return (
     <View style={selectedPropertyMemberStyles.container}>
-      <RentDescription
-        title="Elige el arrendado!"
-        description="Escoge a la persona a la cual se le generará el borrador de contrato"
-      />
-
       <FlatList
+        ListHeaderComponent={
+          <View style={selectedPropertyMemberStyles.header}>
+            <Text style={selectedPropertyMemberStyles.title}>
+              Elige al arrendatario
+            </Text>
+            <Text style={selectedPropertyMemberStyles.description}>
+              Escoge a la persona a la cual se le generará el borrador de
+              contrato.
+            </Text>
+          </View>
+        }
         data={propertyMembers.data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -99,7 +106,7 @@ export function SelectedPropertyMemberForContractDraft({
         )}
         ListEmptyComponent={
           <EmptyList
-            title="Miembros nos encontrados"
+            title="Miembros no encontrados"
             description="Asegurate de invitar o añadir miembros a tu propiedad!"
           />
         }
@@ -112,11 +119,25 @@ const selectedPropertyMemberStyles = StyleSheet.create({
   container: {
     width: "100%",
     flex: 1,
-    paddingHorizontal: 12,
-    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  header: {
+    gap: 3,
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: Palette.textPrimary,
+  },
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: Palette.textMuted,
   },
   propertyMemberList: {
-    paddingBottom: 20,
+    flexGrow: 1,
+    paddingBottom: 32,
   },
   memberSeparator: {
     height: 10,
@@ -221,7 +242,13 @@ export function GenerateContractDraft({
           <View style={generateContractStyles.buttonContainer}>
             <ButtonForm
               title="Crear borrador"
+              variant="primary"
+              isPending={mutation.isPending}
               action={handleContractDraftCreation}
+            />
+            <ButtonForm
+              title="Elegir otro miembro"
+              action={() => setSelectedMember(null)}
             />
           </View>
         </>
@@ -237,20 +264,21 @@ const generateContractStyles = StyleSheet.create({
   },
 
   editorStyle: {
-    height: 500,
-    marginHorizontal: 12,
-    marginTop: 24,
-    backgroundColor: "#FFFFFF",
+    flex: 1,
+    minHeight: 320,
+    marginHorizontal: 20,
+    backgroundColor: Palette.surface,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: Palette.border,
     borderRadius: 16,
     overflow: "hidden",
   },
 
   buttonContainer: {
     width: "100%",
-    paddingHorizontal: 24,
-    marginTop: 6,
-    marginBottom: -12,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    gap: 8,
   },
 });

@@ -10,7 +10,7 @@ import EmailIcon from "../../../assets/icons/email-icon.svg";
 import SeeIconPasswordHide from "../../../assets/icons/eye-icon-hide.svg";
 import SeeIconPassword from "../../../assets/icons/eye-icon.svg";
 import { ButtonForm } from "../../../components/buttons/button";
-import { Colors } from "../../../themes/themes";
+import { Palette } from "../../../themes/themes";
 import { GoogleAuthButton } from "../components/auth-provider";
 
 import { useMutation } from "@tanstack/react-query";
@@ -28,14 +28,14 @@ import { FormInfoStorage, InfoStorage } from "../services/auth.service";
 
 const email: KeyInput = {
   field: "email",
-  label: "email",
-  placeholder: "digita tu correo",
+  label: "Correo electrónico",
+  placeholder: "tu@correo.com",
 };
 
 const password: KeyInput = {
   field: "password",
-  label: "password",
-  placeholder: "digite su contraseña",
+  label: "Contraseña",
+  placeholder: "Tu contraseña",
 };
 
 function LoginScreen() {
@@ -138,7 +138,12 @@ function LoginScreen() {
         </View>
 
         <View style={styles.loginCard}>
-          <Text style={styles.subtitle}>Bienvenido una vez mas!</Text>
+          <View style={styles.titleBlock}>
+            <Text style={styles.title}>Inicia sesión</Text>
+            <Text style={styles.subtitle}>
+              Bienvenido de nuevo. Gestiona tus propiedades y contratos.
+            </Text>
+          </View>
 
           <View style={styles.loginFormSection}>
             <Input
@@ -183,10 +188,10 @@ function LoginScreen() {
           </View>
 
           <ButtonForm
+            variant="primary"
+            isPending={mutation.isPending}
             action={submitLogin}
-            title={
-              mutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"
-            }
+            title="Iniciar sesión"
             disabled={disabledButton}
           />
 
@@ -194,7 +199,7 @@ function LoginScreen() {
             <View style={styles.dividerContainer}>
               <View style={styles.decorativeBarrer} />
 
-              <Text style={styles.dividerText}>o continúa con</Text>
+              <Text style={styles.dividerText}>o</Text>
 
               <View style={styles.decorativeBarrer} />
             </View>
@@ -283,38 +288,47 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 21,
-    fontWeight: "500",
+  titleBlock: {
+    gap: 4,
+  },
 
-    textAlign: "center",
-    color: "black",
+  title: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+    color: Palette.textPrimary,
+  },
+
+  subtitle: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: Palette.textMuted,
   },
 
   loginCard: {
     width: "100%",
 
-    paddingHorizontal: 16,
-    paddingVertical: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
 
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#0000001A",
+    borderColor: Palette.border,
 
     backgroundColor: "#FFFFFF",
 
-    gap: 20,
+    gap: 18,
 
-    shadowColor: "#000000",
+    shadowColor: "#0F172A",
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
 
-    elevation: 6,
+    elevation: 3,
   },
 
   loginFormSection: {
@@ -325,8 +339,8 @@ const styles = StyleSheet.create({
   loginFormSectionImage: {
     position: "absolute",
 
-    right: 12,
-    top: 14,
+    right: 14,
+    top: 15,
   },
 
   providersSection: {
@@ -350,14 +364,14 @@ const styles = StyleSheet.create({
 
     height: 1,
 
-    backgroundColor: "#D1D5DB",
+    backgroundColor: Palette.border,
   },
 
   dividerText: {
     marginHorizontal: 10,
 
-    fontSize: 14,
-    color: "#6B7280",
+    fontSize: 13,
+    color: Palette.textMuted,
   },
 
   registerContainer: {
@@ -374,13 +388,13 @@ const styles = StyleSheet.create({
 
   registerText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: Palette.textMuted,
   },
 
   registerLink: {
     fontSize: 14,
     fontWeight: "600",
-    color: Colors.TERTIARY,
+    color: Palette.accent,
   },
 });
 

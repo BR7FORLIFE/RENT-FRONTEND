@@ -76,8 +76,8 @@ const descriptionStyles = StyleSheet.create({
   titleSection: {
     width: "100%",
     paddingHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 12,
+    marginBottom: 16,
   },
 
   title: {
@@ -89,10 +89,10 @@ const descriptionStyles = StyleSheet.create({
 
   subtitle: {
     marginTop: 5,
-    fontSize: 11,
-    lineHeight: 18,
-    color: "#6B7280",
-    maxWidth: "90%",
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#64748B",
+    maxWidth: "92%",
   },
 });
 

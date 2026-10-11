@@ -18,6 +18,7 @@ export interface ButtonProps {
   disabled?: boolean;
   isPending?: boolean;
   style?: ButtonStyle;
+  variant?: "secondary" | "primary";
 }
 
 function ButtonForm({
@@ -26,7 +27,10 @@ function ButtonForm({
   disabled = false,
   isPending = false,
   style,
+  variant = "secondary",
 }: ButtonProps) {
+  const isPrimary = variant === "primary" && !disabled;
+
   return (
     <Pressable
       onPress={action}
@@ -36,6 +40,7 @@ function ButtonForm({
 
         // Estado normal / disabled
         disabled ? styles.disabledButton : styles.enabledButton,
+        isPrimary && styles.primaryButton,
 
         // Feedback al presionar
         pressed && !disabled && styles.pressedButton,
@@ -46,7 +51,7 @@ function ButtonForm({
       {isPending ? (
         <ActivityIndicator
           size="small"
-          color={disabled ? "#64748B" : "#111827"}
+          color={disabled ? "#64748B" : isPrimary ? "#FFFFFF" : "#111827"}
         />
       ) : (
         <Text
@@ -55,6 +60,7 @@ function ButtonForm({
             {
               fontSize: style?.fontSize ?? 14,
             },
+            isPrimary && styles.primaryText,
             disabled && styles.disabledText,
           ]}
         >
@@ -95,6 +101,15 @@ const styles = StyleSheet.create({
   enabledButton: {
     backgroundColor: "#FFFFFF",
     borderColor: "#D1D5DB",
+  },
+
+  primaryButton: {
+    backgroundColor: "#2563EB",
+    borderColor: "#2563EB",
+  },
+
+  primaryText: {
+    color: "#FFFFFF",
   },
 
   disabledButton: {

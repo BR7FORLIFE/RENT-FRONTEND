@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { Colors } from "../../themes/themes";
+import { Palette } from "../../themes/themes";
 
 import SearchIcon from "../../assets/icons/search-input.svg";
 
@@ -43,7 +43,7 @@ function Input({
           styles.text,
           {
             top: shouldSee ? -8 : 15,
-            color: shouldSee ? Colors.TERTIARY : Colors.NEUTRAL,
+            color: onfocus ? Palette.accent : Palette.textMuted,
           },
         ]}
       >
@@ -55,7 +55,7 @@ function Input({
         style={[
           styles.input,
           {
-            borderColor: shouldSee ? Colors.TERTIARY : Colors.NEUTRAL,
+            borderColor: onfocus ? Palette.accent : Palette.borderStrong,
           },
         ]}
         keyboardType={typeInput || "default"}
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: 4,
 
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
 
     backgroundColor: "#FFFFFF",
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     paddingRight: 44,
 
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
 
     fontSize: 15,
     color: "#111827",
@@ -120,6 +120,7 @@ type SearchInputProps = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  onSubmit?: () => void;
 };
 // SearchInput
 
@@ -127,6 +128,7 @@ function SearchInput({
   value,
   onChangeText,
   placeholder = "Buscar",
+  onSubmit,
 }: SearchInputProps) {
   const [focus, setFocus] = useState(false);
 
@@ -135,7 +137,7 @@ function SearchInput({
       style={[
         stylesSearch.container,
         {
-          borderColor: focus ? Colors.TERTIARY : "#D8DDE6",
+          borderColor: focus ? Palette.accent : Palette.borderStrong,
         },
       ]}
     >
@@ -144,6 +146,8 @@ function SearchInput({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
+        returnKeyType={onSubmit ? "search" : "default"}
+        onSubmitEditing={onSubmit}
         style={stylesSearch.input}
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
@@ -229,10 +233,15 @@ function NumberInput<T>({
   const editableInput = (text: string) => {
     const toNumber = Number(text);
 
-    if (isNaN(toNumber)) {
+    if (isNaN(toNumber) || toNumber < 0) {
       return;
     }
     setNumber(toNumber);
+
+    saveData((currentData) => ({
+      ...currentData,
+      [field]: toNumber,
+    }));
   };
 
   return (

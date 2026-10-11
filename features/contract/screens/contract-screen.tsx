@@ -40,16 +40,14 @@ export function ContractScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{ backgroundColor: "white", flex: 1, flexDirection: "column" }}
-    >
+    <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <SplashWaveBackground />
 
       <RentHeader sectionName="CONTRATOS" />
 
       <RentDescription
         title="Ver contratos"
-        description="Gestiona los contratos asociados a tus propiedades."
+        description="Elige una propiedad para ver y gestionar sus contratos."
       />
 
       <View style={styles.asociationProperties}>
@@ -111,14 +109,13 @@ const styles = StyleSheet.create({
   asociationProperties: {
     width: "100%",
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
 
   associationList: {
+    flexGrow: 1,
     width: "100%",
-    paddingHorizontal: 2,
-    paddingTop: 4,
-    paddingBottom: 6,
+    paddingBottom: 24,
     gap: 12,
   },
 });

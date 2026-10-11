@@ -6,12 +6,13 @@ import
     type BarcodeScanningResult,
   } from "expo-camera";
 import { useState } from "react";
-import { Button, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import QrCode from "react-native-qrcode-svg";
 import Toast from "react-native-toast-message";
 import { ButtonForm } from "../../../../components/buttons/button";
-import { SearchInput } from "../../../../components/inputs/input";
+import { Input } from "../../../../components/inputs/input";
 import { useMe } from "../../../../stores/auth-store";
+import { Palette } from "../../../../themes/themes";
 import { InvitePropertyMember } from "../../api";
 import { QrPayloadSchema } from "../../schemas/help-schemas";
 import { useBehaviorQr, useProperty } from "../../stores/property.store";
@@ -84,77 +85,118 @@ export function QrScan({
   };
 
   if (!permission) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 24,
-        }}
-      />
-    );
+    return <View style={scanStyles.center} />;
   }
 
   if (!permission.granted) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 32,
-          gap: 16,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "700",
-            textAlign: "center",
-            marginBottom: 4,
-          }}
-        >
-          Permiso de cámara
-        </Text>
+      <View style={scanStyles.center}>
+        <Text style={scanStyles.title}>Permiso de cámara</Text>
 
-        <Text
-          style={{
-            fontSize: 16,
-            lineHeight: 24,
-            textAlign: "center",
-            color: "#666",
-            marginBottom: 8,
-          }}
-        >
-          Necesitamos acceso a tu camara para poder escanear el codigo QR de la
+        <Text style={scanStyles.description}>
+          Necesitamos acceso a tu cámara para escanear el código QR de la
           invitación.
         </Text>
 
-        <Button onPress={setPermission} title="Dar permiso a la cámara" />
+        <View style={scanStyles.actions}>
+          <ButtonForm
+            title="Dar permiso a la cámara"
+            variant="primary"
+            action={setPermission}
+          />
+          <ButtonForm title="Cancelar" action={() => setOpenQrScan(false)} />
+        </View>
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#000",
-      }}
-    >
+    <View style={scanStyles.camera}>
       <CameraView
-        style={{
-          flex: 1,
-        }}
+        style={StyleSheet.absoluteFill}
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
         onBarcodeScanned={handleQrResult}
       />
+
+      <View pointerEvents="none" style={scanStyles.frameWrapper}>
+        <View style={scanStyles.frame} />
+        <Text style={scanStyles.hint}>
+          Apunta al código QR de la propiedad
+        </Text>
+      </View>
+
+      <View style={scanStyles.cancel}>
+        <ButtonForm title="Cancelar" action={() => setOpenQrScan(false)} />
+      </View>
     </View>
   );
 }
+
+const scanStyles = StyleSheet.create({
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    gap: 12,
+    backgroundColor: Palette.background,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: Palette.textPrimary,
+    textAlign: "center",
+  },
+
+  description: {
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: "center",
+    color: Palette.textMuted,
+  },
+
+  actions: {
+    width: "100%",
+    gap: 8,
+    marginTop: 8,
+  },
+
+  camera: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+
+  frameWrapper: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+
+  frame: {
+    width: 240,
+    height: 240,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+  },
+
+  hint: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+
+  cancel: {
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: 32,
+  },
+});
 
 export function InvitePropertyMemberCard() {
   const { setOpen } = useBehaviorQr();
@@ -177,6 +219,12 @@ export function InvitePropertyMemberCard() {
         text2: "Invitacion enviada exitosamente!",
       });
     },
+    onError: () => {
+      Toast.show({
+        type: "error",
+        text2: "No se pudo enviar la invitación. Inténtalo de nuevo.",
+      });
+    },
   });
 
   const sendInvitation = () => {
@@ -187,6 +235,8 @@ export function InvitePropertyMemberCard() {
     return null;
   }
 
+  const emailIsValid = /^\S+@\S+\.\S+$/.test(email.trim());
+
   return (
     <View style={invitePropertyMemberStyles.overlay}>
       <Pressable
@@ -196,17 +246,31 @@ export function InvitePropertyMemberCard() {
 
       <View style={invitePropertyMemberStyles.card}>
         <View style={invitePropertyMemberStyles.header}>
-          <Text style={invitePropertyMemberStyles.title}>Agregar miembro</Text>
+          <View style={invitePropertyMemberStyles.headerText}>
+            <Text style={invitePropertyMemberStyles.title}>
+              Agregar miembro
+            </Text>
+            <Text
+              style={invitePropertyMemberStyles.propertyName}
+              numberOfLines={1}
+            >
+              {data.propertyName}
+            </Text>
+          </View>
 
-          <Text style={invitePropertyMemberStyles.propertyName}>
-            {data.propertyName}
-          </Text>
-
-          <Text style={invitePropertyMemberStyles.description}>
-            Genera un código QR para vincular un miembro a esta propiedad.
-            También puedes enviarle una invitación directamente a su correo.
-          </Text>
+          <Pressable
+            onPress={() => setOpen(false)}
+            hitSlop={10}
+            accessibilityLabel="Cerrar"
+          >
+            <Text style={invitePropertyMemberStyles.close}>✕</Text>
+          </Pressable>
         </View>
+
+        <Text style={invitePropertyMemberStyles.description}>
+          Comparte el código QR para vincular a alguien a esta propiedad o
+          envíale una invitación a su correo.
+        </Text>
 
         <View style={invitePropertyMemberStyles.qrSection}>
           <View style={invitePropertyMemberStyles.qrContainer}>
@@ -220,25 +284,28 @@ export function InvitePropertyMemberCard() {
 
         <View style={invitePropertyMemberStyles.dividerContainer}>
           <View style={invitePropertyMemberStyles.divider} />
-
           <Text style={invitePropertyMemberStyles.dividerText}>
-            O INVITA POR CORREO
+            o invita por correo
           </Text>
-
           <View style={invitePropertyMemberStyles.divider} />
         </View>
 
         <View style={invitePropertyMemberStyles.emailSection}>
-          <Text style={invitePropertyMemberStyles.emailLabel}>
-            Correo electrónico
-          </Text>
-
-          <SearchInput value={email} onChangeText={setEmail} />
+          <Input
+            field="email"
+            label="Correo electrónico"
+            placeholder="persona@correo.com"
+            value={email}
+            fn={(_, value) => setEmail(value)}
+            typeInput="email-address"
+          />
 
           <ButtonForm
             title="Enviar invitación"
+            variant="primary"
             action={sendInvitation}
-            disabled={mutation.isPending}
+            disabled={!emailIsValid}
+            isPending={mutation.isPending}
           />
         </View>
       </View>
@@ -248,159 +315,115 @@ export function InvitePropertyMemberCard() {
 
 const invitePropertyMemberStyles = StyleSheet.create({
   overlay: {
-    position: "absolute",
-
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-
+    ...StyleSheet.absoluteFill,
     zIndex: 100,
-
     justifyContent: "center",
     alignItems: "center",
   },
 
   backdrop: {
-    position: "absolute",
-
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
   },
 
   card: {
     width: "90%",
     maxWidth: 500,
-
-    maxHeight: "90%",
-
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-
+    maxHeight: "92%",
+    padding: 20,
+    gap: 16,
     borderRadius: 20,
-
-    backgroundColor: "#FFFFFF",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.2,
+    backgroundColor: Palette.surface,
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
     shadowRadius: 20,
-
     elevation: 10,
-
-    gap: 18,
   },
 
   header: {
     width: "100%",
-    alignItems: "center",
-    gap: 5,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+
+  headerText: {
+    flex: 1,
+    gap: 2,
   },
 
   title: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#111827",
-    textAlign: "center",
+    letterSpacing: -0.3,
+    color: Palette.textPrimary,
   },
 
   propertyName: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1B81FF",
-    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    color: Palette.accent,
+  },
+
+  close: {
+    fontSize: 18,
+    color: Palette.textMuted,
   },
 
   description: {
-    width: "95%",
-
-    marginTop: 4,
-
-    fontSize: 11,
-    lineHeight: 18,
-
-    color: "#6B7280",
-    textAlign: "center",
+    fontSize: 13,
+    lineHeight: 19,
+    color: Palette.textMuted,
   },
 
   qrSection: {
     width: "100%",
-
     alignItems: "center",
     justifyContent: "center",
-
     paddingVertical: 16,
-
+    gap: 10,
     borderRadius: 16,
-
-    backgroundColor: "#F8FAFC",
-
+    backgroundColor: Palette.surfaceMuted,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: Palette.border,
   },
 
   qrContainer: {
     padding: 12,
-
     borderRadius: 14,
-
-    backgroundColor: "#FFFFFF",
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-
-    elevation: 4,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
   },
 
   qrDescription: {
-    marginTop: 10,
-
-    fontSize: 11,
-    color: "#64748B",
+    fontSize: 12,
+    color: Palette.textMuted,
     textAlign: "center",
   },
 
   dividerContainer: {
     width: "100%",
-
     flexDirection: "row",
     alignItems: "center",
-
-    gap: 8,
+    gap: 10,
   },
 
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Palette.border,
   },
 
   dividerText: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: "#9CA3AF",
+    fontSize: 12,
+    color: Palette.textFaint,
   },
 
   emailSection: {
     width: "100%",
-    gap: 10,
-  },
-
-  emailLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#374151",
+    gap: 14,
   },
 });

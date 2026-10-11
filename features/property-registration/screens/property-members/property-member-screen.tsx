@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SearchInput } from "../../../../components/inputs/input";
@@ -8,12 +8,14 @@ import { useState } from "react";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
+import { PrincipalError } from "../../../../components/error";
 import { EmptyList, RentDescription } from "../../../../components/info";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../../components/splash-screen";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllProperties } from "../../api";
+import { IconButton } from "../../../../components/ui/icon-button";
 import { PropertyPreview } from "../../components/property-members/property-preview";
 import
   {
@@ -50,7 +52,7 @@ export function PropertyMemberScreen() {
   }
 
   if (isError) {
-    return null;
+    return <PrincipalError error="No se han podido obtener las propiedades!" />;
   }
 
   return (
@@ -61,31 +63,20 @@ export function PropertyMemberScreen() {
         <Text style={propertyMemberStyles.logo}>RENT</Text>
 
         <View style={propertyMemberStyles.headerActions}>
-          <Pressable
-            style={({ pressed }) => [
-              propertyMemberStyles.iconButton,
-              pressed && propertyMemberStyles.iconButtonPressed,
-            ]}
-          >
-            <NotificationIcon width={23} height={23} />
-          </Pressable>
+          <IconButton accessibilityLabel="Notificaciones">
+            <NotificationIcon width={22} height={22} />
+          </IconButton>
 
-          <Pressable
-            style={({ pressed }) => [
-              propertyMemberStyles.iconButton,
-              pressed && propertyMemberStyles.iconButtonPressed,
-            ]}
-            onPress={processScan}
-          >
-            <ScanIcon width={23} height={23} />
-          </Pressable>
+          <IconButton onPress={processScan} accessibilityLabel="Escanear QR">
+            <ScanIcon width={22} height={22} />
+          </IconButton>
         </View>
       </View>
 
       {/* titulo y descripcion */}
       <RentDescription
         title="Invitar miembros"
-        description="Gestiona las personas que tienen acceso a tus propiedades."
+        description="Elige una propiedad para invitar personas con su código QR o por correo."
       />
 
       {/* search y filtros */}
@@ -109,14 +100,9 @@ export function PropertyMemberScreen() {
             />
           </View>
 
-          <Pressable
-            style={({ pressed }) => [
-              propertyMemberStyles.filterButton,
-              pressed && propertyMemberStyles.filterButtonPressed,
-            ]}
-          >
-            <FilterIcon width={21} height={21} />
-          </Pressable>
+          <IconButton size={46} accessibilityLabel="Filtrar">
+            <FilterIcon width={20} height={20} />
+          </IconButton>
         </View>
       </View>
 
@@ -171,6 +157,7 @@ const propertyMemberStyles = StyleSheet.create({
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
   },
 
   iconButton: {
@@ -263,19 +250,18 @@ const propertyMemberStyles = StyleSheet.create({
   },
 
   list: {
-    height: "50%",
+    flex: 1,
     width: "100%",
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 8,
   },
 
   listContent: {
-    paddingHorizontal: 2,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingBottom: 24,
   },
 
   separator: {
-    height: 36,
+    height: 12,
   },
 });

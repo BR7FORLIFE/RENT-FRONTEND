@@ -1,8 +1,34 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Animated, Easing, Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import WaveBackground from "../assets/backgrounds/wave-background.svg";
+import { Palette, Radius } from "../themes/themes";
+
+const TRACK_WIDTH = 120;
+const BAR_WIDTH = 48;
 
 export default function SplashScreen() {
+  // barra indeterminada: la barra recorre la pista de izquierda a derecha
+  const [progress] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: 1100,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [progress]);
+
+  const translateX = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-BAR_WIDTH, TRACK_WIDTH],
+  });
+
   return (
     <SafeAreaView style={styles.screen}>
       <View pointerEvents="none" style={styles.background}>
@@ -12,24 +38,21 @@ export default function SplashScreen() {
       </View>
 
       <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <View style={styles.logoWrapper}>
-            <Image
-              source={require("../assets/images/logo-recortado.png")}
-              resizeMode="contain"
-              style={styles.logo}
-            />
-          </View>
+        <View style={styles.logoWrapper}>
+          <Image
+            source={require("../assets/images/logo-recortado.png")}
+            resizeMode="contain"
+            style={styles.logo}
+          />
         </View>
 
-        <View style={styles.infoContainer}>
-          <Text style={styles.appName}>Rent</Text>
+        <Text style={styles.appName}>Rent</Text>
+        <Text style={styles.loadingText}>Cargando...</Text>
 
-          <Text style={styles.loadingText}>Cargando...</Text>
-
-          <View style={styles.loaderContainer}>
-            <View style={styles.loader} />
-          </View>
+        <View style={styles.loaderContainer}>
+          <Animated.View
+            style={[styles.loader, { transform: [{ translateX }] }]}
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -39,7 +62,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Palette.background,
   },
 
   background: {
@@ -51,101 +74,68 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-
     opacity: 0.9,
   },
 
   content: {
     flex: 1,
-
     alignItems: "center",
     justifyContent: "center",
-
     paddingHorizontal: 24,
   },
 
-  logoContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginBottom: 20,
-  },
-
   logoWrapper: {
-    width: 120,
-    height: 120,
-
+    width: 104,
+    height: 104,
     alignItems: "center",
     justifyContent: "center",
-
-    borderRadius: 32,
-
-    backgroundColor: "#FFFFFF",
-
+    borderRadius: Radius.lg + 8,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    marginBottom: 20,
     shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
   },
 
   logo: {
-    width: 88,
-    height: 88,
-  },
-
-  infoContainer: {
-    width: "100%",
-
-    alignItems: "center",
+    width: 76,
+    height: 76,
   },
 
   appName: {
-    fontSize: 30,
-    lineHeight: 36,
-
+    fontSize: 28,
+    lineHeight: 34,
     fontWeight: "800",
-
-    letterSpacing: -0.5,
-
-    color: "#111827",
-
-    marginBottom: 8,
+    letterSpacing: -0.3,
+    color: Palette.textPrimary,
+    marginBottom: 4,
   },
 
   loadingText: {
-    fontSize: 14,
-    lineHeight: 20,
-
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: "500",
-
-    color: "#6B7280",
-
-    marginBottom: 16,
+    color: Palette.textMuted,
+    marginBottom: 20,
   },
 
   loaderContainer: {
-    width: 120,
+    width: TRACK_WIDTH,
     height: 4,
-
     overflow: "hidden",
-
-    borderRadius: 4,
-
-    backgroundColor: "#E5E7EB",
+    borderRadius: Radius.pill,
+    backgroundColor: Palette.border,
   },
 
   loader: {
-    width: "45%",
+    width: BAR_WIDTH,
     height: "100%",
-
-    borderRadius: 4,
-
-    backgroundColor: "#111827",
+    borderRadius: Radius.pill,
+    backgroundColor: Palette.accent,
   },
 });
 

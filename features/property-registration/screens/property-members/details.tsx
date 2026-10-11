@@ -3,7 +3,6 @@ import
   {
     FlatList,
     Image,
-    Pressable,
     StyleSheet,
     Text,
     View,
@@ -25,10 +24,10 @@ import type { StatusPropertyMemberType } from "../../schemas/property-registrati
 //images
 import WaveBackground from "../../../../assets/backgrounds/wave-background.svg";
 import CommunityIcon from "../../../../assets/icons/community.svg";
-import FilterIcon from "../../../../assets/icons/filter.svg";
 
 import { EmptyList } from "../../../../components/info";
 import { SearchInput } from "../../../../components/inputs/input";
+import { SegmentedTabs } from "../../../../components/ui/segmented-tabs";
 
 const statusOptions: {
   label: string;
@@ -59,7 +58,6 @@ export function PropertyMemberDetailsScreen() {
     page: 1,
     status: "ACTIVE",
   });
-  const [isFilter, setFilter] = useState<boolean>(false);
 
   const {
     data: propertyData,
@@ -179,67 +177,22 @@ export function PropertyMemberDetailsScreen() {
         </View>
       </View>
 
-      {/**filtros y busquedas */}
+      {/**busqueda y filtro por estado */}
       <View style={styles.searchContainer}>
-        <View style={{ width: "80%", height: "50%" }}>
-          <SearchInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Buscar miembro.."
-          />
-        </View>
-        <Pressable
-          style={{
-            width: "20%",
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={() => setFilter((prev) => !prev)}
-        >
-          <FilterIcon width={24} height={24} />
-        </Pressable>
-
-        {isFilter && (
-          <View style={styles.filterContainer}>
-            <Text style={styles.filterTitle}>Estado</Text>
-
-            {statusOptions.map((option) => {
-              const isSelected = pagination.status === option.value;
-
-              return (
-                <Pressable
-                  key={option.value}
-                  style={[
-                    styles.filterOption,
-                    isSelected && styles.filterOptionSelected,
-                  ]}
-                  onPress={() => {
-                    setPagination((prev) => ({
-                      ...prev,
-                      page: 1,
-                      status: option.value,
-                    }));
-                  }}
-                >
-                  <View
-                    style={[styles.radio, isSelected && styles.radioSelected]}
-                  />
-
-                  <Text
-                    style={[
-                      styles.filterText,
-                      isSelected && styles.filterTextSelected,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        )}
+        <SearchInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Buscar miembro.."
+        />
       </View>
+
+      <SegmentedTabs
+        tabs={statusOptions}
+        value={pagination.status}
+        onChange={(status) =>
+          setPagination((prev) => ({ ...prev, page: 1, status }))
+        }
+      />
 
       {/**lista de properties members */}
       <View style={styles.propertyMemberContainer}>
@@ -273,7 +226,7 @@ export function PropertyMemberDetailsScreen() {
           ItemSeparatorComponent={() => <View style={styles.memberSeparator} />}
           ListEmptyComponent={
             <EmptyList
-              title="Miembros nos encontrados"
+              title="No hay miembros"
               description="Asegurate de invitar o añadir miembros a tu propiedad!"
             />
           }
@@ -312,93 +265,10 @@ const styles = StyleSheet.create({
 
   //search
   searchContainer: {
-    position: "relative",
     width: "100%",
-    height: 40,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    paddingHorizontal: 12,
-    marginTop: 12,
-  },
-
-  filterContainer: {
-    position: "absolute",
-
-    top: 48,
-    right: 0,
-
-    width: 190,
-
-    padding: 8,
-
-    backgroundColor: "#FFFFFF",
-
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
-
-    elevation: 5,
-
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-
-    zIndex: 100,
-  },
-
-  filterTitle: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#64748B",
-  },
-
-  filterOption: {
-    minHeight: 42,
-
-    flexDirection: "row",
-    alignItems: "center",
-
-    paddingHorizontal: 10,
-
-    borderRadius: 10,
-  },
-
-  filterOptionSelected: {
-    backgroundColor: "#EFF6FF",
-  },
-
-  filterText: {
-    marginLeft: 10,
-
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#334155",
-  },
-
-  filterTextSelected: {
-    color: "#1D4ED8",
-    fontWeight: "600",
-  },
-
-  radio: {
-    width: 16,
-    height: 16,
-
-    borderWidth: 1.5,
-    borderColor: "#CBD5E1",
-    borderRadius: 8,
-  },
-
-  radioSelected: {
-    borderWidth: 4,
-    borderColor: "#2563EB",
+    paddingHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 12,
   },
 
   //informacion de propiedad
@@ -506,7 +376,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
     width: "100%",
-    marginTop: 24,
+    marginTop: 8,
     paddingHorizontal: 20,
   },
 

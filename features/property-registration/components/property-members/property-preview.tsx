@@ -2,6 +2,8 @@ import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import ImagePreview from "../../../../assets/icons/image-preview.svg";
 import QrCode from "../../../../assets/icons/qr.svg";
+import { IconButton } from "../../../../components/ui/icon-button";
+import { Palette } from "../../../../themes/themes";
 import type { PropertyResponseApi } from "../../api.response";
 import { useBehaviorQr, useProperty } from "../../stores/property.store";
 
@@ -12,6 +14,7 @@ export function PropertyPreview({
 }) {
   const { setOpen } = useBehaviorQr();
   const { set } = useProperty();
+  const imageUrl = property.resources[0]?.secureUrl;
 
   const showQrInfo = () => {
     set(property);
@@ -26,111 +29,89 @@ export function PropertyPreview({
   };
 
   return (
-    <Pressable onPress={propertyMemberDetails}>
-      <View style={propertyPreview.container}>
-        {/**imagen de previsualizacion de la propiedad */}
-        <View style={propertyPreview.image}>
-          {property.resources[0].secureUrl ? (
-            <Image
-              source={{ uri: property.resources[0].secureUrl! }}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          ) : (
-            <ImagePreview width={24} height={24} />
-          )}
-        </View>
-
-        {/**seccion de FMI, nombre, y tipo de propiedad  */}
-        <View style={propertyPreview.information}>
-          <View>
-            <Text style={{ fontSize: 10, color: "#000000d3" }}>
-              FMI {property.fmi}
-            </Text>
-            <Text
-              style={{
-                fontSize: 11,
-                fontWeight: "600",
-                letterSpacing: 1.2,
-                lineHeight: 25,
-              }}
-            >
-              {property.propertyName}
-            </Text>
-          </View>
-
-          <View>
-            <Text style={{ fontSize: 10, color: "#000000d3" }}>
-              {property.typeProperty}
-            </Text>
-          </View>
-        </View>
-
-        {/**seccion de imagen de qr */}
-        <View style={propertyPreview.qr}>
-          <Pressable
-            onPress={showQrInfo}
-            style={({ pressed }) => [
-              propertyPreview.button,
-
-              pressed && propertyPreview.buttonPressed,
-            ]}
-          >
-            <QrCode width={24} height={24} />
-          </Pressable>
-        </View>
+    <Pressable
+      onPress={propertyMemberDetails}
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+    >
+      <View style={styles.image}>
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.photo} />
+        ) : (
+          <ImagePreview width={24} height={24} />
+        )}
       </View>
+
+      <View style={styles.information}>
+        <Text style={styles.name} numberOfLines={1}>
+          {property.propertyName}
+        </Text>
+        <Text style={styles.meta} numberOfLines={1}>
+          {property.typeProperty}
+        </Text>
+        <Text style={styles.fmi} numberOfLines={1}>
+          FMI {property.fmi}
+        </Text>
+      </View>
+
+      <IconButton onPress={showQrInfo} accessibilityLabel="Mostrar código QR">
+        <QrCode width={22} height={22} />
+      </IconButton>
     </Pressable>
   );
 }
 
-const propertyPreview = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: "100%",
-    height: 40,
-    minHeight: 60,
     flexDirection: "row",
-    borderLeftWidth: 1,
-    borderLeftColor: "#00000047",
+    alignItems: "center",
+    gap: 12,
+    padding: 12,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    borderRadius: 16,
+  },
+
+  pressed: {
+    backgroundColor: Palette.surfaceMuted,
+    transform: [{ scale: 0.99 }],
   },
 
   image: {
-    minWidth: "20%",
-    height: "100%",
-    justifyContent: "center",
+    width: 56,
+    height: 56,
     alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    borderRadius: 12,
+    backgroundColor: Palette.surfaceMuted,
+  },
+
+  photo: {
+    width: "100%",
+    height: "100%",
   },
 
   information: {
     flex: 1,
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingLeft: 6,
+    minWidth: 0,
+    gap: 2,
   },
 
-  qr: {
-    minWidth: "20%",
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  name: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Palette.textPrimary,
   },
 
-  button: {
-    minHeight: "100%",
-    paddingHorizontal: 18,
-
-    borderRadius: 12,
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "#ffffff",
+  meta: {
+    fontSize: 12,
+    color: Palette.textSecondary,
   },
 
-  buttonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+  fmi: {
+    fontSize: 11,
+    color: Palette.textFaint,
   },
 });

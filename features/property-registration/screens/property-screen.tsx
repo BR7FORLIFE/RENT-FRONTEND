@@ -12,7 +12,7 @@ import SplashScreen, {
   SplashWaveBackground,
 } from "../../../components/splash-screen";
 import { useBehaviorAside } from "../../../stores/global-store";
-import { Colors } from "../../../themes/themes";
+import { Palette } from "../../../themes/themes";
 import { GetAllProperties } from "../api";
 import type {
   PropertyOccupationType,
@@ -22,6 +22,7 @@ import type {
 import AsideIcon from "../../../assets/icons/bar-right.svg";
 import PlusIcon from "../../../assets/icons/plus.svg";
 import { ContentAside } from "../../../components/aside";
+import { IconButton } from "../../../components/ui/icon-button";
 import { EmptyList } from "../../../components/info";
 import { Me } from "../../../core/api/api-endpoints";
 import { useMe } from "../../../stores/auth-store";
@@ -90,10 +91,10 @@ export default function PropertyScreen() {
       <View style={styles.headerSection}>
         <View style={styles.titleRow}>
           <View style={styles.asidebutton}>
-            <Pressable onPress={toggle}>
-              <AsideIcon width={27} height={27} />
-            </Pressable>
-            <Text style={styles.title}>Mis Propiedades</Text>
+            <IconButton onPress={toggle} accessibilityLabel="Abrir menú">
+              <AsideIcon width={22} height={22} />
+            </IconButton>
+            <Text style={styles.title}>Mis propiedades</Text>
           </View>
 
           <Pressable
@@ -215,17 +216,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 20,
 
-    backgroundColor: Colors.NEUTRAL,
-
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-
-    elevation: 4,
+    backgroundColor: Palette.accent,
   },
 
   buttonPressed: {

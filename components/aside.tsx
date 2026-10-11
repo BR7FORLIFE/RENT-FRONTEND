@@ -1,160 +1,186 @@
 import { router } from "expo-router";
-
-import
-  {
-    Pressable,
-    StyleSheet,
-    Text,
-    useWindowDimensions,
-    View,
-  } from "react-native";
-
-import type { SvgProps } from "react-native-svg";
-
-import { MeCard } from "../features/auth/components/me";
-import { logoutUser } from "../features/auth/services/auth.service";
-import { useBehaviorAside } from "../stores/global-store";
-import { AsideButton, ButtonForm } from "./buttons/button";
-
-import InvitePersonIcon from "../assets/icons/invite-person.svg";
-import JoinIcon from "../assets/icons/join.svg";
-import NotificationIcon from "../assets/icons/notification.svg";
-
 import { useEffect } from "react";
-
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { SvgProps } from "react-native-svg";
 
-interface AsideItems {
+import { MeCard } from "../features/auth/components/me";
+import { logoutUser } from "../features/auth/services/auth.service";
+import { useBehaviorAside } from "../stores/global-store";
+import { Palette } from "../themes/themes";
+
+import HomeIcon from "../assets/icons/home.svg";
+import InvitePersonIcon from "../assets/icons/invite-person.svg";
+import JoinIcon from "../assets/icons/join.svg";
+import NotificationIcon from "../assets/icons/notification.svg";
+
+interface AsideItem {
   Icon: React.FC<SvgProps>;
   name: string;
+  description: string;
   action: () => void;
 }
 
-const ACTIONS_ITEMS: AsideItems[] = [
+const PROPERTY_ITEMS: AsideItem[] = [
+  {
+    Icon: HomeIcon,
+    name: "Feed",
+    description: "Inmuebles publicados",
+    action: () => router.navigate("/property/feed"),
+  },
   {
     Icon: InvitePersonIcon,
     name: "Miembros",
-    action: () => {
-      router.navigate("/property-member");
-    },
+    description: "Invita y gestiona personas",
+    action: () => router.navigate("/property-member"),
   },
   {
     Icon: JoinIcon,
-    name: "Asociaciones a propiedades",
-    action: () => {
-      router.navigate("/property/property-associations");
-    },
+    name: "Asociaciones",
+    description: "Propiedades a las que perteneces",
+    action: () => router.navigate("/property/property-associations"),
   },
 ];
 
-const ACTIVITIES_ITEMS: AsideItems[] = [
+const ACTIVITY_ITEMS: AsideItem[] = [
   {
     Icon: NotificationIcon,
     name: "Notificaciones",
+    description: "Avisos y novedades",
     action: () => null,
   },
 ];
 
+function AsideSection({
+  title,
+  items,
+  onSelect,
+}: {
+  title: string;
+  items: AsideItem[];
+  onSelect: (action: () => void) => void;
+}) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+
+      {items.map(({ Icon, name, description, action }) => (
+        <Pressable
+          key={name}
+          onPress={() => onSelect(action)}
+          style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
+        >
+          <View style={styles.itemIcon}>
+            <Icon width={20} height={20} />
+          </View>
+
+          <View style={styles.itemText}>
+            <Text style={styles.itemName}>{name}</Text>
+            <Text style={styles.itemDescription} numberOfLines={1}>
+              {description}
+            </Text>
+          </View>
+
+          <Text style={styles.chevron}>›</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 export function ContentAside() {
   const { isOpen, toggle } = useBehaviorAside();
+  const { width } = useWindowDimensions();
 
-  const { width, height } = useWindowDimensions();
+  const WIDTH = Math.min(width * 0.82, 340);
 
-  const HEIGHT = height * 0.82;
-  const WIDTH = width * 0.78;
+  const translateX = useSharedValue(-WIDTH);
+  const backdropOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    translateX.value = withTiming(isOpen ? 0 : -WIDTH, { duration: 250 });
+    backdropOpacity.value = withTiming(isOpen ? 1 : 0, { duration: 250 });
+  }, [isOpen, WIDTH, translateX, backdropOpacity]);
+
+  const drawerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  // cierra el panel y luego ejecuta la acción elegida
+  const handleSelect = (action: () => void) => {
+    toggle();
+    action();
+  };
 
   const handleLogout = () => {
+    toggle();
     logoutUser();
     router.navigate("/auth/login");
   };
 
-  const translateX = useSharedValue(-WIDTH);
-
-  useEffect(() => {
-    translateX.value = withTiming(isOpen ? 0 : -WIDTH, {
-      duration: 300,
-    });
-  }, [isOpen, WIDTH, translateX]);
-
-  const asideAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: translateX.value,
-        },
-      ],
-    };
-  });
-
   return (
     <View style={styles.container}>
-      <Pressable style={styles.overlay} onPress={toggle} />
+      <Animated.View style={[styles.backdrop, backdropStyle]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={toggle} />
+      </Animated.View>
 
-      <Animated.View
-        style={[
-          styles.aside,
-          asideAnimatedStyle,
-          {
-            top: HEIGHT * 0.08,
-            left: WIDTH * 0.04,
-            width: WIDTH,
-            height: HEIGHT,
-          },
-        ]}
-      >
-        <View style={styles.content}>
-          <View style={styles.profileSection}>
+      <Animated.View style={[styles.drawer, { width: WIDTH }, drawerStyle]}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.brandRow}>
+            <Text style={styles.brand}>RENT</Text>
+            <Pressable
+              onPress={toggle}
+              hitSlop={10}
+              accessibilityLabel="Cerrar menú"
+            >
+              <Text style={styles.close}>✕</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.profile}>
             <MeCard />
           </View>
 
-          <View style={styles.menuSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>PROPIEDADES</Text>
-
-              <View style={styles.sectionLine} />
-            </View>
-
-            <View style={styles.itemsContainer}>
-              {ACTIONS_ITEMS.map(({ name, action, Icon }) => (
-                <View key={name} style={styles.itemWrapper}>
-                  <AsideButton
-                    title={name}
-                    action={action}
-                    icon={<Icon width={17} height={17} />}
-                  />
-                </View>
-              ))}
-            </View>
-
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>ACTIVIDAD</Text>
-
-              <View style={styles.sectionLine} />
-            </View>
-
-            <View style={styles.itemsContainer}>
-              {ACTIVITIES_ITEMS.map(({ name, action, Icon }) => (
-                <View key={name} style={styles.itemWrapper}>
-                  <AsideButton
-                    title={name}
-                    action={action}
-                    icon={<Icon width={24} height={24} />}
-                  />
-                </View>
-              ))}
-            </View>
+          <View style={styles.menu}>
+            <AsideSection
+              title="Propiedades"
+              items={PROPERTY_ITEMS}
+              onSelect={handleSelect}
+            />
+            <AsideSection
+              title="Actividad"
+              items={ACTIVITY_ITEMS}
+              onSelect={handleSelect}
+            />
           </View>
-        </View>
 
-        <View style={styles.footer}>
-          <View style={styles.footerLine} />
-
-          <ButtonForm title="Cerrar sesión" action={handleLogout} />
-        </View>
+          <View style={styles.footer}>
+            <Pressable
+              onPress={handleLogout}
+              style={({ pressed }) => [
+                styles.logout,
+                pressed && styles.logoutPressed,
+              ]}
+            >
+              <Text style={styles.logoutText}>Cerrar sesión</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
       </Animated.View>
     </View>
   );
@@ -166,99 +192,152 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
 
-  overlay: {
+  backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(15, 23, 42, 0.32)",
+    backgroundColor: "rgba(15, 23, 42, 0.4)",
   },
 
-  aside: {
+  drawer: {
     position: "absolute",
-    backgroundColor: "#FFFFFF",
-    zIndex: 1,
-    borderRadius: 22,
+    top: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: Palette.surface,
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
     shadowColor: "#0F172A",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.16,
-    shadowRadius: 20,
+    shadowOffset: { width: 4, height: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
     elevation: 12,
   },
 
-  content: {
+  safeArea: {
     flex: 1,
-    width: "100%",
   },
 
-  profileSection: {
-    width: "100%",
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 18,
-    backgroundColor: "#F8FAFC",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-  },
-
-  menuSection: {
-    flex: 1,
-    width: "100%",
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-
-  sectionHeader: {
+  brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
-    marginBottom: 12,
-    marginTop: 18,
-    gap: 10,
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
+
+  brand: {
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    color: Palette.textPrimary,
+  },
+
+  close: {
+    fontSize: 18,
+    color: Palette.textMuted,
+  },
+
+  profile: {
+    marginHorizontal: 20,
+    padding: 14,
+    backgroundColor: Palette.surfaceMuted,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    borderRadius: 16,
+  },
+
+  menu: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+  },
+
+  section: {
+    gap: 4,
+    marginTop: 16,
   },
 
   sectionTitle: {
-    fontSize: 10,
+    paddingHorizontal: 8,
+    marginBottom: 4,
+    fontSize: 11,
     fontWeight: "700",
-    color: "#94A3B8",
-    letterSpacing: 1.2,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: Palette.textFaint,
   },
 
-  sectionLine: {
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+
+  itemPressed: {
+    backgroundColor: Palette.surfaceMuted,
+  },
+
+  itemIcon: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: Palette.accentSoft,
+  },
+
+  itemText: {
     flex: 1,
-    height: 1,
-    backgroundColor: "#E2E8F0",
+    gap: 1,
   },
 
-  itemsContainer: {
-    width: "100%",
-    gap: 8,
+  itemName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Palette.textPrimary,
   },
 
-  itemWrapper: {
-    width: "100%",
-    borderRadius: 13,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#F1F5F9",
-    backgroundColor: "#FFFFFF",
+  itemDescription: {
+    fontSize: 12,
+    color: Palette.textMuted,
+  },
+
+  chevron: {
+    fontSize: 20,
+    lineHeight: 20,
+    color: Palette.textFaint,
   },
 
   footer: {
-    width: "100%",
-    paddingHorizontal: 16,
-    paddingBottom: 18,
-    paddingTop: 10,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: Palette.borderSoft,
   },
 
-  footerLine: {
-    width: "100%",
-    height: 1,
-    backgroundColor: "#E2E8F0",
-    marginBottom: 14,
+  logout: {
+    minHeight: 46,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    backgroundColor: Palette.dangerSoft,
+  },
+
+  logoutPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+
+  logoutText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Palette.danger,
   },
 });

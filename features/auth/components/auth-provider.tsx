@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 import GoogleIcon from "../../../assets/icons/google-icon.svg";
+import { Palette } from "../../../themes/themes";
 
 export const GoogleAuthButton = ({
   action,
@@ -9,9 +10,17 @@ export const GoogleAuthButton = ({
   disabled?: boolean;
 }) => {
   return (
-    <Pressable style={styles.container} onPress={action} disabled={disabled}>
-      <GoogleIcon width={24} height={24} />
-      <Text style={{ fontSize: 17 }}>Google</Text>
+    <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}
+      onPress={action}
+      disabled={disabled}
+    >
+      <GoogleIcon width={20} height={20} />
+      <Text style={styles.text}>Continuar con Google</Text>
     </Pressable>
   );
 };
@@ -19,12 +28,29 @@ export const GoogleAuthButton = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    gap: 12,
-    borderWidth: 1,
-    borderRadius: 7,
+    gap: 10,
     width: "100%",
-    height: 48,
+    minHeight: 46,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: Palette.borderStrong,
+    borderRadius: 12,
+    backgroundColor: Palette.surface,
+  },
+
+  pressed: {
+    backgroundColor: Palette.surfaceMuted,
+    transform: [{ scale: 0.98 }],
+  },
+
+  disabled: {
+    opacity: 0.5,
+  },
+
+  text: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Palette.textPrimary,
   },
 });

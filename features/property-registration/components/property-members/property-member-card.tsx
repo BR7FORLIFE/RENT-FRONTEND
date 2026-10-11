@@ -1,5 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import InfoIcon from "../../../../assets/icons/info.svg";
+import { Avatar } from "../../../../components/ui/avatar";
+import { StatusBadge } from "../../../../components/ui/status-badge";
+import { Palette } from "../../../../themes/themes";
+import { formatEnumLabel, memberStatusInfo } from "../../services/format";
 
 interface Props {
   name: string;
@@ -9,13 +13,29 @@ interface Props {
   action: () => void;
 }
 
-export function PropertyMemberCard({
-  name,
-  policies,
-  roles,
-  status,
-  action,
-}: Props) {
+function RoleChips({ roles, max = 3 }: { roles: string[]; max?: number }) {
+  const visible = roles.slice(0, max);
+  const hidden = roles.length - visible.length;
+
+  if (roles.length === 0) {
+    return <Text style={styles.noRoles}>Sin roles asignados</Text>;
+  }
+
+  return (
+    <View style={styles.chips}>
+      {visible.map((role) => (
+        <Text key={role} style={styles.chip} numberOfLines={1}>
+          {formatEnumLabel(role)}
+        </Text>
+      ))}
+      {hidden > 0 && <Text style={styles.more}>+{hidden}</Text>}
+    </View>
+  );
+}
+
+export function PropertyMemberCard({ name, roles, status, action }: Props) {
+  const statusInfo = memberStatusInfo(status);
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -24,36 +44,17 @@ export function PropertyMemberCard({
       ]}
       onPress={action}
     >
-      <View style={styles.profile}>
-        <View style={styles.avatar} />
-      </View>
+      <Avatar name={name} />
 
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>
           {name}
         </Text>
-
-        {policies && (
-          <View style={styles.row}>
-            {policies.slice(0, 3).map((policy) => (
-              <Text key={policy} style={styles.policy} numberOfLines={1}>
-                {policy}
-              </Text>
-            ))}
-          </View>
-        )}
-
-        <View style={styles.row}>
-          {roles.map((role) => (
-            <Text key={role} style={styles.role}>
-              {role}
-            </Text>
-          ))}
-        </View>
+        <RoleChips roles={roles} />
       </View>
 
-      <View style={styles.statusContainer}>
-        <Text style={styles.status}>{status}</Text>
+      <View style={styles.trailing}>
+        <StatusBadge label={statusInfo.label} tone={statusInfo.tone} />
         <Text style={styles.actionIndicator}>›</Text>
       </View>
     </Pressable>
@@ -66,88 +67,75 @@ const styles = StyleSheet.create({
     minHeight: 78,
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Palette.surface,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: Palette.border,
   },
 
   containerPressed: {
-    backgroundColor: "#F8FAFC",
-    borderColor: "#CBD5E1",
+    backgroundColor: Palette.surfaceMuted,
+    borderColor: Palette.borderStrong,
     transform: [{ scale: 0.99 }],
-  },
-
-  profile: {
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#EFF6FF",
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
   },
 
   info: {
     flex: 1,
     minWidth: 0,
-    justifyContent: "center",
-    gap: 4,
+    gap: 6,
   },
 
   name: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#111827",
+    color: Palette.textPrimary,
   },
 
-  row: {
+  chips: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: 5,
+    columnGap: 5,
+    rowGap: 4,
   },
 
-  policy: {
-    fontSize: 10,
-    fontWeight: "400",
-    color: "#64748B",
-  },
-
-  role: {
+  chip: {
+    maxWidth: "100%",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
     fontSize: 10,
     fontWeight: "500",
-    color: "#334155",
+    color: Palette.textSecondary,
+    backgroundColor: Palette.surfaceMuted,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    borderRadius: 7,
+    overflow: "hidden",
   },
 
-  statusContainer: {
-    flexDirection: "row",
-    marginLeft: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-
-  status: {
-    fontSize: 10,
+  more: {
+    fontSize: 11,
     fontWeight: "600",
-    color: "#2563EB",
+    color: Palette.textMuted,
+  },
+
+  noRoles: {
+    fontSize: 11,
+    color: Palette.textFaint,
+  },
+
+  trailing: {
+    alignItems: "flex-end",
+    gap: 6,
   },
 
   actionIndicator: {
     fontSize: 20,
     lineHeight: 20,
-    fontWeight: "400",
-    color: "#94A3B8",
+    color: Palette.textFaint,
   },
 });
 
@@ -158,31 +146,15 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ name, roles, onInfoPress }: MemberCardProps) {
-  const visibleRoles = roles.slice(0, 5);
-  const hasMoreRoles = roles.length > 5;
-
   return (
     <View style={memberCardStyles.container}>
-      <View style={memberCardStyles.avatar} />
+      <Avatar name={name} size={46} />
+
       <View style={memberCardStyles.infoContainer}>
         <Text style={memberCardStyles.name} numberOfLines={1}>
           {name}
         </Text>
-
-        <View style={memberCardStyles.rolesContainer}>
-          {visibleRoles.map((role, index) => (
-            <Text
-              key={`${role}-${index}`}
-              style={memberCardStyles.role}
-              numberOfLines={1}
-            >
-              {role}
-              {index < visibleRoles.length - 1 || hasMoreRoles ? "," : ""}
-            </Text>
-          ))}
-
-          {hasMoreRoles && <Text style={memberCardStyles.moreRoles}>...</Text>}
-        </View>
+        <RoleChips roles={roles} max={5} />
       </View>
 
       <Pressable
@@ -192,17 +164,19 @@ export function MemberCard({ name, roles, onInfoPress }: MemberCardProps) {
         ]}
         onPress={onInfoPress}
       >
-        <InfoIcon width={18} height={18} color="#2563EB" strokeWidth={2} />
+        <InfoIcon width={18} height={18} color={Palette.accent} strokeWidth={2} />
       </Pressable>
     </View>
   );
 }
+
 const memberCardStyles = StyleSheet.create({
   container: {
     width: "100%",
     minHeight: 86,
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: "#FFFFFF",
@@ -219,16 +193,6 @@ const memberCardStyles = StyleSheet.create({
     elevation: 2,
   },
 
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: "#EFF6FF",
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-    marginRight: 12,
-  },
-
   infoContainer: {
     flex: 1,
     justifyContent: "center",
@@ -240,34 +204,6 @@ const memberCardStyles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827",
     marginBottom: 6,
-  },
-
-  rolesContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    columnGap: 5,
-    rowGap: 4,
-  },
-
-  role: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "#475569",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 7,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    maxWidth: "100%",
-  },
-
-  moreRoles: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#64748B",
-    marginLeft: 1,
   },
 
   infoButton: {

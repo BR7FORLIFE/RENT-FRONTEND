@@ -1,18 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PrincipalError } from "../../../components/error";
 import { RentHeader } from "../../../components/header";
-import { EmptyList, RentDescription } from "../../../components/info";
+import { EmptyList } from "../../../components/info";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../components/splash-screen";
+import { Palette } from "../../../themes/themes";
 import type { PaginationParams } from "../../../types/global";
+import {
+  SegmentedTabs,
+  type SegmentedTab,
+} from "../../../components/ui/segmented-tabs";
 import { PropertyMemberMe } from "../../property-registration/api";
 import { GetAllContractDraft, GetAllContracts } from "../api";
-import { ButtonContractAction } from "../components/UI/button-contract-action";
 import { GenerateContractDraft } from "../components/contract-draft/contract-draft-generation";
 import { SeeContractAccepted } from "../components/contract-draft/see-contract-draft-accepted";
 import
@@ -27,6 +31,13 @@ export type Sections =
   | "LIST-CONTRACT-DRAFT"
   | "GENERATE-CONTRACT-DRAFT"
   | "VER-ACEPTACIONES-BORRADORES";
+
+const SECTION_TABS: SegmentedTab<Sections>[] = [
+  { label: "Contratos", value: "LIST-CONTRACTS" },
+  { label: "Borradores", value: "LIST-CONTRACT-DRAFT" },
+  { label: "Nuevo borrador", value: "GENERATE-CONTRACT-DRAFT" },
+  { label: "Aceptados", value: "VER-ACEPTACIONES-BORRADORES" },
+];
 
 interface ContractListProps<T> {
   data: T[];
@@ -47,10 +58,14 @@ export function ContractList<T>({
 }: ContractListProps<T>) {
   return (
     <>
-      <RentDescription title={rentTitle} description={rentDescription} />
-
       <View style={styles.contractListSection}>
         <FlatList
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={styles.listTitle}>{rentTitle}</Text>
+              <Text style={styles.listDescription}>{rentDescription}</Text>
+            </View>
+          }
           data={data}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => renderItem(item)}
@@ -221,69 +236,104 @@ export function ContractDetailsScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        paddingHorizontal: 4,
-        backgroundColor: "white",
-        position: "relative",
-      }}
-    >
+    <SafeAreaView style={styles.screen}>
       <SplashWaveBackground />
       <RentHeader sectionName="CONTRATOS" />
 
-      {section === "LIST-CONTRACTS" && (
-        <ContractListSection propertyId={propertyId} />
-      )}
+      <View style={styles.propertyTitle}>
+        <Text style={styles.propertyLabel}>Propiedad</Text>
+        <Text style={styles.propertyName} numberOfLines={1}>
+          {propertyName}
+        </Text>
+      </View>
 
-      {section === "LIST-CONTRACT-DRAFT" && (
-        <ContractDraftListSection
-          propertyId={propertyId}
-          propertyMemberId={propertyMemberMe.info.id}
-          propertyName={propertyName}
-        />
-      )}
+      <SegmentedTabs tabs={SECTION_TABS} value={section} onChange={setSection} />
 
-      {section === "GENERATE-CONTRACT-DRAFT" ? (
-        <ButtonContractAction
-          propertyName={propertyName}
-          sectionName={section}
-          setSection={setSection}
-          hidden
-        />
-      ) : (
-        <ButtonContractAction
-          propertyName={propertyName}
-          sectionName={section}
-          setSection={setSection}
-        />
-      )}
+      <View style={styles.content}>
+        {section === "LIST-CONTRACTS" && (
+          <ContractListSection propertyId={propertyId} />
+        )}
 
-      {section === "GENERATE-CONTRACT-DRAFT" && (
-        <GenerateContractDraft
-          propertyId={propertyId}
-          propertyName={propertyName}
-          propertyMemberId={propertyMemberMe.info.id}
-        />
-      )}
+        {section === "LIST-CONTRACT-DRAFT" && (
+          <ContractDraftListSection
+            propertyId={propertyId}
+            propertyMemberId={propertyMemberMe.info.id}
+            propertyName={propertyName}
+          />
+        )}
 
-      {section === "VER-ACEPTACIONES-BORRADORES" && (
-        <SeeContractAccepted propertyId={propertyId} />
-      )}
+        {section === "GENERATE-CONTRACT-DRAFT" && (
+          <GenerateContractDraft
+            propertyId={propertyId}
+            propertyName={propertyName}
+            propertyMemberId={propertyMemberMe.info.id}
+          />
+        )}
+
+        {section === "VER-ACEPTACIONES-BORRADORES" && (
+          <SeeContractAccepted propertyId={propertyId} />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Palette.background,
+  },
+
+  propertyTitle: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 2,
+  },
+
+  propertyLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: Palette.textMuted,
+  },
+
+  propertyName: {
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+    color: Palette.textPrimary,
+  },
+
+  content: {
+    flex: 1,
+  },
+
   contractListSection: {
-    height: "60%",
+    flex: 1,
     width: "100%",
   },
 
+  listHeader: {
+    marginBottom: 4,
+    gap: 3,
+  },
+
+  listTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: Palette.textPrimary,
+  },
+
+  listDescription: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: Palette.textMuted,
+  },
+
   contractListContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
     gap: 12,
   },
 });

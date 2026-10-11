@@ -1,10 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { StatusBadge } from "../../../components/ui/status-badge";
+import { Palette } from "../../../themes/themes";
 import type { StatusContractType } from "../api.response";
-
-//imagenes
-
-import InfoIcon from "../../../assets/icons/info.svg";
+import {
+  CONTRACT_STATUS,
+  formatDate,
+  formatMoney,
+} from "../services/format";
 
 interface ContractPreviewCardProps {
   startDate: string;
@@ -14,6 +17,15 @@ interface ContractPreviewCardProps {
   action: () => void;
 }
 
+function DateColumn({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.dateColumn}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.date}>{value}</Text>
+    </View>
+  );
+}
+
 export function ContractPreviewCard({
   startDate,
   endDate,
@@ -21,129 +33,33 @@ export function ContractPreviewCard({
   montlyRent,
   action,
 }: ContractPreviewCardProps) {
+  const statusInfo = CONTRACT_STATUS[status] ?? {
+    label: String(status ?? "Sin estado"),
+    tone: "neutral" as const,
+  };
+
   return (
-    <Pressable style={styles.container} onPress={action}>
-      {/*contenedor de fecha y estados */}
-      <View style={styles.dateAndStatusContainer}>
-        {/*fechas */}
-        <View style={styles.dateContainer}>
-          <Text style={styles.dateLabel}>Inicio</Text>
-          <Text style={styles.date}>
-            {new Date(startDate).toLocaleDateString()}
-          </Text>
-
-          <Text style={styles.dateLabel}>Finalización</Text>
-          <Text style={styles.date}>
-            {new Date(endDate).toLocaleDateString()}
-          </Text>
+    <Pressable
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      onPress={action}
+    >
+      <View style={styles.header}>
+        <View style={styles.titleBlock}>
+          <Text style={styles.label}>Contrato</Text>
+          <Text style={styles.rent}>{formatMoney(montlyRent)}</Text>
+          <Text style={styles.rentCaption}>Renta mensual</Text>
         </View>
 
-        {/*estado */}
-        <View style={styles.statusContainer}>
-          <Text style={styles.status}>{status}</Text>
-        </View>
+        <StatusBadge label={statusInfo.label} tone={statusInfo.tone} />
       </View>
 
-      {/*contenedor de renta mensual y boton de informacion */}
-      <View style={styles.rentContainer}>
-        {/*imagen de informacion */}
-        <Pressable style={styles.infoButton}>
-          <InfoIcon width={20} height={20} />
-        </Pressable>
-
-        {/*renta mensual */}
-        <View style={styles.rentContent}>
-          <Text style={styles.rentLabel}>Renta Mensual</Text>
-          <Text style={styles.rent}>{montlyRent}</Text>
-        </View>
+      <View style={styles.dates}>
+        <DateColumn label="Inicio" value={formatDate(startDate)} />
+        <DateColumn label="Finalización" value={formatDate(endDate)} />
       </View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 16,
-    gap: 16,
-  },
-
-  dateAndStatusContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-
-  dateContainer: {
-    gap: 4,
-  },
-
-  dateLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#94A3B8",
-  },
-
-  date: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#334155",
-  },
-
-  statusContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-  },
-
-  status: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#2563EB",
-  },
-
-  rentContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-  },
-
-  rentContent: {
-    gap: 2,
-  },
-
-  rentLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#64748B",
-  },
-
-  rent: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-
-  infoButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 10,
-  },
-});
 
 interface ContractDraftCardProps {
   version: number;
@@ -164,178 +80,97 @@ export function ContractDraftCard({
   endDate,
   action,
 }: ContractDraftCardProps) {
+  const agreed = landlordAgreed && tenantAgreed;
+  const partial = landlordAgreed || tenantAgreed;
+
   return (
-    <Pressable style={contractdraftcardstyles.container} onPress={action}>
-      {/**version y estados */}
-      <View style={contractdraftcardstyles.header}>
-        <View style={contractdraftcardstyles.versionContainer}>
-          <Text style={contractdraftcardstyles.versionLabel}>Borrador</Text>
-          <Text style={contractdraftcardstyles.version}>Versión {version}</Text>
+    <Pressable
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      onPress={action}
+    >
+      <View style={styles.header}>
+        <View style={styles.titleBlock}>
+          <Text style={styles.label}>Borrador · Versión {version}</Text>
+          <Text style={styles.rent}>{formatMoney(monthlyRent)}</Text>
+          <Text style={styles.rentCaption}>Renta mensual</Text>
         </View>
 
-        <View style={contractdraftcardstyles.statusContainer}>
-          <View
-            style={[
-              contractdraftcardstyles.statusDot,
-              landlordAgreed &&
-                tenantAgreed &&
-                contractdraftcardstyles.statusDotAgreed,
-            ]}
-          />
-          <Text style={contractdraftcardstyles.status}>
-            {landlordAgreed && tenantAgreed ? "Acordado" : "Pendiente"}
-          </Text>
-        </View>
+        <StatusBadge
+          label={agreed ? "Acordado" : partial ? "Aceptación parcial" : "Pendiente"}
+          tone={agreed ? "success" : partial ? "accent" : "warning"}
+        />
       </View>
 
-      {/*fechas del borrador */}
-      <View style={contractdraftcardstyles.dateContainer}>
-        <View>
-          <Text style={contractdraftcardstyles.dateLabel}>Inicio</Text>
-          <Text style={contractdraftcardstyles.date}>
-            {startDate.toLocaleDateString()}
-          </Text>
-        </View>
-
-        <View>
-          <Text style={contractdraftcardstyles.dateLabel}>Finalización</Text>
-          <Text style={contractdraftcardstyles.date}>
-            {endDate.toLocaleDateString()}
-          </Text>
-        </View>
-      </View>
-
-      {/*renta mensual */}
-      <View style={contractdraftcardstyles.rentContainer}>
-        {/*mas inforamcion */}
-        <Pressable style={contractdraftcardstyles.infoButton}>
-          <InfoIcon width={20} height={20} />
-        </Pressable>
-
-        {/*renta mensual (valor) */}
-        <View style={contractdraftcardstyles.rentContent}>
-          <Text style={contractdraftcardstyles.rentLabel}>Renta Mensual</Text>
-          <Text style={contractdraftcardstyles.rent}>
-            ${monthlyRent.toLocaleString()}
-          </Text>
-        </View>
+      <View style={styles.dates}>
+        <DateColumn label="Inicio" value={formatDate(startDate)} />
+        <DateColumn label="Finalización" value={formatDate(endDate)} />
       </View>
     </Pressable>
   );
 }
 
-const contractdraftcardstyles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     width: "100%",
     padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 16,
     gap: 16,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    borderRadius: 16,
+  },
+
+  pressed: {
+    backgroundColor: Palette.surfaceMuted,
+    transform: [{ scale: 0.99 }],
   },
 
   header: {
-    width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    gap: 12,
   },
 
-  versionContainer: {
+  titleBlock: {
+    flex: 1,
     gap: 2,
   },
 
-  versionLabel: {
+  label: {
     fontSize: 11,
     fontWeight: "500",
-    color: "#94A3B8",
+    color: Palette.textFaint,
   },
 
-  version: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1E293B",
+  rent: {
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+    color: Palette.textPrimary,
   },
 
-  statusContainer: {
+  rentCaption: {
+    fontSize: 12,
+    color: Palette.textMuted,
+  },
+
+  dates: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 10,
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Palette.borderSoft,
   },
 
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#94A3B8",
-  },
-
-  statusDotAgreed: {
-    backgroundColor: "#2563EB",
-  },
-
-  status: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#64748B",
-  },
-
-  dateContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  dateLabel: {
-    marginBottom: 4,
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#94A3B8",
+  dateColumn: {
+    flex: 1,
+    gap: 3,
   },
 
   date: {
     fontSize: 13,
-    fontWeight: "500",
-    color: "#334155",
-  },
-
-  rentContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-  },
-
-  rentContent: {
-    gap: 2,
-  },
-
-  rentLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#64748B",
-  },
-
-  rent: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-
-  infoButton: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 10,
+    fontWeight: "600",
+    color: Palette.textSecondary,
   },
 });

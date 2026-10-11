@@ -6,6 +6,9 @@ import type {
     GetAllPropertyMemberInfo,
     PropertyMemberMeResponseApi,
     PropertyResponseApi,
+    PublishedPropertyDetailResponseApi,
+    PublishedPropertyResponseApi,
+    PublishPropertyResponseApi,
     ResourceImagePersistenceResponseApi,
 } from "./api.response";
 import {
@@ -203,10 +206,43 @@ export const OpenStreetMapApi = async (
     }
     const data = (await req.json()) as OpenStreetResponse[];
 
+    if (data.length === 0) {
+        throw new Error("PLACE_NOT_FOUND");
+    }
+
     return {
         lat: data[0].lat,
         lon: data[0].lon,
         name: data[0].name,
         display_name: data[0].display_name,
     };
+};
+
+export const PublishProperty = async (propertyId: string) => {
+    const { data } = await api.post<PublishPropertyResponseApi>(
+        `${FINANCIAL_MODULE}/property/${propertyId}/publish`,
+    );
+    return data;
+};
+
+export const UnpublishProperty = async (propertyId: string) => {
+    const { data } = await api.post<PublishPropertyResponseApi>(
+        `${FINANCIAL_MODULE}/property/${propertyId}/unpublish`,
+    );
+    return data;
+};
+
+export const GetPublishedProperties = async (page: number, limit: number) => {
+    const { data } = await api.get<GetAll<PublishedPropertyResponseApi[]>>(
+        `${FINANCIAL_MODULE}/property/published`,
+        { params: { page, limit } },
+    );
+    return data;
+};
+
+export const GetPublishedPropertyById = async (propertyId: string) => {
+    const { data } = await api.get<
+        Get<"property", PublishedPropertyDetailResponseApi>
+    >(`${FINANCIAL_MODULE}/property/published/${propertyId}`);
+    return data.property;
 };

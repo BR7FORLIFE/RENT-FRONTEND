@@ -60,7 +60,7 @@ export function resourcesStorage(): Storage<string[]> {
         await AsyncStorage.setItem(KEY_STORAGE, JSON.stringify(uri));
     };
 
-    const clean = async () => await AsyncStorage.clear();
+    const clean = async () => await AsyncStorage.removeItem(KEY_STORAGE);
 
     return { get, set, clean };
 }

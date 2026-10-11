@@ -11,7 +11,7 @@ import type { KeyInput } from "../../../constants/constants";
 import { register } from "../../../core/api/api-endpoints";
 import type { RegisterType } from "../../../core/schemas/auth-schema";
 import { useAuth } from "../../../stores/auth-store";
-import { Colors } from "../../../themes/themes";
+import { Palette } from "../../../themes/themes";
 
 import type { AxiosError } from "axios";
 import type { ApiError } from "../../../types/global";
@@ -41,18 +41,18 @@ const keyInputs: KeyInput[] = [
   },
   {
     field: "email",
-    label: "Direccion de correo",
+    label: "Correo electrónico",
     placeholder: "test@gmail.com",
   },
   {
     field: "identificationNumber",
-    label: "Numero de identificacion",
-    placeholder: "digita tu numero de identificacion",
+    label: "Número de identificación",
+    placeholder: "Tu número de identificación",
   },
   {
     field: "password",
-    label: "Constraseña",
-    placeholder: "tu contraseña",
+    label: "Contraseña",
+    placeholder: "Tu contraseña",
   },
 ];
 
@@ -261,13 +261,12 @@ export default function RegisterScreen() {
 
           <View style={styles.buttonSection}>
             <ButtonForm
-              title="Registrarse"
+              title="Crear cuenta"
+              variant="primary"
               action={handleSubmit}
               disabled={!isCompleteFields || mutation.isPending}
               isPending={mutation.isPending}
             />
-
-            <Text style={styles.orText}>Or</Text>
 
             <View style={styles.loginRedirect}>
               <Text style={styles.loginText}>¿Tienes una cuenta?</Text>
@@ -316,7 +315,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 16,
 
-    shadowColor: Colors.SECONDARY,
+    shadowColor: Palette.textPrimary,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -335,20 +334,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
 
     borderWidth: 1,
-    borderColor: "#0000001A",
+    borderColor: Palette.border,
     borderRadius: 20,
 
     backgroundColor: "#FFFFFF",
-
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-
-    elevation: 3,
   },
 
   // Textos
@@ -357,7 +346,7 @@ const styles = StyleSheet.create({
 
     gap: 6,
 
-    marginBottom: 28,
+    marginBottom: 24,
   },
 
   containerFormTitle: {
@@ -375,12 +364,12 @@ const styles = StyleSheet.create({
   description: {
     width: "100%",
 
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: 13,
+    lineHeight: 19,
 
     fontWeight: "400",
 
-    color: "#6B7280",
+    color: Palette.textMuted,
   },
 
   // Inputs
@@ -389,9 +378,9 @@ const styles = StyleSheet.create({
 
     flexDirection: "column",
 
-    gap: 22,
+    gap: 20,
 
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   // Picker
@@ -419,8 +408,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
     borderWidth: 1,
-    borderColor: Colors.NEUTRAL,
-    borderRadius: 8,
+    borderColor: Palette.borderStrong,
+    borderRadius: 12,
 
     backgroundColor: "#FFFFFF",
   },
@@ -440,14 +429,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
     gap: 10,
-  },
-
-  orText: {
-    fontSize: 13,
-
-    color: "#9CA3AF",
-
-    marginVertical: 2,
   },
 
   loginRedirect: {
@@ -474,6 +455,6 @@ const styles = StyleSheet.create({
 
     fontWeight: "600",
 
-    color: Colors.TERTIARY,
+    color: Palette.accent,
   },
 });

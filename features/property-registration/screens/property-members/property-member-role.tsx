@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { ButtonForm } from "../../../../components/buttons/button";
@@ -11,6 +11,7 @@ import { EmptyList, RentDescription } from "../../../../components/info";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../../components/splash-screen";
+import { Palette } from "../../../../themes/themes";
 import { queryClient } from "../../../../core/configs/tanstackconfig";
 import
   {
@@ -29,6 +30,7 @@ import
     type POLICY_STATEMENT,
     type ROLES,
   } from "../../constants";
+import { formatEnumLabel } from "../../services/format";
 
 export function PropertyMemberRolesScreen() {
   // creamos una referencia persistente entre render para solamente insertar una sola vez
@@ -148,14 +150,7 @@ export function PropertyMemberRolesScreen() {
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "white",
-        flexDirection: "column",
-        paddingHorizontal: 12,
-      }}
-    >
+    <SafeAreaView style={styles.screen}>
       <SplashWaveBackground />
       <RentHeader sectionName="ROLES" />
 
@@ -178,11 +173,23 @@ export function PropertyMemberRolesScreen() {
           <View style={styles.rolesContainer}>
             <View style={styles.rolesHeader}>
               {rolePressed.isPressed ? (
-                <Text style={styles.rolesTitle}>
-                  POLITICAS PARA {rolePressed.role}
-                </Text>
+                <>
+                  <Text style={styles.rolesTitle}>
+                    {formatEnumLabel(rolePressed.role)}
+                  </Text>
+                  <Text style={styles.rolesSubtitle}>
+                    Desmarca las políticas que no quieres otorgar con este rol.
+                  </Text>
+                </>
               ) : (
-                <Text style={styles.rolesTitle}>ROLES</Text>
+                <>
+                  <Text style={styles.rolesTitle}>Asignar roles</Text>
+                  <Text style={styles.rolesSubtitle}>
+                    {selectOverridePolicy.length === 0
+                      ? "Marca los roles del miembro o toca uno para ver sus políticas."
+                      : `${selectOverridePolicy.length} seleccionado${selectOverridePolicy.length === 1 ? "" : "s"} · toca un rol para ver sus políticas.`}
+                  </Text>
+                </>
               )}
             </View>
 
@@ -191,8 +198,8 @@ export function PropertyMemberRolesScreen() {
                 key="policies-statements"
                 data={selectedRoleData?.policies ?? []}
                 keyExtractor={(item) => item}
-                numColumns={1}
                 contentContainerStyle={styles.rolesList}
+                showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
                   <View style={styles.roleItem}>
                     <SelectPolicyOverride
@@ -204,24 +211,24 @@ export function PropertyMemberRolesScreen() {
                 )}
                 ListEmptyComponent={
                   <EmptyList
-                    title="No se han encontrado politicas en el sistema!"
-                    description="intente mas tarde.."
+                    title="No se han encontrado políticas"
+                    description="Inténtalo de nuevo más tarde."
                   />
                 }
-                style={{ height: "50%", marginBottom: 12 }}
+                style={styles.list}
               />
             ) : (
               <FlatList
                 key="roles-statements"
                 data={ROLES_AND_POLICIES}
-                numColumns={2}
                 keyExtractor={(item) => item.role}
-                columnWrapperStyle={styles.rolesRow}
                 contentContainerStyle={styles.rolesList}
+                showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
                   <View style={styles.roleItem}>
                     <SelectRole
                       name={item.role}
+                      subtitle={`${item.policies.length} políticas`}
                       isSelected={selectOverridePolicy.some(
                         (role) => role.role === item.role,
                       )}
@@ -232,16 +239,16 @@ export function PropertyMemberRolesScreen() {
                 )}
                 ListEmptyComponent={
                   <EmptyList
-                    title="No se han encontrado roles en el sistema!"
-                    description="intente mas tarde.."
+                    title="No se han encontrado roles"
+                    description="Inténtalo de nuevo más tarde."
                   />
                 }
-                style={{ height: "50%", marginBottom: 12 }}
+                style={styles.list}
               />
             )}
           </View>
           {rolePressed?.isPressed ? (
-            <View style={{ width: "100%", paddingHorizontal: 20 }}>
+            <View style={styles.footer}>
               <ButtonForm
                 title="Regresar"
                 action={() =>
@@ -250,8 +257,8 @@ export function PropertyMemberRolesScreen() {
               />
             </View>
           ) : (
-            <View style={{ width: "100%", paddingHorizontal: 20 }}>
-              <ButtonForm title="Asignar Roles" />
+            <View style={styles.footer}>
+              <ButtonForm title="Asignar roles" />
             </View>
           )}
         </>
@@ -260,21 +267,19 @@ export function PropertyMemberRolesScreen() {
       {/**cuando el miembro tiene un estado distinto a active y esta en proceso para activarse */}
       {data.status === "IN_PROCESS" && (
         <>
-          <View style={{ marginTop: 24 }}></View>
-          <RentDescription
-            title={`Necesitas activar al miembro ${data.fullname}`}
-            description="Presiona el boton de activar para que el miembro pueda realizar acciones en la app!"
-          />
+          <View style={styles.activateSection}>
+            <RentDescription
+              title="Activa al miembro"
+              description={`${data.fullname} aún no puede realizar acciones en la app. Actívalo para habilitar su acceso.`}
+            />
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.activateButton,
-              pressed && styles.activateButtonPressed,
-            ]}
-            onPress={activeProperyMember}
-          >
-            <Text style={styles.activateButtonText}>Activar miembro</Text>
-          </Pressable>
+            <View style={styles.footer}>
+              <ButtonForm
+                title="Activar miembro"
+                action={activeProperyMember}
+              />
+            </View>
+          </View>
         </>
       )}
     </SafeAreaView>
@@ -282,70 +287,56 @@ export function PropertyMemberRolesScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    width: "100%",
-    height: 58,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E9EEF5",
-  },
-
-  brand: {
-    fontSize: 20,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-    color: "#111827",
-  },
-
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#475569",
+  screen: {
+    flex: 1,
+    backgroundColor: Palette.background,
   },
 
   memberSection: {
     width: "100%",
-    marginTop: 10,
-    paddingHorizontal: 4,
-    gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 8,
+    paddingHorizontal: 20,
+    gap: 12,
   },
 
   propertyName: {
-    width: "100%",
-    paddingHorizontal: 4,
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#334155",
-    textAlign: "center",
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    color: Palette.textMuted,
     marginTop: 12,
   },
 
   rolesContainer: {
+    flex: 1,
     width: "100%",
-    marginTop: 18,
+    marginTop: 20,
+    paddingHorizontal: 20,
   },
 
   rolesHeader: {
     width: "100%",
-    paddingBottom: 8,
     marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#CBD5E1",
-    borderStyle: "dashed",
     justifyContent: "center",
   },
 
   rolesTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.2,
+    color: Palette.textPrimary,
+  },
+
+  rolesSubtitle: {
+    marginTop: 3,
     fontSize: 12,
-    fontWeight: "600",
-    color: "#475569",
-    letterSpacing: 0.5,
+    lineHeight: 17,
+    color: Palette.textMuted,
+  },
+
+  list: {
+    flex: 1,
   },
 
   rolesList: {
@@ -353,35 +344,18 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 
-  rolesRow: {
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-
   roleItem: {
     width: "100%",
-    paddingHorizontal: 20,
   },
 
-  activateButton: {
+  footer: {
     width: "100%",
-    height: 46,
-    marginTop: 18,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
 
-  activateButtonPressed: {
-    backgroundColor: "#1D4ED8",
-  },
-
-  activateButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    letterSpacing: 0.2,
+  activateSection: {
+    marginTop: 16,
   },
 });

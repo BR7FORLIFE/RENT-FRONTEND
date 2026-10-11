@@ -8,6 +8,7 @@ import { ButtonForm } from "../../../components/buttons/button";
 import { PrincipalError } from "../../../components/error";
 import { RentHeader } from "../../../components/header";
 import { RentDescription } from "../../../components/info";
+import { Palette } from "../../../themes/themes";
 import SplashScreen from "../../../components/splash-screen";
 import { AgreeContractDraft, GetContractDraftById } from "../api";
 import
@@ -67,19 +68,15 @@ export function ContractDetailsDraftScreen() {
   const canAgree = isMemberOfContract && !hasAgreed;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView style={contractDetailsDraftStyles.screen}>
       <RentHeader sectionName="Borrador de contrato" />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 12,
-          gap: 6,
-          paddingBottom: 64,
-        }}
+        contentContainerStyle={contractDetailsDraftStyles.scroll}
       >
         <RentDescription
-          title="Informacion de borrador"
-          description="En este apartado abarcaras toda la informacion correspondiente a este borrador!"
+          title="Información del borrador"
+          description="Revisa las partes, el contenido y las condiciones antes de aceptar."
         />
 
         {/**informacion de aceptacion y version de contrato */}
@@ -117,7 +114,9 @@ export function ContractDetailsDraftScreen() {
 
         {canAgree ? (
           <ButtonForm
-            title="ACEPTAR BORRADOR"
+            title="Aceptar borrador"
+            variant="primary"
+            isPending={mutation.isPending}
             action={() => {
               mutation.mutate(undefined, {
                 onSuccess: () => {
@@ -134,7 +133,7 @@ export function ContractDetailsDraftScreen() {
           />
         ) : (
           <ButtonForm
-            title="REGRESAR"
+            title="Regresar"
             action={() =>
               router.push({
                 pathname: "/home/(tabs)/property-registration",
@@ -149,27 +148,36 @@ export function ContractDetailsDraftScreen() {
 }
 
 const contractDetailsDraftStyles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Palette.background,
+  },
+
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 48,
+    gap: 16,
+  },
+
   container: {
     width: "100%",
-    flex: 1,
     gap: 12,
-    marginTop: 12,
   },
 
   title: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#1E293B",
+    fontWeight: "700",
+    color: Palette.textPrimary,
   },
 
   document: {
-    flex: 1,
+    minHeight: 360,
     width: "100%",
 
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Palette.surface,
 
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: Palette.border,
     borderRadius: 16,
 
     overflow: "hidden",

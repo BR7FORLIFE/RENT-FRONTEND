@@ -14,11 +14,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { ResourceImageType } from "../schemas/property-registration.schema";
 
 //svgs
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PrincipalError } from "../../../components/error";
 import SplashScreen from "../../../components/splash-screen";
-import { GetPropertyById } from "../api";
+import { ButtonForm } from "../../../components/buttons/button";
+import { StatusBadge } from "../../../components/ui/status-badge";
+import { GetPropertyById, PublishProperty, UnpublishProperty } from "../api";
 import { BackButton } from "../components/display";
 
 interface PropertyDescriptionProps {
@@ -991,6 +993,91 @@ const propertyLocationStyles = StyleSheet.create({
   },
 });
 
+const PublishSection = ({
+  propertyId,
+  isPublished,
+}: {
+  propertyId: string;
+  isPublished: boolean;
+}) => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending, isError } = useMutation({
+    mutationFn: () =>
+      isPublished ? UnpublishProperty(propertyId) : PublishProperty(propertyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+      queryClient.invalidateQueries({ queryKey: ["publishedProperties"] });
+    },
+  });
+
+  return (
+    <View style={publishStyles.container}>
+      <View style={publishStyles.header}>
+        <Text style={publishStyles.title}>Publicación</Text>
+        <StatusBadge
+          label={isPublished ? "Publicado" : "No publicado"}
+          tone={isPublished ? "success" : "neutral"}
+        />
+      </View>
+
+      <Text style={publishStyles.description}>
+        {isPublished
+          ? "Tu inmueble es visible para los usuarios en el feed."
+          : "Publica tu inmueble para que otros usuarios lo vean en el feed."}
+      </Text>
+
+      {isError && (
+        <Text style={publishStyles.error}>
+          No pudimos actualizar la publicación. Inténtalo de nuevo.
+        </Text>
+      )}
+
+      <ButtonForm
+        title={isPublished ? "Despublicar" : "Publicar"}
+        variant={isPublished ? "secondary" : "primary"}
+        isPending={isPending}
+        action={() => mutate()}
+      />
+    </View>
+  );
+};
+
+const publishStyles = StyleSheet.create({
+  container: {
+    width: "100%",
+    padding: 16,
+    gap: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#64748B",
+  },
+
+  error: {
+    fontSize: 12,
+    color: "#B91C1C",
+  },
+});
+
 export default function DetailsScreen({ propertyId }: { propertyId?: string }) {
   const { id: searchId } = useLocalSearchParams();
 
@@ -1030,6 +1117,12 @@ export default function DetailsScreen({ propertyId }: { propertyId?: string }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={detailsStyle.content}
       >
+        {/* publicacion en el feed */}
+        <PublishSection
+          propertyId={property.id}
+          isPublished={property.isPublished}
+        />
+
         {/* galeria de imagenes */}
         <ImagesSlider resources={property.resources} />
 

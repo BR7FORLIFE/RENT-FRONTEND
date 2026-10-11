@@ -1384,3 +1384,49 @@ The objective is to produce code that feels like it was written by the same team
 The frontend should remain:
 
 **clean, consistent, predictable, professional and maintainable.**
+
+---
+
+# 48. Contexto actual del proyecto (snapshot del código)
+
+## Versiones y comandos
+* Expo `~57`, React Native `0.86`, React `19.2`, Expo Router `~57`, TanStack Query `5`, Zustand `5`, Zod `4`, TypeScript `6`. (`AGENTS.md` menciona docs de Expo v54; manda `package.json`.)
+* `pnpm start` / `android` / `ios` / `web`, `pnpm lint` (expo lint), `pnpm test` (vitest). Verificación de tipos: `npx tsc --noEmit`.
+* Variables en `.env*` con prefijo `EXPO_PUBLIC_` (`EXPO_PUBLIC_API_URL`, Cloudinary). Se leen en `core/env.ts` y `core/api/api-config.ts`.
+
+## Capa de red
+* `core/api/api-config.ts`: instancia `api` (axios, `baseURL`), interceptor que inyecta `Bearer` desde `useAuth`, y `notificationSocket` (Socket.IO, namespace `/<FINANCIAL_MODULE>/notifications`).
+* `core/api/paths.ts` (`AUTHPATHS`, `FINANCIAL_MODULE`), `core/api/api-endpoints.ts` (auth: register, login, me, refresh…).
+* Cada feature tiene `api.ts` (funciones), `api.response.ts` (tipos de respuesta) y `schemas/` (Zod). Respuestas paginadas: `GetAll<T>` = `{ data, metadata }` en `types/global.ts`.
+* `queryClient` único en `core/configs/tanstackconfig.ts`.
+
+## Estado
+* TanStack Query: todo dato de servidor. Query keys en uso: `["properties"]`, `["properties", id]`, `["propertyMembers", propertyId, status]`, `["propertyMember", id, propertyId]`, `["propertyMemberMe", propertyId]`, `["GetAllContract", propertyId]`, `["GetAllContractDraft", propertyId]`, `["GetAllContractDraftAccepted", propertyId]`, `["contractDraft", id]`.
+* Zustand: `stores/auth-store.ts` (`useAuth` tokens/userId, `useMe` datos del usuario), `stores/global-store.ts` (aside, notificaciones), `features/property-registration/stores/property.store.ts` (propiedad seleccionada, panel QR).
+
+## Rutas (`app/`) → pantallas (`features/`)
+* `auth/*` → `features/auth/screens` (login, register, email-verification, OAuth callback).
+* `home/(tabs)/*` → pestañas: `contract`, `finance-reports`, `properties-services`, `property-registration`, `public-services`.
+* `contracts/[id]` → `ContractDetailsScreen` (contratos de una propiedad con pestañas: Contratos · Borradores · Nuevo borrador · Aceptados). `contracts/details/draft` → `ContractDetailsDraftScreen`.
+* `property/property-registration/*`, `property/property-associations/*`, `property-member/index` (invitar/QR/escáner), `property-member/[id]` (miembros de una propiedad, filtro por estado con pestañas), `property-member/roles/[id]` (roles y políticas de un miembro).
+
+## Dominio de contratos (resumen)
+* Estados de contrato: `DRAFT, PENDING_ACCEPTANCE, PENDING_DOCUMENTATION, ACTIVE, REJECTED, CANCELLED, SUSPENDED, FINISHED` (`features/contract/api.response.ts`); etiquetas y tonos en `features/contract/services/format.ts`.
+* Flujo: crear borrador (editor HTML `react-native-pell-rich-editor`, `INITIAL_CONTRACT_DRAFT` + `ExtractContractInformationOfHTML` en `services/helper.ts`) → ambas partes aceptan (`AgreeContractDraft`) → "Aceptados" permite `CreateContract`.
+* Montos y fechas llegan como string en listados y como number/Date tras mapeo en `GetAllContractDraft`; formatear siempre con `formatMoney` / `formatDate`.
+
+## Dominio de miembros y roles (resumen)
+* Estados de miembro: `ACTIVE`, `IN_PROCESS` (debe activarse), `DESACTIVE`. `ROLES` y `POLICY_STATEMENT` en `features/property-registration/constants.ts`; `ROLES_AND_POLICIES` mapea rol → políticas.
+* El usuario en sesión no se muestra en su propia lista de miembros (no puede asignarse roles).
+* La asignación de roles ("Asignar roles") aún no está conectada a `AssignmentRoleToPropertyMember` en la pantalla de roles.
+
+## Sistema visual (refactor de diseño)
+* Tokens en `themes/themes.ts`: `Palette`, `Radius`, `Spacing`, `Tone/ToneStyles` (además del `Colors` original).
+* Componentes compartidos nuevos en `components/ui/`: `SegmentedTabs`, `StatusBadge`, `Avatar`, `InfoRow`/`InfoBlock`. `ButtonForm` admite `variant="primary"`. `PrincipalError` ahora es un estado de error con icono y mensaje.
+* Navegación entre secciones: pestañas horizontales (no FAB ni desplegables). Se eliminó `button-contract-action.tsx`.
+* Skills de diseño del proyecto en `.claude/skills/`: `rent-design-tokens`, `rent-ui-components`, `rent-screen-patterns`. Consúltalas antes de tocar estilos o crear componentes.
+
+## Deuda visual conocida (candidatas a migrar a `Palette` y a los patrones anteriores)
+* Pantallas con hex literales y alturas en porcentaje: `features/property-registration/screens/*` (registro, detalle, asociaciones), `features/finance-reports`, `features/properties-services`, `features/public-services`, `features/auth/screens`.
+* `components/aside.tsx`, `components/property-card.tsx` y `components/inputs/input.tsx` conservan estilos propios.
+* `components/selects/selects.tsx` es un stub; `property-members/notification.tsx` y `scan.tsx` están vacíos.

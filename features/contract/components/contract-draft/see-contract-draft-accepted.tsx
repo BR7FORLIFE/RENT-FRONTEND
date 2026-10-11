@@ -1,18 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import
-    {
-        ActivityIndicator,
-        Alert,
-        Pressable,
-        StyleSheet,
-        Text,
-        View,
-    } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
+import { ButtonForm } from "../../../../components/buttons/button";
 import { PrincipalError } from "../../../../components/error";
+import { EmptyList } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
 import { CreateContract, getAllContractDraftAccepted } from "../../api";
+import { InfoBlock } from "../../../../components/ui/info-row";
+import { StatusBadge } from "../../../../components/ui/status-badge";
+import { Palette } from "../../../../themes/themes";
 import type { ContractDraftInfoResponse } from "../../api.response";
+import { formatDate, formatMoney } from "../../services/format";
 
 interface SeeContractAcceptedProps {
   propertyId: string;
@@ -72,37 +70,34 @@ export function SeeContractAccepted({ propertyId }: SeeContractAcceptedProps) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Borradores aceptados</Text>
-
-        <Text style={styles.description}>
-          Estos borradores han sido aceptados por las partes y pueden
-          convertirse en contratos.
-        </Text>
-      </View>
-
-      <View style={styles.list}>
-        {data.data.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No hay borradores aceptados</Text>
-
-            <Text style={styles.emptyDescription}>
-              Cuando ambas partes acepten un borrador aparecerá aquí.
-            </Text>
-          </View>
-        ) : (
-          data.data.map((draft) => (
-            <AcceptedContractDraftCard
-              key={draft.id}
-              draft={draft}
-              isCreating={createContractMutation.isPending}
-              onCreateContract={() => createContractMutation.mutate(draft)}
-            />
-          ))
-        )}
-      </View>
-    </View>
+    <FlatList
+      data={data.data}
+      keyExtractor={(draft) => draft.id}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.list}
+      ListHeaderComponent={
+        <View style={styles.header}>
+          <Text style={styles.title}>Borradores aceptados</Text>
+          <Text style={styles.description}>
+            Estos borradores han sido aceptados por las partes y pueden
+            convertirse en contratos.
+          </Text>
+        </View>
+      }
+      ListEmptyComponent={
+        <EmptyList
+          title="No hay borradores aceptados"
+          description="Cuando ambas partes acepten un borrador aparecerá aquí."
+        />
+      }
+      renderItem={({ item }) => (
+        <AcceptedContractDraftCard
+          draft={item}
+          isCreating={createContractMutation.isPending}
+          onCreateContract={() => createContractMutation.mutate(item)}
+        />
+      )}
+    />
   );
 }
 
@@ -117,258 +112,98 @@ function AcceptedContractDraftCard({
   isCreating,
   onCreateContract,
 }: AcceptedContractDraftCardProps) {
-  const startDate = new Date(draft.startDate).toLocaleDateString();
-  const endDate = new Date(draft.endDate).toLocaleDateString();
-
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <View>
+        <View style={styles.cardTitleBlock}>
           <Text style={styles.cardTitle}>Borrador v{draft.version}</Text>
-
           <Text style={styles.cardSubtitle}>
             Ambas partes han aceptado el borrador
           </Text>
         </View>
 
-        <View style={styles.acceptedBadge}>
-          <Text style={styles.acceptedBadgeText}>ACEPTADO</Text>
-        </View>
+        <StatusBadge label="Aceptado" tone="success" />
       </View>
 
-      <View style={styles.divider} />
-
-      <View style={styles.infoContainer}>
-        <InfoItem
-          label="Arriendo mensual"
-          value={`$${draft.monthlyRent.toLocaleString()}`}
-        />
-
-        <InfoItem
-          label="Depósito"
-          value={`$${draft.depositAmount.toLocaleString()}`}
-        />
-
-        <InfoItem label="Inicio" value={startDate} />
-
-        <InfoItem label="Finalización" value={endDate} />
+      <View style={styles.infoGrid}>
+        <InfoBlock label="Arriendo mensual" value={formatMoney(draft.monthlyRent)} />
+        <InfoBlock label="Depósito" value={formatMoney(draft.depositAmount)} />
       </View>
 
-      <View style={styles.agreementContainer}>
-        <AgreementItem label="Arrendador" agreed={draft.landlordAgreed} />
-
-        <AgreementItem label="Arrendatario" agreed={draft.tenantAgreed} />
+      <View style={styles.infoGrid}>
+        <InfoBlock label="Inicio" value={formatDate(draft.startDate)} />
+        <InfoBlock label="Finalización" value={formatDate(draft.endDate)} />
       </View>
 
-      <Pressable
-        style={[styles.createButton, isCreating && styles.createButtonDisabled]}
-        onPress={onCreateContract}
-        disabled={isCreating}
-      >
-        {isCreating ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Text style={styles.createButtonText}>CREAR CONTRATO</Text>
-        )}
-      </Pressable>
-    </View>
-  );
-}
-
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.infoItem}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
-    </View>
-  );
-}
-
-function AgreementItem({ label, agreed }: { label: string; agreed: boolean }) {
-  return (
-    <View style={styles.agreementItem}>
-      <View
-        style={[
-          styles.agreementIndicator,
-          agreed
-            ? styles.agreementIndicatorAccepted
-            : styles.agreementIndicatorPending,
-        ]}
+      <ButtonForm
+        title="Crear contrato"
+        variant="primary"
+        action={onCreateContract}
+        isPending={isCreating}
       />
-
-      <Text style={styles.agreementText}>
-        {label}: {agreed ? "Aceptado" : "Pendiente"}
-      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#202124",
-  },
-
-  description: {
-    marginTop: 5,
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#70757A",
-  },
-
   list: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
     gap: 12,
   },
 
+  header: {
+    gap: 3,
+    marginBottom: 4,
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: Palette.textPrimary,
+  },
+
+  description: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: Palette.textMuted,
+  },
+
   card: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
     padding: 16,
+    gap: 16,
+    backgroundColor: Palette.surface,
+    borderWidth: 1,
+    borderColor: Palette.border,
+    borderRadius: 16,
   },
 
   cardHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 10,
+    gap: 12,
+  },
+
+  cardTitleBlock: {
+    flex: 1,
+    gap: 3,
   },
 
   cardTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#202124",
+    color: Palette.textPrimary,
   },
 
   cardSubtitle: {
-    marginTop: 4,
     fontSize: 12,
-    color: "#6B7280",
+    color: Palette.textMuted,
   },
 
-  acceptedBadge: {
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    borderRadius: 8,
-    backgroundColor: "#EEF6FF",
-  },
-
-  acceptedBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#2563EB",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 14,
-  },
-
-  infoContainer: {
-    gap: 10,
-  },
-
-  infoItem: {
+  infoGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  infoLabel: {
-    fontSize: 13,
-    color: "#6B7280",
-  },
-
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#202124",
-  },
-
-  agreementContainer: {
-    marginTop: 14,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-    gap: 8,
-  },
-
-  agreementItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  agreementIndicator: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-
-  agreementIndicatorAccepted: {
-    backgroundColor: "#2563EB",
-  },
-
-  agreementIndicatorPending: {
-    backgroundColor: "#9CA3AF",
-  },
-
-  agreementText: {
-    fontSize: 13,
-    color: "#4B5563",
-  },
-
-  createButton: {
-    marginTop: 16,
-    height: 44,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#2563EB",
-  },
-
-  createButtonDisabled: {
-    opacity: 0.6,
-  },
-
-  createButtonText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-
-  emptyContainer: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#202124",
-  },
-
-  emptyDescription: {
-    marginTop: 6,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: "center",
-    color: "#6B7280",
+    gap: 12,
   },
 });

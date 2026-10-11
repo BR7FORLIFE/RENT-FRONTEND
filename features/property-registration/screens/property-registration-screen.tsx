@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import WaveBackground from "../../../assets/backgrounds/wave-background.svg";
@@ -30,7 +30,11 @@ export interface RegisterFormData {
     React.SetStateAction<Partial<CreatePropertyType> | undefined>
   >;
   setStep: React.Dispatch<React.SetStateAction<number>>;
+  //lo ya capturado, para precargar un paso cuando el usuario regresa
+  data?: Partial<CreatePropertyType>;
 }
+
+const TOTAL_STEPS = 7;
 export default function PropertyRegistrationScreen() {
   const [proccesing, setProccesing] = useState<boolean>(false);
   const [isCreateProperty, setIsCreateProperty] = useState(false);
@@ -42,9 +46,15 @@ export default function PropertyRegistrationScreen() {
   const mutation = useMutation({
     mutationFn: SaveProperty,
     mutationKey: ["property", "create"],
-    onError: (err: AxiosError<ApiError>) => {},
+    onError: (err: AxiosError<ApiError>) => {
+      Toast.show({
+        type: "error",
+        text2:
+          err.response?.data?.message ??
+          "No se pudo registrar la propiedad. Inténtalo de nuevo.",
+      });
+    },
     onSuccess: () => {
-      setProccesing(false);
       resourcesStorage().clean(); //limpiamos el storage de imagenes
       Toast.show({
         type: "success",
@@ -67,23 +77,49 @@ export default function PropertyRegistrationScreen() {
     router.navigate("/home/(tabs)/property-registration");
   };
 
+  //regresa al paso anterior; en el primer paso sale del registro
+  const goBack = () => {
+    if (step > 1) {
+      setStep((prev) => prev - 1);
+      return;
+    }
+    cleanSteps();
+  };
+
   useEffect(() => {
     if (!isCreateProperty) return;
 
     const registerProperty = async () => {
       setProccesing(true);
-      // (IMPORTANTE EVALUAR SI NO HAY IMAGENES PUES CREARLO DE TODAS FORMAS)
-      //logica para subir las imagenes a cloudinary
-      const cloudImageInfo = await uploadImagesToCloudinary();
 
-      const property = {
-        ...registerForm,
-        resources: cloudImageInfo,
-      };
-      //mandamos al servidor el objeto completo del inmueble a registrar
-      await mutation.mutateAsync(property as Partial<CreatePropertyType>);
+      try {
+        let cloudImageInfo;
 
-      setIsCreateProperty(false)
+        try {
+          //subimos las imagenes a cloudinary (puede no haber ninguna)
+          cloudImageInfo = await uploadImagesToCloudinary();
+        } catch {
+          Toast.show({
+            type: "error",
+            text2: "No se pudieron subir las imágenes. Inténtalo de nuevo.",
+          });
+          return;
+        }
+
+        const property = {
+          ...registerForm,
+          resources: cloudImageInfo,
+        };
+
+        //mandamos al servidor el objeto completo del inmueble a registrar
+        await mutation.mutateAsync(property as Partial<CreatePropertyType>);
+      } catch {
+        //el error del servidor ya lo notifica el onError de la mutation
+      } finally {
+        //siempre salimos del splash, incluso si algo falla
+        setProccesing(false);
+        setIsCreateProperty(false);
+      }
     };
 
     registerProperty();
@@ -97,45 +133,61 @@ export default function PropertyRegistrationScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <WaveBackground style={styles.wave} />
-      <BackButton action={cleanSteps} />
 
-      <View style={styles.stepIndicator}>
-        <Text style={styles.stepText}>{`Step ${step} / 7`}</Text>
+      <View style={styles.topBar}>
+        <BackButton action={goBack} />
+
+        <Text style={styles.stepText}>{`Paso ${step} de ${TOTAL_STEPS}`}</Text>
+      </View>
+
+      <View style={styles.progressTrack}>
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${(step / TOTAL_STEPS) * 100}%` },
+          ]}
+        />
       </View>
 
       <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../../assets/images/logo-recortado.png")}
-            resizeMode="contain"
-            style={styles.logo}
-          />
-        </View>
-
         <View style={styles.stepContainer}>
           {step === 1 && (
-            <DrapAndDropStep saveData={setRegisterForm} setStep={setStep} />
+            <DrapAndDropStep
+              saveData={setRegisterForm}
+              setStep={setStep}
+              data={registerForm}
+            />
           )}
 
           {step === 2 && (
-            <DirectionStep saveData={setRegisterForm} setStep={setStep} />
+            <DirectionStep
+              saveData={setRegisterForm}
+              setStep={setStep}
+              data={registerForm}
+            />
           )}
 
           {step === 3 && (
             <FmiAndPredialNumberStep
               saveData={setRegisterForm}
               setStep={setStep}
+              data={registerForm}
             />
           )}
 
           {step === 4 && (
-            <PropertyInfo saveData={setRegisterForm} setStep={setStep} />
+            <PropertyInfo
+              saveData={setRegisterForm}
+              setStep={setStep}
+              data={registerForm}
+            />
           )}
 
           {step === 5 && (
             <StructurePropertyInfo
               saveData={setRegisterForm}
               setStep={setStep}
+              data={registerForm}
             />
           )}
 
@@ -143,6 +195,7 @@ export default function PropertyRegistrationScreen() {
             <EconomicPropertyInfo
               saveData={setRegisterForm}
               setStep={setStep}
+              data={registerForm}
             />
           )}
 
@@ -151,6 +204,7 @@ export default function PropertyRegistrationScreen() {
               disabled={proccesing}
               saveData={setRegisterForm}
               setIsCreateProperty={setIsCreateProperty}
+              data={registerForm}
             />
           )}
         </View>
@@ -162,87 +216,45 @@ export default function PropertyRegistrationScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-
-    position: "relative",
-
     backgroundColor: "#FFFFFF",
   },
 
   wave: {
     position: "absolute",
-
     left: 0,
     right: 0,
     bottom: 0,
-
     zIndex: 0,
   },
 
-  backButton: {
-    position: "absolute",
-
-    top: 30,
-    left: 20,
-
-    zIndex: 10,
-
+  topBar: {
     flexDirection: "row",
-
     alignItems: "center",
-
-    gap: 6,
-
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-
-    borderRadius: 10,
-
-    backgroundColor: "#FFFFFF",
-
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-
-    elevation: 3,
-  },
-
-  backButtonPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.75,
-  },
-
-  backText: {
-    fontSize: 13,
-
-    fontWeight: "600",
-
-    color: "#374151",
-  },
-
-  stepIndicator: {
-    position: "absolute",
-
-    top: 35,
-    right: 20,
-
-    zIndex: 10,
-
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-
-    borderRadius: 20,
-
-    backgroundColor: "#F3F4F6",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
 
   stepText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#4B5563",
+    color: "#475569",
+  },
+
+  progressTrack: {
+    height: 4,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    overflow: "hidden",
+    borderRadius: 2,
+    backgroundColor: "#E2E8F0",
+  },
+
+  progressFill: {
+    height: "100%",
+    borderRadius: 2,
+    backgroundColor: "#2563EB",
   },
 
   content: {
@@ -250,32 +262,11 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 24,
-  },
-
-  logoContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginBottom: 14,
-  },
-
-  logo: {
-    width: 64,
-    height: 64,
-
-    borderRadius: 12,
   },
 
   stepContainer: {
     width: "100%",
     maxWidth: 500,
-
     flex: 1,
-
-    alignItems: "center",
-    justifyContent: "flex-start",
-
-    paddingHorizontal: 4,
   },
 });

@@ -105,3 +105,41 @@ export interface GetAllPropertyMemberInfo {
     overrides: string[];
     policies: string[];
 }
+
+export interface PublishedStructureResponseApi {
+    id: string;
+    propertyId: string;
+    bedrooms: number;
+    bathrooms: number;
+    floors: number;
+    parkingSpaces: number;
+    // Decimal en BD: llega serializado como string
+    area: string;
+    lotArea: string;
+    constructionYear: number | null;
+}
+
+export interface PublishedPropertyResponseApi {
+    id: string;
+    propertyName: string;
+    propertyDescription: string;
+    typeProperty: string;
+    propertyStructureDescription: PublishedStructureResponseApi | null;
+    resourceImages: ResourceImagePersistenceResponseApi[];
+}
+
+export interface PublishedPropertyDetailResponseApi {
+    id: string;
+    propertyName: string;
+    typeProperty: string;
+    propertyStructureDescription: PublishedStructureResponseApi | null;
+    ownerContact: {
+        email: string;
+        cellphone: string;
+    };
+}
+
+export interface PublishPropertyResponseApi {
+    id: string;
+    isPublished: boolean;
+}
