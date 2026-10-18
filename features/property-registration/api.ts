@@ -4,6 +4,7 @@ import type { Get, GetAll } from "../../types/global";
 import type {
     GetAllPropertiesByPropertyMemberResponseApi,
     GetAllPropertyMemberInfo,
+    MemberRolePoliciesResponseApi,
     PropertyMemberMeResponseApi,
     PropertyResponseApi,
     PublishedPropertyDetailResponseApi,
@@ -122,6 +123,34 @@ export const AssignmentRoleToPropertyMember = async (
     const { data } = await api.post<{ message: string }>(
         `${FINANCIAL_MODULE}/property-member/${memberId}`,
         { propertyId, roles },
+    );
+
+    return data;
+};
+
+export const GetMemberRolePolicies = async (
+    propertyMemberId: string,
+    propertyId: string,
+    role: string,
+) => {
+    const { data } = await api.get<MemberRolePoliciesResponseApi>(
+        `${FINANCIAL_MODULE}/property-member/${propertyMemberId}/property/${propertyId}/role/${role}/policies`,
+    );
+
+    return data;
+};
+
+//activa o desactiva (override) una politica de un rol para un miembro
+export const ToggleMemberRolePolicy = async (
+    propertyMemberId: string,
+    propertyId: string,
+    role: string,
+    policyId: string,
+    active: boolean,
+) => {
+    const { data } = await api.patch<{ message: string }>(
+        `${FINANCIAL_MODULE}/property-member/${propertyMemberId}/property/${propertyId}/policies`,
+        { role, policyId, active },
     );
 
     return data;

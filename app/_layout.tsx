@@ -4,10 +4,12 @@ import { Stack } from "expo-router";
 import Toast from "react-native-toast-message";
 import SplashScreen from "../components/splash-screen";
 import { queryClient } from "../core/configs/tanstackconfig";
+import { useNotificationSocket } from "../features/notifications/hooks/use-notification-socket";
 import { useBootstrapApp } from "../hooks/hooks";
 
 export default function AppLayout() {
   const isLoading = useBootstrapApp();
+  useNotificationSocket();
 
   const [loaded] = useFonts({
     arimo: require("../assets/fonts/arimo.ttf"),

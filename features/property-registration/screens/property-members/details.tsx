@@ -10,13 +10,13 @@ import
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //assets
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { PrincipalError } from "../../../../components/error";
 import SplashScreen from "../../../../components/splash-screen";
-import { useAuth } from "../../../../stores/auth-store";
 import { Colors } from "../../../../themes/themes";
 import type { PaginationParams } from "../../../../types/global";
+import { Me } from "../../../../core/api/api-endpoints";
 import { GetAllPropertyMembers, GetPropertyById } from "../../api";
 import { PropertyMemberCard } from "../../components/property-members/property-member-card";
 import type { StatusPropertyMemberType } from "../../schemas/property-registration.schema";
@@ -49,7 +49,9 @@ const statusOptions: {
 
 export function PropertyMemberDetailsScreen() {
   const { id: propertyId } = useLocalSearchParams<{ id: string }>();
-  const userId = useAuth((state) => state.userId);
+  // useAuth.userId solo se llena al registrarse, por eso se toma el usuario de la query "me" (compartida con property-screen)
+  const { data: me, isLoading: meLoading } = useQuery({ queryKey: ["me"], queryFn: Me });
+  const userId = me?.userId;
   const [search, setSearch] = useState<string>("");
   const [pagination, setPagination] = useState<
     PaginationParams & { status: StatusPropertyMemberType }
@@ -85,8 +87,26 @@ export function PropertyMemberDetailsScreen() {
       ),
   });
 
+  // totales por estado para los contadores de las pestañas (misma query key que la lista, comparte cache)
+  const statusQueries = useQueries({
+    queries: statusOptions.map((option) => ({
+      queryKey: ["propertyMembers", propertyId, option.value],
+      queryFn: () =>
+        GetAllPropertyMembers(propertyId, 1, pagination.limit, option.value),
+    })),
+  });
+
+  // el total del backend incluye al usuario en sesión, que no se lista
+  const tabs = statusOptions.map((option, index) => {
+    const result = statusQueries[index].data;
+    if (!result || !userId) return option;
+    const includesMe = result.data.some((member) => member.userId === userId);
+    return { ...option, count: result.metadata.total - (includesMe ? 1 : 0) };
+  });
+
   // el usuario en sesion no debe poder asignarse roles a si mismo, ademas aplicamos la busqueda
   const members = useMemo(() => {
+    if (!userId) return [];
     const term = search.trim().toLowerCase();
     return (propertyMemberData?.data ?? []).filter(
       (member) =>
@@ -95,7 +115,7 @@ export function PropertyMemberDetailsScreen() {
     );
   }, [propertyMemberData, userId, search]);
 
-  if (propertyLoading && memberLoading) {
+  if ((propertyLoading && memberLoading) || meLoading) {
     return <SplashScreen />;
   }
 
@@ -187,7 +207,7 @@ export function PropertyMemberDetailsScreen() {
       </View>
 
       <SegmentedTabs
-        tabs={statusOptions}
+        tabs={tabs}
         value={pagination.status}
         onChange={(status) =>
           setPagination((prev) => ({ ...prev, page: 1, status }))

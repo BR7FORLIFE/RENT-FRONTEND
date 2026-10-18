@@ -138,10 +138,16 @@ const styles = StyleSheet.create({
 type FilterButtonProps = {
   title: string;
   active?: boolean;
+  count?: number;
   onPress: () => void;
 };
 
-function FilterButton({ title, active = false, onPress }: FilterButtonProps) {
+function FilterButton({
+  title,
+  active = false,
+  count,
+  onPress,
+}: FilterButtonProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -154,6 +160,15 @@ function FilterButton({ title, active = false, onPress }: FilterButtonProps) {
       <Text style={[stylesFilter.text, active && stylesFilter.activeText]}>
         {title}
       </Text>
+      {count !== undefined && (
+        <View style={[stylesFilter.count, active && stylesFilter.activeCount]}>
+          <Text
+            style={[stylesFilter.countText, active && stylesFilter.activeText]}
+          >
+            {count}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -166,6 +181,8 @@ const stylesFilter = StyleSheet.create({
 
     borderRadius: 999,
 
+    flexDirection: "row",
+    gap: 6,
     justifyContent: "center",
     alignItems: "center",
 
@@ -203,6 +220,26 @@ const stylesFilter = StyleSheet.create({
 
   activeText: {
     color: "#FFFFFF",
+  },
+
+  count: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F1F5F9",
+  },
+
+  activeCount: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+
+  countText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#475569",
   },
 });
 

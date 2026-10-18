@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { SvgProps } from "react-native-svg";
 
 import { MeCard } from "../features/auth/components/me";
+import { useNotifications } from "../features/notifications/stores/notification.store";
 import { logoutUser } from "../features/auth/services/auth.service";
 import { useBehaviorAside } from "../stores/global-store";
 import { Palette } from "../themes/themes";
@@ -58,7 +59,7 @@ const ACTIVITY_ITEMS: AsideItem[] = [
     Icon: NotificationIcon,
     name: "Notificaciones",
     description: "Avisos y novedades",
-    action: () => null,
+    action: () => router.navigate("/notifications"),
   },
 ];
 
@@ -71,6 +72,8 @@ function AsideSection({
   items: AsideItem[];
   onSelect: (action: () => void) => void;
 }) {
+  const unreadCount = useNotifications((state) => state.unreadCount);
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -91,6 +94,14 @@ function AsideSection({
               {description}
             </Text>
           </View>
+
+          {name === "Notificaciones" && unreadCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </Text>
+            </View>
+          )}
 
           <Text style={styles.chevron}>›</Text>
         </Pressable>
@@ -304,6 +315,22 @@ const styles = StyleSheet.create({
   itemDescription: {
     fontSize: 12,
     color: Palette.textMuted,
+  },
+
+  badge: {
+    minWidth: 20,
+    height: 20,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    backgroundColor: Palette.accent,
+  },
+
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
   },
 
   chevron: {

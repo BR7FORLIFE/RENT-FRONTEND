@@ -15,3 +15,6 @@ export const AUTHPATHS = {
 };
 
 export const FINANCIAL_MODULE = "/rent-financial";
+
+//namespace de Socket.IO (no lleva el prefijo global FINANCIAL_MODULE)
+export const NOTIFICATIONS_NAMESPACE = "notifications";

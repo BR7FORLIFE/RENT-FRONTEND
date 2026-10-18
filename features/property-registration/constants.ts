@@ -95,3 +95,43 @@ export const ROLES_AND_POLICIES: RolesAndPoliciesStatements[] = [
         ],
     },
 ];
+
+// Roles que el dueño puede asignar (el backend rechaza propietario, arrendatarios, fiadores, etc.)
+export const ASSIGNABLE_ROLE_GROUPS = [
+    {
+        title: "Administración",
+        roles: [
+            "ADMINISTRADOR",
+            "AGENTE_INMOBILIARIO",
+            "GESTOR_INMOBILIARIO",
+            "REPRESENTANTE_LEGAL",
+        ],
+    },
+    {
+        title: "Permanencia y residencia",
+        roles: [
+            "MIEMBRO",
+            "RESIDENTE",
+            "FAMILIAR",
+            "OCUPANTE_AUTORIZADO",
+            "INVITADO",
+        ],
+    },
+    {
+        title: "Operación y mantenimiento",
+        roles: [
+            "SOPORTE_OPERATIVO",
+            "PERSONAL_MANTENIMIENTO",
+            "TECNICO",
+            "ELECTRICISTA",
+            "PLOMERO",
+            "PERSONAL_LIMPIEZA",
+            "JARDINERO",
+            "SEGURIDAD",
+            "CONSERJE",
+        ],
+    },
+] as const;
+
+export type AssignableRole =
+    (typeof ASSIGNABLE_ROLE_GROUPS)[number]["roles"][number];

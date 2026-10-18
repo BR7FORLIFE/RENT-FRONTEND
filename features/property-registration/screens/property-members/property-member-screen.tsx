@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -63,7 +64,10 @@ export function PropertyMemberScreen() {
         <Text style={propertyMemberStyles.logo}>RENT</Text>
 
         <View style={propertyMemberStyles.headerActions}>
-          <IconButton accessibilityLabel="Notificaciones">
+          <IconButton
+            onPress={() => router.navigate("/notifications")}
+            accessibilityLabel="Notificaciones"
+          >
             <NotificationIcon width={22} height={22} />
           </IconButton>
 

@@ -87,7 +87,6 @@ export function PropertyFinanceScreen() {
           {canCreate && (
             <View style={styles.footer}>
               <ButtonForm
-                variant="primary"
                 title="Registrar movimiento"
                 action={() =>
                   router.push({

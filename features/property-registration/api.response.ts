@@ -143,3 +143,17 @@ export interface PublishPropertyResponseApi {
     id: string;
     isPublished: boolean;
 }
+
+export interface MemberRolePolicy {
+    id: string;
+    policyName: string;
+    description: string;
+    active: boolean;
+}
+
+export interface MemberRolePoliciesResponseApi {
+    propertyMemberId: string;
+    propertyId: string;
+    role: string;
+    policies: MemberRolePolicy[];
+}

@@ -4,6 +4,7 @@ import { FilterButton } from "../buttons/button";
 export interface SegmentedTab<T extends string> {
   label: string;
   value: T;
+  count?: number;
 }
 
 // Pestañas horizontales para cambiar de sección dentro de una misma pantalla.
@@ -28,6 +29,7 @@ export function SegmentedTabs<T extends string>({
         <FilterButton
           key={tab.value}
           title={tab.label}
+          count={tab.count}
           active={tab.value === value}
           onPress={() => onChange(tab.value)}
         />

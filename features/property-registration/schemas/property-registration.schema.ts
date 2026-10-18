@@ -1,3 +1,4 @@
+import type { AssignableRole } from "../constants";
 import * as z from "zod";
 
 export const statusPropertyMemberEnum = z.enum([
@@ -28,12 +29,7 @@ const Street = z.enum(["CALLE", "CARRERA", "AVENIDA", "DIAGONAL"]);
 
 export type TypeStreet = z.infer<typeof Street>;
 
-export type PropertyActorRoleType =
-    | "PROPIETARIO"
-    | "ARRENDADO"
-    | "ADMINISTRADOR"
-    | "SOPORTE_OPERATIVO"
-    | "MIEMBRO";
+export type PropertyActorRoleType = AssignableRole | "PROPIETARIO" | "ARRENDADO";
 
 export const DirectionSchema = z.object({
     id: z.uuid().optional(),
