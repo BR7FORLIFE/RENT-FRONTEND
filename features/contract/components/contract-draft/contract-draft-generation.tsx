@@ -1,3 +1,5 @@
+import Toast from "react-native-toast-message";
+import { getApiErrorMessage } from "../../../../core/api/errors";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
@@ -172,6 +174,11 @@ export function GenerateContractDraft({
   const mutation = useMutation({
     mutationKey: ["contractDraft", propertyId],
     mutationFn: (body: CreateContractDraftType) => CreateContractDraft(body),
+    onError: (error) =>
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(error, "No fue posible crear el borrador"),
+      }),
   });
 
   const handleContractDraftCreation = async () => {
@@ -181,7 +188,9 @@ export function GenerateContractDraft({
 
     if (!data) return;
 
-    await mutation.mutateAsync({
+    //el error ya lo notifica el onError de la mutation
+    const created = await mutation
+      .mutateAsync({
       content,
       depositAmount: data.depositAmount,
       startDate: new Date(data.startDate),
@@ -190,7 +199,10 @@ export function GenerateContractDraft({
       tenantMemberId: selectedMember!.id,
       propertyId,
       monthlyRent: data.monthlyRent,
-    });
+    })
+      .catch(() => null);
+
+    if (!created) return;
 
     //invalidamos la cache para que refleje todos los borradores de contratos
     queryClient.invalidateQueries({

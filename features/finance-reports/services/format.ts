@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../core/api/errors";
 import type { Tone } from "../../../themes/themes";
 import type {
     Category,
@@ -141,7 +142,5 @@ export function periodRange(preset: PeriodPreset, now = new Date()) {
 }
 
 export function errorMessage(error: unknown, fallback: string): string {
-    const data = (error as { response?: { data?: { message?: unknown } } })
-        ?.response?.data;
-    return typeof data?.message === "string" ? data.message : fallback;
+    return getApiErrorMessage(error, fallback);
 }

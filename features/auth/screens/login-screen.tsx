@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../core/api/errors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -67,13 +68,10 @@ function LoginScreen() {
     mutationFn: login,
     mutationKey: ["login"],
     onError: (err: AxiosError<ApiError>) => {
-      const data = err.response?.data;
-      if (data) {
-        Toast.show({
-          type: "error",
-          text2: data.message,
-        });
-      }
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(err, "No fue posible completar la solicitud"),
+      });
     },
     onSuccess: (data) => {
       const { accessToken, refreshToken } = data;
@@ -92,7 +90,7 @@ function LoginScreen() {
   };
 
   const submitLogin = async () => {
-    await mutation.mutateAsync(info);
+    await mutation.mutateAsync(info).catch(() => undefined);
   };
 
   const oauth2Login = async () => {

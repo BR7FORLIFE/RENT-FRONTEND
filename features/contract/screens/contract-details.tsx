@@ -1,3 +1,5 @@
+import Toast from "react-native-toast-message";
+import { getApiErrorMessage } from "../../../core/api/errors";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef } from "react";
@@ -40,6 +42,11 @@ export function ContractDetailsDraftScreen() {
   const mutation = useMutation({
     mutationKey: ["agreeContractDraft", contractDraftId],
     mutationFn: () => AgreeContractDraft(contractDraftId, propertyId),
+    onError: (error) =>
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(error, "No fue posible aceptar el borrador"),
+      }),
   });
 
   if (isLoading) {

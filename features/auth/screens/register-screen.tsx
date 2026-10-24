@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../core/api/errors";
 import { Picker } from "@react-native-picker/picker";
 import { useMutation } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
@@ -81,14 +82,10 @@ export default function RegisterScreen() {
       router.navigate("/auth/email");
     },
     onError: (err: AxiosError<ApiError>) => {
-      const data = err.response?.data;
-
-      if (data) {
-        Toast.show({
-          text1: data.message,
-          type: "error",
-        });
-      }
+      Toast.show({
+        type: "error",
+        text1: getApiErrorMessage(err, "No fue posible completar la solicitud"),
+      });
     },
   });
 
@@ -144,7 +141,7 @@ export default function RegisterScreen() {
     }
 
     //enviamos la peticion al servidor
-    await mutation.mutateAsync(info);
+    await mutation.mutateAsync(info).catch(() => undefined);
   };
 
   return (

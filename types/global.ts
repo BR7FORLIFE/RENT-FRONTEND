@@ -1,5 +1,5 @@
 export interface ApiError {
-    localDateTime: string;
+    localDatetime: string;
     error: string;
     message: string;
     path: string;

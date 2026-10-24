@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../../../core/api/errors";
 // path para login con oauth2 302 redirecciones -> rentfrontend://login/oauth2/callback?sessionID=
 import { useMutation } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
@@ -24,19 +25,16 @@ export default function Oauth2SessionID() {
       router.navigate("/home/(tabs)/property-registration");
     },
     onError: (err: AxiosError<ApiError>) => {
-      const data = err.response?.data;
-      if (data) {
-        Toast.show({
-          type: "error",
-          text2: data.message,
-        });
-      }
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(err, "No fue posible completar la solicitud"),
+      });
     },
   });
 
   useEffect(() => {
     const getData = async () => {
-      await mutation.mutateAsync();
+      await mutation.mutateAsync().catch(() => undefined);
     };
     getData();
   }, [sessionID, mutation]);

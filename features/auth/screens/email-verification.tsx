@@ -1,3 +1,5 @@
+import Toast from "react-native-toast-message";
+import { getApiErrorMessage } from "../../../core/api/errors";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,7 +21,11 @@ export default function EmailVerificationScreen() {
     onSuccess: () => {
       setStartTime(600);
     },
-    onError: () => {},
+    onError: (error) =>
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(error, "No fue posible reenviar el correo"),
+      }),
   });
 
   useEffect(() => {
@@ -35,7 +41,7 @@ export default function EmailVerificationScreen() {
   const sendForwardEmail = async () => {
     if (startTime > 0 || mutation.isPending) return;
 
-    await mutation.mutateAsync(userId!);
+    await mutation.mutateAsync(userId!).catch(() => undefined);
   };
 
   const minutes = Math.floor(startTime / 60);

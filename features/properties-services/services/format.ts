@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../core/api/errors";
 import type { Tone } from "../../../themes/themes";
 import type {
     Currency,
@@ -65,9 +66,7 @@ export const ACTION_LABEL: Record<ServiceRequestAction, string> = {
 
 // Mensaje legible a partir del error del backend ({ message, error }).
 export function apiErrorMessage(error: unknown, fallback: string): string {
-    const message = (error as { response?: { data?: { message?: unknown } } })
-        ?.response?.data?.message;
-    return typeof message === "string" ? message : fallback;
+    return getApiErrorMessage(error, fallback);
 }
 
 export function isConflict(error: unknown): boolean {

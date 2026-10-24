@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../../../core/api/errors";
 import { useMutation } from "@tanstack/react-query";
 import
   {
@@ -59,6 +60,16 @@ export function QrScan({
       propertyId: string;
       userId: string;
     }) => InvitePropertyMember(user!.email, propertyId, userId),
+    onSuccess: () =>
+      Toast.show({
+        type: "success",
+        text2: "Has sido invitado exitosamente!",
+      }),
+    onError: (error) =>
+      Toast.show({
+        type: "error",
+        text2: getApiErrorMessage(error, "No fue posible enviar la invitación"),
+      }),
   });
 
   const handleQrResult = (result: BarcodeScanningResult) => {
@@ -71,12 +82,6 @@ export function QrScan({
       setScanned(true);
 
       mutation.mutate({ propertyId, userId });
-
-      //notificamos al usuario que se ha invitado correctamente
-      Toast.show({
-        type: "success",
-        text2: "Has sido invitado exitosamente!",
-      });
 
       setOpenQrScan(false); //cerramos el scanner de qr
     } catch (error) {

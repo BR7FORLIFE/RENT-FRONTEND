@@ -178,7 +178,7 @@ export async function GetPropertyByPropertyMember(propertyId: string) {
     const { data } = await api.get<{
         propertyName: string;
         propertyDescription: string;
-    }>(`${FINANCIAL_MODULE}/property-member/properties/${propertyId}`);
+    }>(`${FINANCIAL_MODULE}/property-member/property/${propertyId}`);
     return data;
 }
 

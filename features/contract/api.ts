@@ -67,7 +67,7 @@ export async function ChangeContractStatus(
     propertyId: string,
     status: "SUSPENDED" | "FINISHED",
 ) {
-    const { data } = await api.post<{ contractId: string; message: string }>(
+    const { data } = await api.patch<{ contractId: string; message: string }>(
         `${FINANCIAL_MODULE}/contract/${contractId}/property/${propertyId}/status`,
         { status },
     );
