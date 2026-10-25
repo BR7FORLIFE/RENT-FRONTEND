@@ -4,6 +4,7 @@ import type { GetAll } from "../../types/global";
 import type {
     OfferingScope,
     OfferingStatus,
+    ServiceOfferingDetailResponse,
     ServiceOfferingResponse,
     ServiceRequestDetailResponse,
     ServiceRequestResponse,
@@ -26,6 +27,7 @@ export interface OfferingFilters {
     scope?: OfferingScope;
     status?: OfferingStatus;
     onlyValid?: boolean;
+    excludeMine?: boolean;
     sortBy?: "createdAt" | "basePrice" | "validUntil";
     sortOrder?: "asc" | "desc";
 }
@@ -60,7 +62,7 @@ export async function GetMyOfferings(page: number, limit: number) {
 }
 
 export async function GetOfferingById(id: string) {
-    const { data } = await api.get<ServiceOfferingResponse>(
+    const { data } = await api.get<ServiceOfferingDetailResponse>(
         `${OFFERINGS}/${id}`,
     );
     return data;
@@ -86,6 +88,13 @@ export async function ChangeOfferingStatus(id: string, status: OfferingStatus) {
     const { data } = await api.patch<ServiceOfferingResponse>(
         `${OFFERINGS}/${id}/status`,
         { status },
+    );
+    return data;
+}
+
+export async function DeleteOffering(id: string) {
+    const { data } = await api.delete<{ id: string; message: string }>(
+        `${OFFERINGS}/${id}`,
     );
     return data;
 }

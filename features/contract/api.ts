@@ -131,9 +131,14 @@ export async function AgreeContractDraft(
     return data;
 }
 
-export async function getAllContractDraftAccepted(propertyId: string) {
+export async function getAllContractDraftAccepted(
+    propertyId: string,
+    page = 1,
+    limit = 10,
+) {
     const { data } = await api.get<GetAll<ContractDraftInfoResponse[]>>(
         `${FINANCIAL_MODULE}/contract/draft/getAcceptedContracts/property/${propertyId}`,
+        { params: { page, limit } },
     );
     return data;
 }

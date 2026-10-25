@@ -66,7 +66,34 @@ export type POLICY_STATEMENT =
     | "CONSULTAR_INVITACIONES_MIEMBROS"
     | "ENVIAR_INVITACION_MIEMBRO"
     | "REENVIAR_INVITACION_MIEMBRO"
-    | "CANCELAR_INVITACION_MIEMBRO";
+    | "CANCELAR_INVITACION_MIEMBRO"
+    | "SOLICITAR_SERVICIOS"
+    | "VER_SOLICITUDES_SERVICIOS"
+    | "CANCELAR_SOLICITUDES_SERVICIOS"
+    | "PUBLICAR_OFERTAS_SERVICIOS"
+    | "VER_FINANZAS"
+    | "REGISTRAR_MOVIMIENTOS_FINANCIEROS"
+    | "EDITAR_MOVIMIENTOS_FINANCIEROS";
+
+// Politicas que tienen una pantalla asociada (ver TEMPLATES en property-associations/template.tsx).
+// Una politica fuera de esta lista no se muestra al miembro ni se puede asignar: abriria una pantalla en blanco.
+export const POLICIES_WITH_SCREEN = [
+    "VER_INMUEBLE",
+    "EDITAR_INMUEBLE",
+    "VER_DOCUMENTOS_INMUEBLE",
+    "VER_CONTRATOS",
+    "VER_CONTRATOS_PRELIMINARES",
+    "SOLICITAR_SERVICIOS",
+    "VER_SOLICITUDES_SERVICIOS",
+    "PUBLICAR_OFERTAS_SERVICIOS",
+    "VER_FINANZAS",
+    "REGISTRAR_MOVIMIENTOS_FINANCIEROS",
+] as const satisfies readonly POLICY_STATEMENT[];
+
+export type PolicyWithScreen = (typeof POLICIES_WITH_SCREEN)[number];
+
+export const hasPolicyScreen = (policy: string): policy is PolicyWithScreen =>
+    (POLICIES_WITH_SCREEN as readonly string[]).includes(policy);
 
 interface RolesAndPoliciesStatements {
     role: ROLES;

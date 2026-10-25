@@ -157,3 +157,9 @@ export interface MemberRolePoliciesResponseApi {
     role: string;
     policies: MemberRolePolicy[];
 }
+
+export interface RolePoliciesResponseApi {
+    propertyId: string;
+    role: string;
+    policies: Omit<MemberRolePolicy, "active">[];
+}

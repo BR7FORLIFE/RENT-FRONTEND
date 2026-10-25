@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Alert, FlatList, StyleSheet, Text, View } from "react-native";
 
 import { ButtonForm } from "../../../../components/buttons/button";
@@ -6,6 +7,7 @@ import { PrincipalError } from "../../../../components/error";
 import { EmptyList } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
 import { CreateContract, getAllContractDraftAccepted } from "../../api";
+import { Pager } from "../../../../components/ui/pager";
 import { InfoBlock } from "../../../../components/ui/info-row";
 import { StatusBadge } from "../../../../components/ui/status-badge";
 import { Palette } from "../../../../themes/themes";
@@ -19,9 +21,12 @@ interface SeeContractAcceptedProps {
 export function SeeContractAccepted({ propertyId }: SeeContractAcceptedProps) {
   const queryClient = useQueryClient();
 
+  const [page, setPage] = useState(1);
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["GetAllContractDraftAccepted", propertyId],
-    queryFn: () => getAllContractDraftAccepted(propertyId),
+    queryKey: ["GetAllContractDraftAccepted", propertyId, page],
+    queryFn: () => getAllContractDraftAccepted(propertyId, page),
+    placeholderData: keepPreviousData,
   });
 
   const createContractMutation = useMutation({
@@ -83,6 +88,13 @@ export function SeeContractAccepted({ propertyId }: SeeContractAcceptedProps) {
             convertirse en contratos.
           </Text>
         </View>
+      }
+      ListFooterComponent={
+        <Pager
+          page={page}
+          totalPages={data.metadata.totalPages}
+          onChange={setPage}
+        />
       }
       ListEmptyComponent={
         <EmptyList

@@ -11,6 +11,7 @@ import { queryClient } from "../../../../core/configs/tanstackconfig";
 import { Palette } from "../../../../themes/themes";
 import { GetMemberRolePolicies, ToggleMemberRolePolicy } from "../../api";
 import type { MemberRolePoliciesResponseApi } from "../../api.response";
+import { hasPolicyScreen } from "../../constants";
 import { formatEnumLabel } from "../../services/format";
 
 interface Props {
@@ -85,8 +86,11 @@ export function RolePolicies({ memberId, propertyId, role, onBack }: Props) {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
+        renderItem={({ item }) => {
+          const hasScreen = hasPolicyScreen(item.policyName);
+
+          return (
+          <View style={[styles.row, !hasScreen && styles.rowDisabled]}>
             <View style={styles.rowText}>
               <Text style={styles.policyName}>{formatEnumLabel(item.policyName)}</Text>
               {!!item.description && (
@@ -94,17 +98,21 @@ export function RolePolicies({ memberId, propertyId, role, onBack }: Props) {
                   {item.description}
                 </Text>
               )}
+              {!hasScreen && (
+                <Text style={styles.noScreen}>Sin pantalla disponible aún</Text>
+              )}
             </View>
             <Switch
               value={item.active}
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || !hasScreen}
               trackColor={{ true: Palette.accent, false: Palette.borderStrong }}
               onValueChange={(active) =>
                 mutation.mutate({ policyId: item.id, active })
               }
             />
           </View>
-        )}
+          );
+        }}
         ListEmptyComponent={
           <EmptyList
             title="Sin políticas"
@@ -141,6 +149,8 @@ const styles = StyleSheet.create({
     borderColor: Palette.border,
     borderRadius: 12,
   },
+  rowDisabled: { opacity: 0.45, backgroundColor: Palette.surfaceMuted },
+  noScreen: { fontSize: 11, fontStyle: "italic", color: Palette.textFaint },
   rowText: { flex: 1, gap: 2 },
   policyName: { fontSize: 14, fontWeight: "500", color: Palette.textPrimary },
   policyDescription: { fontSize: 12, color: Palette.textMuted },

@@ -11,7 +11,6 @@ import { Input } from "../../../components/inputs/input";
 import SplashScreen from "../../../components/splash-screen";
 import { InfoRow } from "../../../components/ui/info-row";
 import { StatusBadge } from "../../../components/ui/status-badge";
-import { useAuth } from "../../../stores/auth-store";
 import { Palette, Radius } from "../../../themes/themes";
 import {
     AcceptRequestPrice,
@@ -21,6 +20,7 @@ import {
     type RequestTransition,
 } from "../api";
 import type { ServiceRequestDetailResponse } from "../api.response";
+import { useCurrentUserId } from "../services/use-current-user-id";
 import { MONEY_REGEX } from "../schemas/services.schema";
 import {
     ACTION_LABEL,
@@ -28,6 +28,7 @@ import {
     formatDate,
     formatPrice,
     isConflict,
+    offeringTitle,
     PRICE_TYPE_LABEL,
     REQUEST_STATUS,
     requestPermissions,
@@ -37,7 +38,7 @@ type Pending = "reject" | "cancel" | "propose" | null;
 
 export function ServiceRequestDetailsScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const userId = useAuth((s) => s.userId);
+    const userId = useCurrentUserId();
     const queryClient = useQueryClient();
     const [pending, setPending] = useState<Pending>(null);
     const [text, setText] = useState("");
@@ -47,8 +48,11 @@ export function ServiceRequestDetailsScreen() {
         queryFn: () => GetRequestById(id),
     });
 
-    const refreshLists = () =>
-        queryClient.invalidateQueries({ queryKey: ["serviceRequests"] });
+    // aceptar/completar/cancelar una solicitud registra o actualiza el gasto en finanzas
+    const refreshLists = () => {
+        queryClient.invalidateQueries({ queryKey: ["financeTransactions"] });
+        return queryClient.invalidateQueries({ queryKey: ["serviceRequests"] });
+    };
 
     const onSuccess = (updated: ServiceRequestDetailResponse) => {
         // la respuesta ya es el detalle actualizado
@@ -116,7 +120,7 @@ export function ServiceRequestDetailsScreen() {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.titleRow}>
                     <Text style={styles.title} numberOfLines={2}>
-                        {data.offering.service.name}
+                        {offeringTitle(data.offering)}
                     </Text>
                     <StatusBadge label={status.label} tone={status.tone} />
                 </View>

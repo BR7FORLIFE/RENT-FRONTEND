@@ -1,7 +1,7 @@
 import Toast from "react-native-toast-message";
 import { getApiErrorMessage } from "../../../../core/api/errors";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { ButtonForm } from "../../../../components/buttons/button";
 import { PrincipalError } from "../../../../components/error";
@@ -37,7 +37,8 @@ export function SelectedPropertyMemberForContractDraft({
     React.SetStateAction<GetAllPropertyMemberInfo | null>
   >;
 }) {
-  const [pagination, setPagination] = useState<
+  const { user } = useMe();
+  const [pagination] = useState<
     PaginationParams & { status: StatusPropertyMemberType }
   >({
     limit: 10,
@@ -91,7 +92,9 @@ export function SelectedPropertyMemberForContractDraft({
             </Text>
           </View>
         }
-        data={propertyMembers.data}
+        data={propertyMembers.data.filter(
+          (member) => member.userId !== user?.userId,
+        )}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <PropertyMemberCard
@@ -163,12 +166,39 @@ export function GenerateContractDraft({
   //useRef para permitir que react native tenga acceso a la instancia del richEditor
   const richText = useRef<RichEditor>(null);
 
-  //estado para obtener el content del borrador del contrato
-  const [content, setContent] = useState<string>("");
-
   //este metodo nos permite obtener al miembro seleccionado
   const [selectedMember, setSelectedMember] =
     useState<GetAllPropertyMemberInfo | null>(null);
+
+  //plantilla inicial: fechas por defecto de un anio para que el borrador sea valido sin editarlas
+  const initialHTML = useMemo(() => {
+    if (!selectedMember || !user) return "";
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setFullYear(endDate.getFullYear() + 1);
+
+    return INITIAL_CONTRACT_DRAFT({
+      propertyName,
+      landlord: {
+        name: user.fullname,
+        identificationNumber: user.identificationNumber,
+        identificationType: user.identificationType,
+      },
+      tenant: {
+        name: selectedMember.fullname,
+        identificationNumber: selectedMember.identificationNumber,
+        identificationType: selectedMember.identificationType,
+      },
+      monthlyRent: 100000,
+      depositAmount: 500000,
+      startDate,
+      endDate,
+    });
+  }, [selectedMember, user, propertyName]);
+
+  //contenido editado; mientras no se edite se usa la plantilla (onChange no se dispara al cargarla)
+  const [editedContent, setContent] = useState<string>("");
+  const content = editedContent || initialHTML;
 
   //mutation para enviar el borrador del contrato al servidor
   const mutation = useMutation({
@@ -186,7 +216,15 @@ export function GenerateContractDraft({
     //la respuesta y enviarla al servidor
     const data = ExtractContractInformationOfHTML(content);
 
-    if (!data) return;
+    if (!data || !selectedMember) return;
+
+    if (new Date(data.endDate) <= new Date(data.startDate)) {
+      Toast.show({
+        type: "error",
+        text2: "La fecha de fin debe ser posterior a la fecha de inicio",
+      });
+      return;
+    }
 
     //el error ya lo notifica el onError de la mutation
     const created = await mutation
@@ -196,7 +234,7 @@ export function GenerateContractDraft({
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
       landlordMemberId: propertyMemberId,
-      tenantMemberId: selectedMember!.id,
+      tenantMemberId: selectedMember.id,
       propertyId,
       monthlyRent: data.monthlyRent,
     })
@@ -229,23 +267,7 @@ export function GenerateContractDraft({
           <View style={generateContractStyles.editorStyle}>
             <RichEditor
               ref={richText}
-              initialContentHTML={INITIAL_CONTRACT_DRAFT({
-                propertyName,
-                landlord: {
-                  name: user!.fullname,
-                  identificationNumber: user!.identificationNumber,
-                  identificationType: user!.identificationType,
-                },
-                tenant: {
-                  name: selectedMember.fullname,
-                  identificationNumber: selectedMember.identificationNumber,
-                  identificationType: selectedMember.identificationType,
-                },
-                monthlyRent: 100000,
-                depositAmount: 500000,
-                startDate: new Date(),
-                endDate: new Date(),
-              })}
+              initialContentHTML={initialHTML}
               onChange={setContent}
             />
           </View>
@@ -260,7 +282,10 @@ export function GenerateContractDraft({
             />
             <ButtonForm
               title="Elegir otro miembro"
-              action={() => setSelectedMember(null)}
+              action={() => {
+                setSelectedMember(null);
+                setContent("");
+              }}
             />
           </View>
         </>

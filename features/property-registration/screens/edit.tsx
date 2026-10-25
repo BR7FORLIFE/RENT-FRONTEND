@@ -68,11 +68,12 @@ function ImageTile({
   );
 }
 
-export function EditProperty() {
+export function EditProperty({ propertyId }: { propertyId?: string } = {}) {
   const [editable, setEditable] = useState<PropertyEditable>();
   const [images, setImages] = useState<EditableImage[]>([]);
   const [pickingImage, setPickingImage] = useState(false);
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id: searchId } = useLocalSearchParams<{ id: string }>();
+  const id = propertyId ?? searchId;
   const queryClient = useQueryClient();
 
   const {

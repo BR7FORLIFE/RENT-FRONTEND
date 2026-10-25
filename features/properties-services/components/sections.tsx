@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { PrincipalError } from "../../../components/error";
 import { EmptyList } from "../../../components/info";
+import { Pager } from "../../../components/ui/pager";
 import { SegmentedTabs } from "../../../components/ui/segmented-tabs";
 import SplashScreen from "../../../components/splash-screen";
 import { ButtonForm } from "../../../components/buttons/button";
@@ -17,7 +18,7 @@ import type { ServiceRequestStatus } from "../api.response";
 import { REQUEST_STATUS_TABS } from "../services/format";
 import { OfferingCard, RequestCard } from "./cards";
 
-const PAGE = { page: 1, limit: 50 };
+const LIMIT = 10;
 
 const listContent = {
     flexGrow: 1,
@@ -27,10 +28,12 @@ const listContent = {
 } as const;
 
 export function MarketplaceSection() {
+    const [page, setPage] = useState(1);
     const { isLoading, isError, data } = useQuery({
-        queryKey: ["serviceOfferings", "marketplace"],
+        queryKey: ["serviceOfferings", "marketplace", page],
         queryFn: () =>
-            GetAllOfferings(PAGE.page, PAGE.limit, { onlyValid: true }),
+            GetAllOfferings(page, LIMIT, { onlyValid: true, excludeMine: true }),
+        placeholderData: keepPreviousData,
     });
 
     if (isLoading) return <SplashScreen />;
@@ -54,6 +57,13 @@ export function MarketplaceSection() {
             )}
             contentContainerStyle={listContent}
             showsVerticalScrollIndicator={false}
+            ListFooterComponent={
+                <Pager
+                    page={page}
+                    totalPages={data.metadata.totalPages}
+                    onChange={setPage}
+                />
+            }
             ListEmptyComponent={
                 <EmptyList
                     title="Sin ofertas disponibles"
@@ -65,9 +75,11 @@ export function MarketplaceSection() {
 }
 
 export function MyOfferingsSection() {
+    const [page, setPage] = useState(1);
     const { isLoading, isError, data } = useQuery({
-        queryKey: ["serviceOfferings", "mine"],
-        queryFn: () => GetMyOfferings(PAGE.page, PAGE.limit),
+        queryKey: ["serviceOfferings", "mine", page],
+        queryFn: () => GetMyOfferings(page, LIMIT),
+        placeholderData: keepPreviousData,
     });
 
     if (isLoading) return <SplashScreen />;
@@ -98,6 +110,13 @@ export function MyOfferingsSection() {
             )}
             contentContainerStyle={listContent}
             showsVerticalScrollIndicator={false}
+            ListFooterComponent={
+                <Pager
+                    page={page}
+                    totalPages={data.metadata.totalPages}
+                    onChange={setPage}
+                />
+            }
             ListEmptyComponent={
                 <EmptyList
                     title="Aún no publicas ofertas"
@@ -110,16 +129,18 @@ export function MyOfferingsSection() {
 
 export function RequestsSection({ role }: { role: "requester" | "provider" }) {
     const [status, setStatus] = useState<"ALL" | ServiceRequestStatus>("ALL");
+    const [page, setPage] = useState(1);
     const filter = status === "ALL" ? undefined : status;
 
     const { isLoading, isError, data } = useQuery({
-        queryKey: ["serviceRequests", role, status],
+        queryKey: ["serviceRequests", role, status, page],
         queryFn: () =>
             (role === "requester" ? GetMyRequests : GetProviderRequests)(
-                PAGE.page,
-                PAGE.limit,
+                page,
+                LIMIT,
                 filter,
             ),
+        placeholderData: keepPreviousData,
     });
 
     return (
@@ -127,7 +148,10 @@ export function RequestsSection({ role }: { role: "requester" | "provider" }) {
             <SegmentedTabs
                 tabs={REQUEST_STATUS_TABS}
                 value={status}
-                onChange={setStatus}
+                onChange={(value) => {
+                    setStatus(value);
+                    setPage(1);
+                }}
             />
             {isLoading ? (
                 <SplashScreen />
@@ -150,6 +174,13 @@ export function RequestsSection({ role }: { role: "requester" | "provider" }) {
                     )}
                     contentContainerStyle={listContent}
                     showsVerticalScrollIndicator={false}
+                    ListFooterComponent={
+                        <Pager
+                            page={page}
+                            totalPages={data.metadata.totalPages}
+                            onChange={setPage}
+                        />
+                    }
                     ListEmptyComponent={
                         <EmptyList
                             title="Sin solicitudes"

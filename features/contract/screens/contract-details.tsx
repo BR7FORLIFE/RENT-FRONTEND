@@ -1,6 +1,6 @@
 import Toast from "react-native-toast-message";
 import { getApiErrorMessage } from "../../../core/api/errors";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -34,6 +34,8 @@ export function ContractDetailsDraftScreen() {
     propertyName: string;
   }>();
 
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["contractDraft", contractDraftId],
     queryFn: () => GetContractDraftById(contractDraftId, propertyId),
@@ -42,6 +44,18 @@ export function ContractDetailsDraftScreen() {
   const mutation = useMutation({
     mutationKey: ["agreeContractDraft", contractDraftId],
     mutationFn: () => AgreeContractDraft(contractDraftId, propertyId),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["contractDraft", contractDraftId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["GetAllContractDraft", propertyId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["GetAllContractDraftAccepted", propertyId],
+        }),
+      ]),
     onError: (error) =>
       Toast.show({
         type: "error",

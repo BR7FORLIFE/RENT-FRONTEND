@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PrincipalError } from "../../../components/error";
+import { Pager } from "../../../components/ui/pager";
+import { SearchInput } from "../../../components/inputs/input";
 import { RentHeader } from "../../../components/header";
 import { EmptyList, RentDescription } from "../../../components/info";
 import SplashScreen, {
@@ -21,10 +23,23 @@ export function ContractScreen() {
     page: 1,
   });
 
+  const [text, setText] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(text.trim());
+      setPagination((prev) => ({ ...prev, page: 1 }));
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [text]);
+
   const { isLoading, data, isError } = useQuery({
-    queryKey: ["properties"],
-    queryFn: () => GetAllProperties(pagination.page, pagination.limit),
+    queryKey: ["properties", pagination.page, pagination.limit, undefined, search],
+    queryFn: () =>
+      GetAllProperties(pagination.page, pagination.limit, undefined, search),
     staleTime: 60000 * 60,
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) {
@@ -50,6 +65,14 @@ export function ContractScreen() {
         description="Elige una propiedad para ver y gestionar sus contratos."
       />
 
+      <View style={styles.searchBox}>
+        <SearchInput
+          value={text}
+          onChangeText={setText}
+          placeholder="Buscar propiedad..."
+        />
+      </View>
+
       <View style={styles.asociationProperties}>
         <FlatList
           data={data.data}
@@ -74,6 +97,11 @@ export function ContractScreen() {
               description="Cuando tengas una asociación, aparecerá aquí para que puedas consultarla y gestionarla."
             />
           }
+        />
+        <Pager
+          page={pagination.page}
+          totalPages={data.metadata.totalPages}
+          onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
         />
       </View>
     </SafeAreaView>
@@ -104,6 +132,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#475569",
+  },
+
+  searchBox: {
+    paddingHorizontal: 20,
+    marginBottom: 8,
   },
 
   asociationProperties: {

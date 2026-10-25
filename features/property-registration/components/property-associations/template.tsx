@@ -7,10 +7,26 @@ import { RentHeader } from "../../../../components/header";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../../components/splash-screen";
-import { ContractDraftListSection } from "../../../contract/screens/contract-list-details";
+import {
+  ContractDraftListSection,
+  ContractListSection,
+} from "../../../contract/screens/contract-list-details";
+import { PropertyFinanceScreen } from "../../../finance-reports/screens/property-finance-screen";
+import { TransactionFormScreen } from "../../../finance-reports/screens/transaction-form-screen";
+import {
+  MarketplaceSection,
+  MyOfferingsSection,
+  RequestsSection,
+} from "../../../properties-services/components/sections";
 import { GetPropertyById, PropertyMemberMe } from "../../api";
-import type { POLICY_STATEMENT } from "../../constants";
+import {
+  hasPolicyScreen,
+  type POLICY_STATEMENT,
+  type PolicyWithScreen,
+} from "../../constants";
 import DetailsScreen from "../../screens/details";
+import { EditProperty } from "../../screens/edit";
+import { PropertyDocumentsSection } from "./property-documents-section";
 
 interface TEMPLATE_VIEW_PROPS {
   propertyId: string;
@@ -19,21 +35,30 @@ interface TEMPLATE_VIEW_PROPS {
 }
 
 interface TEMPLATE_VIEWS {
-  policy: POLICY_STATEMENT;
-
   render: (props: TEMPLATE_VIEW_PROPS) => React.ReactNode;
 
   isPage: boolean; //esto nos permite saber si el elemento a renderizar es una pagina entera con <SafeAreaView/> o una section
 }
 
-const TEMPLATES: TEMPLATE_VIEWS[] = [
-  {
-    policy: "VER_INMUEBLE",
+//toda politica de POLICIES_WITH_SCREEN debe tener su template (lo exige el tipo Record)
+const TEMPLATES: Record<PolicyWithScreen, TEMPLATE_VIEWS> = {
+  VER_INMUEBLE: {
     render: ({ propertyId }) => <DetailsScreen propertyId={propertyId} />,
     isPage: true,
   },
-  {
-    policy: "VER_CONTRATOS_PRELIMINARES",
+  EDITAR_INMUEBLE: {
+    render: ({ propertyId }) => <EditProperty propertyId={propertyId} />,
+    isPage: true,
+  },
+  VER_DOCUMENTOS_INMUEBLE: {
+    render: ({ propertyId }) => <PropertyDocumentsSection propertyId={propertyId} />,
+    isPage: false,
+  },
+  VER_CONTRATOS: {
+    render: ({ propertyId }) => <ContractListSection propertyId={propertyId} />,
+    isPage: false,
+  },
+  VER_CONTRATOS_PRELIMINARES: {
     render: ({ propertyId, propertyMemberId, propertyName }) => (
       <ContractDraftListSection
         propertyId={propertyId}
@@ -43,7 +68,29 @@ const TEMPLATES: TEMPLATE_VIEWS[] = [
     ),
     isPage: false,
   },
-];
+  SOLICITAR_SERVICIOS: {
+    render: () => <MarketplaceSection />,
+    isPage: false,
+  },
+  VER_SOLICITUDES_SERVICIOS: {
+    render: () => <RequestsSection role="requester" />,
+    isPage: false,
+  },
+  PUBLICAR_OFERTAS_SERVICIOS: {
+    render: () => <MyOfferingsSection />,
+    isPage: false,
+  },
+  VER_FINANZAS: {
+    render: ({ propertyId, propertyName }) => (
+      <PropertyFinanceScreen propertyId={propertyId} propertyName={propertyName} />
+    ),
+    isPage: true,
+  },
+  REGISTRAR_MOVIMIENTOS_FINANCIEROS: {
+    render: ({ propertyId }) => <TransactionFormScreen propertyId={propertyId} />,
+    isPage: true,
+  },
+};
 
 export function PropertyAssociationTemplateScreen() {
   const { id: propertyId, policy } = useLocalSearchParams<{
@@ -69,7 +116,7 @@ export function PropertyAssociationTemplateScreen() {
     queryFn: () => GetPropertyById(propertyId),
   });
 
-  const template = TEMPLATES.find((template) => template.policy === policy);
+  const template = hasPolicyScreen(policy) ? TEMPLATES[policy] : undefined;
 
   if (propertyMemberLoading && propertyLoading) {
     return <SplashScreen />;

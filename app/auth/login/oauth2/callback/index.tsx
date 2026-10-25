@@ -7,7 +7,10 @@ import { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import SplashScreen from "../../../../../components/splash-screen";
 import { oauth2GetCredentials } from "../../../../../core/api/api-endpoints";
-import { InfoStorage } from "../../../../../features/auth/services/auth.service";
+import {
+  InfoStorage,
+  resetSessionData,
+} from "../../../../../features/auth/services/auth.service";
 import { useAuth } from "../../../../../stores/auth-store";
 import type { ApiError } from "../../../../../types/global";
 
@@ -20,6 +23,7 @@ export default function Oauth2SessionID() {
     mutationFn: () => oauth2GetCredentials(sessionID as string),
     onSuccess: (data) => {
       const { accessToken, refreshToken } = data;
+      resetSessionData();
       setAccessToken(accessToken);
       InfoStorage().set({ userId: null, refreshToken });
       router.navigate("/home/(tabs)/property-registration");

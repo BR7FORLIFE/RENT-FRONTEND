@@ -5,6 +5,7 @@ import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FilterButton } from "../../../components/buttons/button";
 import { PrincipalError } from "../../../components/error";
 import { EmptyList } from "../../../components/info";
+import { Pager } from "../../../components/ui/pager";
 import SplashScreen from "../../../components/splash-screen";
 import { Palette } from "../../../themes/themes";
 import { GetAllTransactions } from "../api";
@@ -108,23 +109,11 @@ export function TransactionsSection({
                         />
                     }
                     ListFooterComponent={
-                        data.metadata.totalPages > 1 ? (
-                            <View style={styles.pager}>
-                                <FilterButton
-                                    title="Anterior"
-                                    onPress={() => setPage((p) => Math.max(1, p - 1))}
-                                />
-                                <Text style={styles.pageText}>
-                                    {data.metadata.page} / {data.metadata.totalPages}
-                                </Text>
-                                <FilterButton
-                                    title="Siguiente"
-                                    onPress={() =>
-                                        data.metadata.hasNextPage && setPage((p) => p + 1)
-                                    }
-                                />
-                            </View>
-                        ) : null
+                        <Pager
+                            page={data.metadata.page}
+                            totalPages={data.metadata.totalPages}
+                            onChange={setPage}
+                        />
                     }
                 />
             )}

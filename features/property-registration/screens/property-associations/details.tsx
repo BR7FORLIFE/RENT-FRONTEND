@@ -12,6 +12,7 @@ import
   } from "../../../../components/info";
 import SplashScreen from "../../../../components/splash-screen";
 import { PropertyMemberMe } from "../../api";
+import { hasPolicyScreen } from "../../constants";
 
 import ArrowRightIcon from "../../../../assets/icons/arrow-right.svg";
 
@@ -138,7 +139,7 @@ export function PropertyAssociationDetailsScreen() {
         <Text style={styles.text}>Politicas Permitidas</Text>
 
         <FlatList
-          data={propertyMemberMe.policies}
+          data={propertyMemberMe.policies.filter(hasPolicyScreen)}
           keyExtractor={(item) => item}
           renderItem={({ item }) => (
             <PolicyButton

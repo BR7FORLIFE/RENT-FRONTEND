@@ -4,8 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SearchInput } from "../../../../components/inputs/input";
 //icon assets
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import FilterIcon from "../../../../assets/icons/filter.svg";
 import NotificationIcon from "../../../../assets/icons/notification.svg";
 import ScanIcon from "../../../../assets/icons/scan.svg";
@@ -16,6 +16,7 @@ import SplashScreen, {
 } from "../../../../components/splash-screen";
 import type { PaginationParams } from "../../../../types/global";
 import { GetAllProperties } from "../../api";
+import { Pager } from "../../../../components/ui/pager";
 import { IconButton } from "../../../../components/ui/icon-button";
 import { PropertyPreview } from "../../components/property-members/property-preview";
 import
@@ -35,9 +36,22 @@ export function PropertyMemberScreen() {
   //recuperamos las propiedades, gracias a tanstack nosotros podremos
   // obtener las propiedades ya cacheadas en memoria para mostrar sin necesidad de hacer
   // otra peticion
+  const [text, setText] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearch(text.trim());
+      setPagination((prev) => ({ ...prev, page: 1 }));
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [text]);
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["properties"],
-    queryFn: () => GetAllProperties(pagination.page, pagination.limit),
+    queryKey: ["properties", pagination.page, pagination.limit, undefined, search],
+    queryFn: () =>
+      GetAllProperties(pagination.page, pagination.limit, undefined, search),
+    placeholderData: keepPreviousData,
   });
 
   const processScan = () => {
@@ -90,7 +104,7 @@ export function PropertyMemberScreen() {
 
           <View style={propertyMemberStyles.totalBadge}>
             <Text style={propertyMemberStyles.totalValue}>
-              {data?.data.length}
+              {data?.metadata.total}
             </Text>
           </View>
         </View>
@@ -98,9 +112,9 @@ export function PropertyMemberScreen() {
         <View style={propertyMemberStyles.filters}>
           <View style={propertyMemberStyles.search}>
             <SearchInput
-              value=""
-              onChangeText={() => null}
-              placeholder="Buscar miembro..."
+              value={text}
+              onChangeText={setText}
+              placeholder="Buscar propiedad..."
             />
           </View>
 
@@ -127,6 +141,11 @@ export function PropertyMemberScreen() {
               description="asegurate de registrar una propiedad y vuelve a intentarlo!"
             />
           }
+        />
+        <Pager
+          page={pagination.page}
+          totalPages={data?.metadata.totalPages ?? 1}
+          onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
         />
       </View>
 

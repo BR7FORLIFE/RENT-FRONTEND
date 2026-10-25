@@ -22,6 +22,7 @@ import { apiErrorMessage, PRICE_TYPE_LABEL } from "../services/format";
 export function ServiceOfferingFormScreen() {
     const queryClient = useQueryClient();
     const [serviceId, setServiceId] = useState<string | null>(null);
+    const [name, setName] = useState("");
     const [scope, setScope] = useState<OfferingScope>("PUBLIC");
     const [propertyId, setPropertyId] = useState<string | null>(null);
     const [type, setType] = useState<PriceTypeAgreement>("FIXED");
@@ -50,6 +51,7 @@ export function ServiceOfferingFormScreen() {
                     : undefined;
             const parsed = CreateServiceOfferingSchema.parse({
                 serviceId,
+                name: name.trim() || undefined,
                 scope,
                 propertyMemberId: memberId,
                 priceTypeAgreement: type,
@@ -87,6 +89,8 @@ export function ServiceOfferingFormScreen() {
                             <FilterButton key={s.id} title={s.name} active={s.id === serviceId} onPress={() => setServiceId(s.id)} />
                         ))}
                     </View>
+
+                    <Input field="name" label="Nombre de tu servicio (opcional)" placeholder="Ej: Plomería a domicilio" value={name} fn={(_, v) => setName(v)} maxLength={100} />
 
                     <Text style={styles.section}>Alcance</Text>
                     <View style={styles.chips}>

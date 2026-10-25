@@ -10,7 +10,7 @@ import
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //assets
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { PrincipalError } from "../../../../components/error";
 import SplashScreen from "../../../../components/splash-screen";
@@ -26,6 +26,7 @@ import WaveBackground from "../../../../assets/backgrounds/wave-background.svg";
 import CommunityIcon from "../../../../assets/icons/community.svg";
 
 import { EmptyList } from "../../../../components/info";
+import { Pager } from "../../../../components/ui/pager";
 import { SearchInput } from "../../../../components/inputs/input";
 import { SegmentedTabs } from "../../../../components/ui/segmented-tabs";
 
@@ -77,7 +78,7 @@ export function PropertyMemberDetailsScreen() {
     isLoading: memberLoading,
     isError: memberError,
   } = useQuery({
-    queryKey: ["propertyMembers", propertyId, pagination.status], // cache tanstack -> propertyId vinculado con sus miembros
+    queryKey: ["propertyMembers", propertyId, pagination.status, pagination.page], // cache tanstack -> propertyId vinculado con sus miembros
     queryFn: () =>
       GetAllPropertyMembers(
         propertyId,
@@ -85,6 +86,7 @@ export function PropertyMemberDetailsScreen() {
         pagination.limit,
         pagination.status,
       ),
+    placeholderData: keepPreviousData,
   });
 
   // totales por estado para los contadores de las pestañas (misma query key que la lista, comparte cache)
@@ -250,6 +252,11 @@ export function PropertyMemberDetailsScreen() {
               description="Asegurate de invitar o añadir miembros a tu propiedad!"
             />
           }
+        />
+        <Pager
+          page={pagination.page}
+          totalPages={propertyMemberData.metadata.totalPages}
+          onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
         />
       </View>
     </SafeAreaView>

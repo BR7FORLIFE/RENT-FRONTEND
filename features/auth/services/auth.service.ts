@@ -5,7 +5,8 @@ import {
     registerSchema,
     type RegisterType,
 } from "../../../core/schemas/auth-schema";
-import { useAuth } from "../../../stores/auth-store";
+import { useAuth, useMe } from "../../../stores/auth-store";
+import { useProperty } from "../../property-registration/stores/property.store";
 import type { Storage } from "../../../types/global";
 
 const TRIM_TEXT_REGEX = /\s+/g;
@@ -148,16 +149,23 @@ export function FormInfoStorage(): Storage<RegisterType> {
     return { get, set, clean };
 }
 
+/** Descarta todo dato de la sesión anterior (cache de servidor y stores locales). */
+export function resetSessionData() {
+    queryClient.clear();
+    useMe.getState().clear();
+    useProperty.getState().clear();
+}
+
 export async function logoutUser() {
-    //hasync acemos saber al servidor que el usuario ha hecho un logout
-    await logout();
+    try {
+        //hacemos saber al servidor que el usuario ha hecho un logout
+        await logout();
+    } finally {
+        //elimnamos el refresh token del asynStorage
+        await AsyncStorage.removeItem("userInfo"); // <- KEY STORAGE del usuario y su refresh token
 
-    //borramos toda la cache del queryClient
-    queryClient.invalidateQueries();
-
-    //elimnamos el refresh token del asynStorage
-    await AsyncStorage.removeItem("userInfo"); // <- KEY STORAGE del usuario y su refresh token
-
-    //elinamos la informacion del store
-    useAuth.getState().logout();
+        //borramos la cache del queryClient y los stores del usuario anterior
+        resetSessionData();
+        useAuth.getState().logout();
+    }
 }

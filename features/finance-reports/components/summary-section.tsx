@@ -109,6 +109,7 @@ export function SummarySection({ propertyId }: { propertyId: string }) {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.filterLabel}>Periodo</Text>
             <SegmentedTabs tabs={PERIODS} value={preset} onChange={setPreset} />
 
             {isLoading ? (
@@ -149,6 +150,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingBottom: 32,
         gap: 12,
+    },
+
+    filterLabel: {
+        paddingHorizontal: 20,
+        paddingBottom: 6,
+        fontSize: 12,
+        fontWeight: "600",
+        color: Palette.textMuted,
     },
 
     period: {

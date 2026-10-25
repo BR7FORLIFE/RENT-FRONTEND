@@ -1,7 +1,7 @@
 import { create, default as axios, isAxiosError, type InternalAxiosRequestConfig } from "axios";
 import { io } from "socket.io-client";
 import { useAuth } from "../../stores/auth-store";
-import { AUTHPATHS, NOTIFICATIONS_NAMESPACE } from "./paths";
+import { AUTHPATHS, FINANCIAL_MODULE, NOTIFICATIONS_NAMESPACE } from "./paths";
 
 export const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -74,8 +74,10 @@ api.interceptors.response.use(
 
 //el namespace de notificaciones no usa el prefijo global del servicio (/rent-financial)
 //el token se envia sin prefijo "Bearer" y se crea el socket solo cuando ya existe sesion
+//el gateway (nginx) solo expone el handshake bajo el prefijo del servicio: /rent-financial/socket.io
 export const createNotificationSocket = (token: string) =>
     io(`${BASE_URL}/${NOTIFICATIONS_NAMESPACE}`, {
+        path: `${FINANCIAL_MODULE}/socket.io`,
         auth: { token },
         transports: ["websocket"],
     });

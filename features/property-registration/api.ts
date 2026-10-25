@@ -5,6 +5,7 @@ import type {
     GetAllPropertiesByPropertyMemberResponseApi,
     GetAllPropertyMemberInfo,
     MemberRolePoliciesResponseApi,
+    RolePoliciesResponseApi,
     PropertyMemberMeResponseApi,
     PropertyResponseApi,
     PublishedPropertyDetailResponseApi,
@@ -32,10 +33,15 @@ export const SaveProperty = async (property: Partial<CreatePropertyType>) => {
     return data;
 };
 
-export const GetAllProperties = async (page: number, limit: number) => {
+export const GetAllProperties = async (
+    page: number,
+    limit: number,
+    occupation?: "OCUPADO" | "DESOCUPADO",
+    search?: string,
+) => {
     const { data } = await api.get<GetAll<PropertyResponseApi[]>>(
         `${FINANCIAL_MODULE}/property`,
-        { params: { page, limit } },
+        { params: { page, limit, occupation, search: search || undefined } },
     );
     return data;
 };
@@ -140,6 +146,15 @@ export const GetMemberRolePolicies = async (
     return data;
 };
 
+//politicas que incluye un rol (aunque aun no este asignado al miembro)
+export const GetRolePolicies = async (propertyId: string, role: string) => {
+    const { data } = await api.get<RolePoliciesResponseApi>(
+        `${FINANCIAL_MODULE}/property-member/property/${propertyId}/role/${role}/policies`,
+    );
+
+    return data;
+};
+
 //activa o desactiva (override) una politica de un rol para un miembro
 export const ToggleMemberRolePolicy = async (
     propertyMemberId: string,
@@ -187,7 +202,7 @@ export async function GetAllDocumentationByPropertyId(
     page: number,
     limit: number,
 ) {
-    const { data } = await api.get<GetAll<ResourceImagePersistenceResponseApi>>(
+    const { data } = await api.get<GetAll<ResourceImagePersistenceResponseApi[]>>(
         `${FINANCIAL_MODULE}/property/${propertyId}/documentation`,
         {
             params: {

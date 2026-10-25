@@ -16,5 +16,5 @@ export const AUTHPATHS = {
 
 export const FINANCIAL_MODULE = "/rent-financial";
 
-//namespace de Socket.IO (no lleva el prefijo global FINANCIAL_MODULE)
+//namespace de Socket.IO (el path del handshake si lleva el prefijo FINANCIAL_MODULE, ver createNotificationSocket)
 export const NOTIFICATIONS_NAMESPACE = "notifications";

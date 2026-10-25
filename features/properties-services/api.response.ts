@@ -37,6 +37,7 @@ export interface ServiceOfferingResponse {
     serviceId: string;
     providerUserId: string;
     propertyMemberId: string | null;
+    name: string | null;
     scope: OfferingScope;
     status: OfferingStatus;
     priceTypeAgreement: PriceTypeAgreement;
@@ -48,6 +49,16 @@ export interface ServiceOfferingResponse {
     updatedAt: string;
     service: { id: string; name: string; isActive: boolean };
     propertyMember: { id: string; propertyId: string; status: string } | null;
+}
+
+export interface ServiceProviderContact {
+    fullname: string;
+    email: string;
+    cellphone: string;
+}
+
+export interface ServiceOfferingDetailResponse extends ServiceOfferingResponse {
+    provider: ServiceProviderContact | null;
 }
 
 export interface ServiceRequestHistoryResponse {
@@ -84,6 +95,7 @@ export interface ServiceRequestResponse {
     updatedAt: string;
     offering: {
         id: string;
+        name: string | null;
         scope: OfferingScope;
         priceTypeAgreement: PriceTypeAgreement;
         service: { id: string; name: string };

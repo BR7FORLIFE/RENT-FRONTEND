@@ -116,3 +116,11 @@ export function requestPermissions(
         waitingOtherParty: negotiable && hasProposal && proposedByMe,
     };
 }
+
+// nombre propio de la oferta; si no tiene se muestra el del catalogo
+export function offeringTitle(offering: {
+    name: string | null;
+    service: { name: string };
+}): string {
+    return offering.name ?? offering.service.name;
+}

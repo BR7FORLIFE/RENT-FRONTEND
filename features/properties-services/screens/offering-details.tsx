@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { ButtonForm, FilterButton } from "../../../components/buttons/button";
@@ -11,12 +11,14 @@ import { Input } from "../../../components/inputs/input";
 import SplashScreen from "../../../components/splash-screen";
 import { InfoRow } from "../../../components/ui/info-row";
 import { StatusBadge } from "../../../components/ui/status-badge";
-import { useAuth } from "../../../stores/auth-store";
 import { Palette, Radius } from "../../../themes/themes";
+import { useCurrentUserId } from "../services/use-current-user-id";
 import { GetAllPropertiesByPropertyMember } from "../../property-registration/api";
+import type { ServiceOfferingDetailResponse } from "../api.response";
 import {
     ChangeOfferingStatus,
     CreateServiceRequest,
+    DeleteOffering,
     GetOfferingById,
 } from "../api";
 import {
@@ -27,13 +29,14 @@ import {
     apiErrorMessage,
     formatDate,
     formatPrice,
+    offeringTitle,
     PRICE_TYPE_LABEL,
     SCOPE_LABEL,
 } from "../services/format";
 
 export function ServiceOfferingDetailsScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const userId = useAuth((s) => s.userId);
+    const userId = useCurrentUserId();
     const queryClient = useQueryClient();
     const [propertyId, setPropertyId] = useState<string | null>(null);
     const [notes, setNotes] = useState("");
@@ -63,12 +66,37 @@ export function ServiceOfferingDetailsScreen() {
     const toggle = useMutation({
         mutationFn: (status: "ACTIVE" | "INACTIVE") => ChangeOfferingStatus(id, status),
         onSuccess: (updated) => {
-            queryClient.setQueryData(["serviceOffering", id], updated);
+            queryClient.setQueryData<ServiceOfferingDetailResponse>(
+                ["serviceOffering", id],
+                (old) => (old ? { ...old, ...updated } : old),
+            );
             queryClient.invalidateQueries({ queryKey: ["serviceOfferings"] });
         },
         onError: (error) =>
             Toast.show({ type: "error", text1: apiErrorMessage(error, "No se pudo cambiar el estado.") }),
     });
+
+    const remove = useMutation({
+        mutationFn: () => DeleteOffering(id),
+        onSuccess: () => {
+            queryClient.removeQueries({ queryKey: ["serviceOffering", id] });
+            queryClient.invalidateQueries({ queryKey: ["serviceOfferings"] });
+            Toast.show({ type: "success", text1: "Oferta eliminada." });
+            router.back();
+        },
+        onError: (error) =>
+            Toast.show({ type: "error", text1: apiErrorMessage(error, "No se pudo eliminar la oferta.") }),
+    });
+
+    const confirmDelete = () =>
+        Alert.alert(
+            "Eliminar oferta",
+            "Dejarás de prestar este servicio. Esta acción no se puede deshacer.",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Eliminar", style: "destructive", onPress: () => remove.mutate() },
+            ],
+        );
 
     if (offeringQuery.isLoading) return <SplashScreen />;
     if (offeringQuery.isError || !offeringQuery.data)
@@ -106,7 +134,7 @@ export function ServiceOfferingDetailsScreen() {
             <RentHeader sectionName="Oferta" />
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.titleRow}>
-                    <Text style={styles.title} numberOfLines={2}>{offering.service.name}</Text>
+                    <Text style={styles.title} numberOfLines={2}>{offeringTitle(offering)}</Text>
                     <StatusBadge
                         label={offering.status === "ACTIVE" ? "Activa" : "Inactiva"}
                         tone={offering.status === "ACTIVE" ? "success" : "neutral"}
@@ -114,6 +142,7 @@ export function ServiceOfferingDetailsScreen() {
                 </View>
 
                 <View style={styles.card}>
+                    {offering.name && <InfoRow label="Servicio" value={offering.service.name} />}
                     <InfoRow label="Precio base" value={formatPrice(offering.basePrice, offering.currency)} />
                     <InfoRow label="Tipo de precio" value={PRICE_TYPE_LABEL[type]} />
                     <InfoRow label="Alcance" value={SCOPE_LABEL[offering.scope]} />
@@ -121,12 +150,27 @@ export function ServiceOfferingDetailsScreen() {
                     <InfoRow label="Vigente hasta" value={offering.validUntil ? formatDate(offering.validUntil) : "Sin vencimiento"} />
                 </View>
 
+                {offering.provider && !isMine ? (
+                    <View style={styles.card}>
+                        <Text style={styles.section}>Contacto del proveedor</Text>
+                        <InfoRow label="Nombre" value={offering.provider.fullname} />
+                        <InfoRow label="Correo" value={offering.provider.email} />
+                        <InfoRow label="Teléfono" value={offering.provider.cellphone} />
+                    </View>
+                ) : null}
+
                 {isMine ? (
-                    <ButtonForm
-                        title={offering.status === "ACTIVE" ? "Desactivar oferta" : "Activar oferta"}
-                        isPending={toggle.isPending}
-                        action={() => toggle.mutate(offering.status === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
-                    />
+                    <View style={styles.actions}>
+                        <ButtonForm
+                            title={offering.status === "ACTIVE" ? "Desactivar oferta" : "Activar oferta"}
+                            isPending={toggle.isPending}
+                            action={() => toggle.mutate(offering.status === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
+                        />
+                        <ButtonForm title="Eliminar oferta" isPending={remove.isPending} action={confirmDelete} />
+                        <Text style={styles.hint}>
+                            Si la oferta ya tiene solicitudes no puede eliminarse; desactívala para dejar de prestarla.
+                        </Text>
+                    </View>
                 ) : (
                     offering.status === "ACTIVE" && (
                         <View style={styles.card}>
@@ -174,5 +218,6 @@ const styles = StyleSheet.create({
     card: { backgroundColor: Palette.surface, borderWidth: 1, borderColor: Palette.border, borderRadius: Radius.lg, padding: 16, gap: 12 },
     section: { fontSize: 16, fontWeight: "700", color: Palette.textPrimary },
     hint: { fontSize: 12, color: Palette.textMuted },
+    actions: { gap: 8 },
     chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
 });

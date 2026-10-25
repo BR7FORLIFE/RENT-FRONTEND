@@ -8,6 +8,7 @@ import type {
 import {
     formatDate,
     formatPrice,
+    offeringTitle,
     PRICE_TYPE_LABEL,
     REQUEST_STATUS,
     SCOPE_LABEL,
@@ -29,7 +30,7 @@ export function OfferingCard({
         >
             <View style={styles.row}>
                 <Text style={styles.title} numberOfLines={1}>
-                    {offering.service.name}
+                    {offeringTitle(offering)}
                 </Text>
                 <StatusBadge
                     label={inactive ? "Inactiva" : PRICE_TYPE_LABEL[offering.priceTypeAgreement]}
@@ -68,7 +69,7 @@ export function RequestCard({
         >
             <View style={styles.row}>
                 <Text style={styles.title} numberOfLines={1}>
-                    {request.offering.service.name}
+                    {offeringTitle(request.offering)}
                 </Text>
                 <StatusBadge label={status.label} tone={status.tone} />
             </View>

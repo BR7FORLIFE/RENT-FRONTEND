@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
@@ -27,10 +27,16 @@ import {
   AssignmentRoleToPropertyMember,
   ChangeStatusPropertyMember,
   GetPropertyMemberByIdAndPropertyId,
+  GetRolePolicies,
 } from "../../api";
+import { RolePoliciesPreview } from "../../components/property-members/role-policies-preview";
 import { RolePolicies } from "../../components/property-members/role-policies";
 import { MemberCard } from "../../components/property-members/property-member-card";
-import { ASSIGNABLE_ROLE_GROUPS, type AssignableRole } from "../../constants";
+import {
+  ASSIGNABLE_ROLE_GROUPS,
+  hasPolicyScreen,
+  type AssignableRole,
+} from "../../constants";
 import { formatEnumLabel } from "../../services/format";
 
 // mensaje legible del backend (406 con { message }) o uno genérico
@@ -44,30 +50,55 @@ function errorMessage(error: unknown, fallback: string) {
 function RoleOption({
   role,
   selected,
+  available,
   onToggle,
+  onViewPolicies,
 }: {
   role: AssignableRole;
   selected: boolean;
+  //false = el rol no tiene politicas con pantalla (no se puede asignar); undefined = aun cargando
+  available: boolean | undefined;
   onToggle: () => void;
+  onViewPolicies: () => void;
 }) {
   return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: selected }}
-      style={({ pressed }) => [
+    <View
+      style={[
         styles.option,
         selected && styles.optionSelected,
-        pressed && styles.optionPressed,
+        available === false && styles.optionDisabled,
       ]}
     >
-      <View style={[styles.check, selected && styles.checkSelected]}>
-        {selected && <Text style={styles.checkMark}>✓</Text>}
-      </View>
-      <Text style={styles.optionText} numberOfLines={1}>
-        {formatEnumLabel(role)}
-      </Text>
-    </Pressable>
+      <Pressable
+        onPress={onToggle}
+        disabled={available !== true}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: selected, disabled: available !== true }}
+        style={({ pressed }) => [
+          styles.optionMain,
+          pressed && styles.optionPressed,
+        ]}
+      >
+        <View style={[styles.check, selected && styles.checkSelected]}>
+          {selected && <Text style={styles.checkMark}>✓</Text>}
+        </View>
+        <View style={styles.optionTextBlock}>
+          <Text style={styles.optionText} numberOfLines={1}>
+            {formatEnumLabel(role)}
+          </Text>
+          {available === false && (
+            <Text style={styles.noPolicies}>Sin políticas disponibles</Text>
+          )}
+        </View>
+      </Pressable>
+      <Pressable
+        onPress={onViewPolicies}
+        hitSlop={8}
+        style={({ pressed }) => pressed && styles.optionPressed}
+      >
+        <Text style={styles.viewPolicies}>Ver políticas ›</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -82,11 +113,44 @@ export function PropertyMemberRolesScreen() {
   const [tab, setTab] = useState<"current" | "assign">("current");
   //rol abierto para ver/editar sus políticas
   const [openRole, setOpenRole] = useState<string | null>(null);
+  //rol por asignar cuyas políticas se consultan (solo lectura)
+  const [previewRole, setPreviewRole] = useState<string | null>(null);
 
   const { isLoading, isError, data } = useQuery({
     queryKey: ["propertyMember", id, propertyId],
     queryFn: () => GetPropertyMemberByIdAndPropertyId(id, propertyId),
   });
+
+  // un rol solo se puede asignar si incluye al menos una politica con pantalla
+  // (misma queryKey que RolePoliciesPreview para compartir cache)
+  const rolesAvailability = useQueries({
+    queries: ASSIGNABLE_ROLE_GROUPS.flatMap((group) => group.roles).map(
+      (role) => ({
+        queryKey: ["rolePolicies", propertyId, role],
+        queryFn: () => GetRolePolicies(propertyId, role),
+        staleTime: 60000 * 60,
+      }),
+    ),
+  });
+
+  const availableByRole = useMemo(() => {
+    const roles = ASSIGNABLE_ROLE_GROUPS.flatMap((group) => group.roles);
+    const map = new Map<string, boolean | undefined>();
+    roles.forEach((role, index) => {
+      const query = rolesAvailability[index];
+      map.set(
+        role,
+        query.data
+          ? query.data.policies.some((policy) =>
+              hasPolicyScreen(policy.policyName),
+            )
+          : query.isError
+            ? false
+            : undefined,
+      );
+    });
+    return map;
+  }, [rolesAvailability]);
 
   const refreshMembers = () => {
     queryClient.invalidateQueries({ queryKey: ["propertyMember", id] });
@@ -196,7 +260,13 @@ export function PropertyMemberRolesScreen() {
         <MemberCard name={data.fullname} roles={data.roles} />
       </View>
 
-      {canAssign && openRole ? (
+      {canAssign && previewRole ? (
+        <RolePoliciesPreview
+          propertyId={propertyId}
+          role={previewRole}
+          onBack={() => setPreviewRole(null)}
+        />
+      ) : canAssign && openRole ? (
         <RolePolicies
           memberId={id}
           propertyId={propertyId}
@@ -224,8 +294,8 @@ export function PropertyMemberRolesScreen() {
               contentContainerStyle={styles.list}
               ListHeaderComponent={
                 <Text style={styles.rolesSubtitle}>
-                  Toca un rol para ver sus políticas y activarlas o
-                  desactivarlas.
+                  Toca un rol para ver las políticas que incluye y activarlas o
+                  desactivarlas para este miembro.
                 </Text>
               }
               renderItem={({ item }) => (
@@ -239,6 +309,7 @@ export function PropertyMemberRolesScreen() {
                   <Text style={styles.optionText} numberOfLines={1}>
                     {formatEnumLabel(item)}
                   </Text>
+                  <Text style={styles.viewPolicies}>Ver políticas</Text>
                   <Text style={styles.chevron}>›</Text>
                 </Pressable>
               )}
@@ -255,8 +326,8 @@ export function PropertyMemberRolesScreen() {
                 <Text style={styles.rolesTitle}>Asignar roles</Text>
                 <Text style={styles.rolesSubtitle}>
                   {data.status === "IN_PROCESS"
-                    ? "Al asignar roles el miembro se activará automáticamente."
-                    : "Los roles seleccionados se sumarán a los que ya tiene."}
+                    ? "Al asignar roles el miembro se activará automáticamente. Toca “Ver políticas” para revisar qué incluye cada rol."
+                    : "Los roles seleccionados se sumarán a los que ya tiene. Toca “Ver políticas” para revisar qué incluye cada rol."}
                 </Text>
               </View>
 
@@ -273,7 +344,9 @@ export function PropertyMemberRolesScreen() {
                   <RoleOption
                     role={item}
                     selected={selected.includes(item)}
+                    available={availableByRole.get(item)}
                     onToggle={() => toggle(item)}
+                    onViewPolicies={() => setPreviewRole(item)}
                   />
                 )}
                 ListEmptyComponent={
@@ -309,7 +382,7 @@ export function PropertyMemberRolesScreen() {
       )}
 
       {/**activar o desactivar al miembro (oculto mientras se editan las políticas de un rol) */}
-      {!(canAssign && openRole) && (
+      {!(canAssign && (openRole || previewRole)) && (
         <View style={styles.statusFooter}>
           <ButtonForm
             title={
@@ -377,11 +450,15 @@ const styles = StyleSheet.create({
     borderColor: Palette.border,
     borderRadius: 12,
   },
+  optionMain: { flex: 1, flexDirection: "row", alignItems: "center", gap: 12 },
   optionSelected: {
     backgroundColor: Palette.accentSoft,
     borderColor: Palette.accentBorder,
   },
   optionPressed: { opacity: 0.8 },
+  optionDisabled: { opacity: 0.45, backgroundColor: Palette.surfaceMuted },
+  optionTextBlock: { flex: 1, gap: 1 },
+  noPolicies: { fontSize: 11, fontStyle: "italic", color: Palette.textFaint },
   optionText: {
     flex: 1,
     fontSize: 14,
@@ -411,6 +488,11 @@ const styles = StyleSheet.create({
   },
 
   tabs: { marginTop: 16 },
+  viewPolicies: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Palette.accent,
+  },
   chevron: { fontSize: 20, lineHeight: 20, color: Palette.textFaint },
 
   statusFooter: {

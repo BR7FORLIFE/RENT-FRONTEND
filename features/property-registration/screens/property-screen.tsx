@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
@@ -22,6 +22,7 @@ import type {
 import AsideIcon from "../../../assets/icons/bar-right.svg";
 import PlusIcon from "../../../assets/icons/plus.svg";
 import { ContentAside } from "../../../components/aside";
+import { Pager } from "../../../components/ui/pager";
 import { IconButton } from "../../../components/ui/icon-button";
 import { EmptyList } from "../../../components/info";
 import { Me } from "../../../core/api/api-endpoints";
@@ -29,7 +30,13 @@ import { useMe } from "../../../stores/auth-store";
 import type { PaginationParams } from "../../../types/global";
 import { InfoStorage } from "../../auth/services/auth.service";
 
-const FILTER_BUTTONS = ["Todas", "Disponibles", "Ocupadas"];
+const FILTERS = [
+  { label: "Todas", occupation: undefined },
+  { label: "Disponibles", occupation: "DESOCUPADO" },
+  { label: "Ocupadas", occupation: "OCUPADO" },
+] as const;
+
+type Occupation = (typeof FILTERS)[number]["occupation"];
 
 const emptyItems = () => <Text>No data</Text>;
 
@@ -37,9 +44,10 @@ export default function PropertyScreen() {
   const { isOpen, toggle } = useBehaviorAside();
   const { setUser } = useMe();
   const [text, setText] = useState("");
-  const [debounce, setDebounce] = useState();
+  const [search, setSearch] = useState("");
   const [Ai, setAI] = useState<boolean>(false);
 
+  const [occupation, setOccupation] = useState<Occupation>(undefined);
   const [pagination, setPagination] = useState<PaginationParams>({
     page: 1,
     limit: 10,
@@ -47,9 +55,11 @@ export default function PropertyScreen() {
 
   //informacion de todas las propiedades
   const { isLoading, data, isError } = useQuery({
-    queryKey: ["properties"],
-    queryFn: () => GetAllProperties(pagination.page, pagination.limit),
+    queryKey: ["properties", pagination.page, pagination.limit, occupation, search],
+    queryFn: () =>
+      GetAllProperties(pagination.page, pagination.limit, occupation, search),
     staleTime: 60000 * 60,
+    placeholderData: keepPreviousData,
   });
 
   //informacion del usuario cuando ya ha hecho login
@@ -66,12 +76,22 @@ export default function PropertyScreen() {
     }
   }, [meData, setUser]);
 
-  //debounce para las paginaciones y busquedas cuando se agregue busquedas por nombre en el backend
+  //debounce de la busqueda: el backend filtra por nombre o fmi
   useEffect(() => {
-    const debounce = setTimeout(() => {}, 1500);
+    const timeout = setTimeout(() => {
+      setSearch(text.trim());
+      setPagination((prev) => ({ ...prev, page: 1 }));
+    }, 500);
 
-    return () => clearInterval(debounce);
+    return () => clearTimeout(timeout);
   }, [text]);
+
+  const changeFilter = (value: Occupation) => {
+    setOccupation(value);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
+
+  const goToPage = (page: number) => setPagination((prev) => ({ ...prev, page }));
 
   if (isLoading) {
     return <SplashScreen />;
@@ -116,10 +136,14 @@ export default function PropertyScreen() {
 
         <FlatList
           horizontal
-          data={FILTER_BUTTONS}
-          keyExtractor={(item) => item}
+          data={FILTERS}
+          keyExtractor={(item) => item.label}
           renderItem={({ item }) => (
-            <FilterButton title={item} onPress={() => null} />
+            <FilterButton
+              title={item.label}
+              active={item.occupation === occupation}
+              onPress={() => changeFilter(item.occupation)}
+            />
           )}
           ItemSeparatorComponent={() => <View style={styles.filterSeparator} />}
           contentContainerStyle={styles.filterList}
@@ -162,6 +186,13 @@ export default function PropertyScreen() {
               description="Agrega tu primera propiedad para comenzar a administrarla."
             />
           }
+        />
+
+        <Pager
+          page={pagination.page}
+          totalPages={data?.metadata.totalPages ?? 1}
+          onChange={goToPage}
+          style={styles.pagerAboveAI}
         />
       </View>
     </SafeAreaView>
@@ -248,6 +279,12 @@ const styles = StyleSheet.create({
 
     paddingTop: 12,
     paddingBottom: 32,
+  },
+
+  pagerAboveAI: {
+    // deja libre la esquina del boton de IA
+    paddingRight: 80,
+    marginBottom: 8,
   },
 
   propertySeparator: {

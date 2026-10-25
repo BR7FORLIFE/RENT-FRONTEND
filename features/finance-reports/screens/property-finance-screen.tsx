@@ -28,11 +28,15 @@ const TABS: SegmentedTab<Sections>[] = [
   { label: "Historial", value: "HISTORY" },
 ];
 
-export function PropertyFinanceScreen() {
-  const { id: propertyId, propertyName } = useLocalSearchParams<{
-    id: string;
-    propertyName: string;
-  }>();
+interface PropertyFinanceScreenProps {
+  propertyId?: string;
+  propertyName?: string;
+}
+
+export function PropertyFinanceScreen(props: PropertyFinanceScreenProps) {
+  const params = useLocalSearchParams<{ id: string; propertyName: string }>();
+  const propertyId = props.propertyId ?? params.id;
+  const propertyName = props.propertyName ?? params.propertyName;
   const [section, setSection] = useState<Sections>("SUMMARY");
 
   const { isLoading, isError, data } = useQuery({
@@ -72,7 +76,12 @@ export function PropertyFinanceScreen() {
         />
       ) : (
         <>
-          <SegmentedTabs tabs={TABS} value={section} onChange={setSection} />
+          <SegmentedTabs
+            tabs={TABS}
+            value={section}
+            onChange={setSection}
+            variant="underline"
+          />
 
           <View style={styles.content}>
             {section === "SUMMARY" && <SummarySection propertyId={propertyId} />}

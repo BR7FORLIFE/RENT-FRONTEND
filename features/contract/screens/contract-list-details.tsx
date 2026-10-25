@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
@@ -9,6 +9,7 @@ import { EmptyList } from "../../../components/info";
 import SplashScreen, {
   SplashWaveBackground,
 } from "../../../components/splash-screen";
+import { Pager } from "../../../components/ui/pager";
 import { Palette } from "../../../themes/themes";
 import type { PaginationParams } from "../../../types/global";
 import {
@@ -46,6 +47,9 @@ interface ContractListProps<T> {
   emptyDescription: string;
   rentTitle: string;
   rentDescription: string;
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 export function ContractList<T>({
@@ -55,6 +59,9 @@ export function ContractList<T>({
   emptyDescription,
   rentTitle,
   rentDescription,
+  page = 1,
+  totalPages = 1,
+  onPageChange,
 }: ContractListProps<T>) {
   return (
     <>
@@ -75,6 +82,9 @@ export function ContractList<T>({
           contentContainerStyle={styles.contractListContent}
           showsVerticalScrollIndicator={false}
         />
+        {onPageChange && (
+          <Pager page={page} totalPages={totalPages} onChange={onPageChange} />
+        )}
       </View>
     </>
   );
@@ -92,9 +102,10 @@ export function ContractListSection({ propertyId }: { propertyId: string }) {
     isError: contractError,
     data: contractData,
   } = useQuery({
-    queryKey: ["GetAllContract", propertyId],
+    queryKey: ["GetAllContract", propertyId, pagination.page],
     queryFn: () =>
       GetAllContracts(propertyId, pagination.page, pagination.limit),
+    placeholderData: keepPreviousData,
   });
 
   if (contractLoading) {
@@ -127,6 +138,9 @@ export function ContractListSection({ propertyId }: { propertyId: string }) {
       emptyDescription="Genera tu primer contrato para visualizarlo!"
       rentTitle="Lista de contratos"
       rentDescription="Visualiza los distintos contratos para esta propiedad!"
+      page={pagination.page}
+      totalPages={contractData.metadata.totalPages}
+      onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
     />
   );
 }
@@ -151,9 +165,10 @@ export function ContractDraftListSection({
     isError: contractDraftError,
     data: contractDraftData,
   } = useQuery({
-    queryKey: ["GetAllContractDraft", propertyId],
+    queryKey: ["GetAllContractDraft", propertyId, pagination.page],
     queryFn: () =>
       GetAllContractDraft(propertyId, pagination.page, pagination.limit),
+    placeholderData: keepPreviousData,
   });
 
   if (contractDraftLoading) {
@@ -198,6 +213,9 @@ export function ContractDraftListSection({
       emptyDescription="Crea tu primer borrador de contrato!"
       rentTitle="Lista de borradores de contratos"
       rentDescription="Visualiza tus borradores generados para esta propiedad!"
+      page={pagination.page}
+      totalPages={contractDraftData.metadata.totalPages}
+      onPageChange={(page) => setPagination((prev) => ({ ...prev, page }))}
     />
   );
 }

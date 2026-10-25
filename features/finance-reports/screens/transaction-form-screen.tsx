@@ -65,11 +65,13 @@ function Choice<T extends string>({
 }
 
 // Carga el movimiento (si se edita) y monta el formulario con sus valores iniciales.
-export function TransactionFormScreen() {
-  const { propertyId, transactionId } = useLocalSearchParams<{
+export function TransactionFormScreen(props: { propertyId?: string }) {
+  const params = useLocalSearchParams<{
     propertyId: string;
     transactionId?: string;
   }>();
+  const propertyId = props.propertyId ?? params.propertyId;
+  const { transactionId } = params;
 
   const existing = useQuery({
     queryKey: ["financeTransaction", propertyId, transactionId],

@@ -25,7 +25,11 @@ import { AUTHPATHS } from "../../../core/api/paths";
 import type { LoginType } from "../../../core/schemas/auth-schema";
 import { useAuth } from "../../../stores/auth-store";
 import type { ApiError } from "../../../types/global";
-import { FormInfoStorage, InfoStorage } from "../services/auth.service";
+import {
+  FormInfoStorage,
+  InfoStorage,
+  resetSessionData,
+} from "../services/auth.service";
 
 const email: KeyInput = {
   field: "email",
@@ -75,6 +79,7 @@ function LoginScreen() {
     },
     onSuccess: (data) => {
       const { accessToken, refreshToken } = data;
+      resetSessionData();
       setAccessToken(accessToken);
 
       //persistimos la informacion en el Async Storage

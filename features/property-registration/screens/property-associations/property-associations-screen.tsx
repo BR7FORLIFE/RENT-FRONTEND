@@ -1,5 +1,5 @@
 import { Picker } from "@react-native-picker/picker";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import
   {
@@ -23,6 +23,7 @@ import ArrowRightIcon from "../../../../assets/icons/arrow-right.svg";
 import HomeIcon from "../../../../assets/icons/home.svg";
 
 import { router } from "expo-router";
+import { Pager } from "../../../../components/ui/pager";
 import { RentHeader } from "../../../../components/header";
 import { EmptyList } from "../../../../components/info";
 import { NumberInput } from "../../../../components/inputs/input";
@@ -155,6 +156,7 @@ export function PropertyAssociationScreen() {
         debounce.page,
         debounce.limit,
       ),
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -210,6 +212,7 @@ export function PropertyAssociationScreen() {
               onValueChange={(itemValue, _) =>
                 setPagination((prev) => ({
                   ...prev,
+                  page: 1,
                   propertyMemberStatus: itemValue,
                 }))
               }
@@ -219,14 +222,6 @@ export function PropertyAssociationScreen() {
             </Picker>
           </View>
 
-          <View style={styles.numberInputContainer}>
-            <Text style={{ fontSize: 8, fontWeight: "400" }}>Página</Text>
-            <NumberInput
-              field="page"
-              saveData={setPagination}
-              initValue={debounce.page}
-            />
-          </View>
         </View>
       </View>
 
@@ -261,6 +256,11 @@ export function PropertyAssociationScreen() {
         y gestionarla."
             />
           }
+        />
+        <Pager
+          page={pagination.page}
+          totalPages={data.metadata.totalPages}
+          onChange={(page) => setPagination((prev) => ({ ...prev, page }))}
         />
       </View>
     </SafeAreaView>

@@ -20,6 +20,7 @@ export const PriceTypeSchema = z.enum([
 export const CreateServiceOfferingSchema = z
     .strictObject({
         serviceId: z.uuid(),
+        name: z.string().trim().min(1).max(100).optional(),
         scope: z.enum(["PUBLIC", "PROPERTY"]),
         propertyMemberId: z.uuid().optional(),
         priceTypeAgreement: PriceTypeSchema,
