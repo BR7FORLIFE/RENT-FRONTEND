@@ -1,9 +1,9 @@
 import { Tabs } from "expo-router";
 import ContractIcon from "../../../assets/icons/contract-tab.svg";
 import FinancialReportIcon from "../../../assets/icons/financial-report-tab.svg";
-import InvoiceIcon from "../../../assets/icons/invoice-tab.svg";
 import RegisterPropertyIcon from "../../../assets/icons/property-registration-tab.svg";
 import PropertyServiceIcon from "../../../assets/icons/property-services-tab.svg";
+import StatisticsIcon from "../../../assets/icons/statistics-tab.svg";
 
 export default function TabContainer() {
   return (
@@ -44,10 +44,10 @@ export default function TabContainer() {
       />
 
       <Tabs.Screen
-        name="public-services"
+        name="statistics"
         options={{
-          title: "Facturas",
-          tabBarIcon: ({ size }) => <InvoiceIcon width={size} height={size} />,
+          title: "Estadísticas",
+          tabBarIcon: ({ size }) => <StatisticsIcon width={size} height={size} />,
         }}
       />
     </Tabs>
